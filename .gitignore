@@ -1,7 +1,8 @@
 /node_modules
 /.next
 /out
-docs/
+.docs/
+.runs/
 .DS_Store
 *.log
 .env*
