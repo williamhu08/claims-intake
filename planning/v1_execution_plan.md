@@ -11,7 +11,9 @@ After a claimant submits a narrative, Clearway should show:
 - why that route was proposed.
 
 V1 remains a single-turn experience. It makes the system's understanding
-legible; V2 will ask the missing questions.
+legible; V2 will ask the missing questions. The V2 design will use dynamic
+decomposition: choose the next permitted action from the observed case state,
+rather than run a fixed prompt chain for every claim.
 
 ## V0 follow-up applied: state-machine inspiration, not a copied loop
 
@@ -26,7 +28,8 @@ claimant narrative → structured extraction → normalized CaseState → visibl
 This is deliberately not yet a conversational agent loop. The V1 stop
 condition is explicit: after one validated analysis, render the complete state
 and identify what is missing. Do not ask a follow-up question, call a tool, or
-mutate the state again.
+mutate the state again. This creates the reliable state boundary from which V2
+can dynamically choose an allowed next action.
 
 The source repository has not yet been reviewed in this environment, so this
 plan is an adaptation of the stated design principles—not a claim that its
@@ -171,6 +174,12 @@ Start V2 only when V1 can reliably answer:
 Before implementing V2, review Udacity's `claims_intake_agent_solution`,
 especially `loop.py` and `run.py`, and make an explicit adaptation decision for
 case-state updates, targeted questions, tool boundaries, and stopping rules.
+Use dynamic decomposition rather than a fixed prompt chain: based on validated
+state, choose among a targeted clarification, a route recommendation, or human
+escalation. Bound the allowed actions and number of turns, keep an auditable
+trace, and escalate rather than guess or loop indefinitely. See the ignored
+working note `.docs/udacity_dynamic_decomposition.md` for the screenshot-based
+design rationale.
 
 ## Success criteria
 
