@@ -17,7 +17,7 @@ export default function Home() {
             </span>
           </div>
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            First Notice of Loss
+            Claim triage
           </span>
         </div>
       </header>
