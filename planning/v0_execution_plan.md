@@ -91,6 +91,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
 
 ## End-of-V0 follow-up
 
+- [x] Carry the Udacity-inspired state discipline into the V1 plan: explicit
+  state, missing-information tracking, and a deliberate V1 stop condition.
+  This is a product-design adaptation, not a claim of source-level review or
+  copied implementation.
 - [ ] Before starting V1, review Udacity's `claims_intake_agent_solution`, especially `loop.py` and `run.py`. Use it as inspiration for the case-state loop, targeted clarification, and stopping conditions; decide explicitly which patterns fit this product before introducing agent orchestration.
 - [ ] There may be more from Udacity to also review, please also update the execution plan (in `vercel-claims-roadmap.md`) accordingly.
 
