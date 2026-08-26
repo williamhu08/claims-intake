@@ -120,20 +120,20 @@ adapt it as a V1 compatibility wrapper.
 
 Update a step to `[x]` only when every bullet beneath it is complete.
 
-1. [ ] **Define the state model**
-   - [ ] Add V1 Zod schemas and TypeScript types in `lib/claims`.
-   - [ ] Centralize labels, fact ordering, allowed fact statuses, and route labels.
-   - [ ] Implement deterministic derivation of `missingFactKeys` from fact statuses.
-   - [ ] Encode the V1 terminal stop condition: analysis returns one normalized
+1. [x] **Define the state model**
+   - [x] Add V1 Zod schemas and TypeScript types in `lib/claims`.
+   - [x] Centralize labels, fact ordering, allowed fact statuses, and route labels.
+   - [x] Implement deterministic derivation of `missingFactKeys` from fact statuses.
+   - [x] Encode the V1 terminal stop condition: analysis returns one normalized
      `CaseState` and never selects or asks a next question.
-   - [ ] Write unit tests for invalid, contradictory, and incomplete state.
+   - [x] Write unit tests for invalid, contradictory, and incomplete state.
 
-2. [ ] **Build the server-owned analysis path**
-   - [ ] Add `POST /api/case-analysis` using one AI SDK structured-output call through AI Gateway.
-   - [ ] Instruct the model to use only stated facts and represent uncertainty as `missing` or `unclear`.
-   - [ ] Validate model output, then normalize it into `CaseState` on the server.
-   - [ ] Return safe errors for malformed output and Gateway failure.
-   - [ ] Preserve the V0 intake route unchanged.
+2. [x] **Build the server-owned analysis path**
+   - [x] Add `POST /api/case-analysis` using one AI SDK structured-output call through AI Gateway.
+   - [x] Instruct the model to use only stated facts and represent uncertainty as `missing` or `unclear`.
+   - [x] Validate model output, then normalize it into `CaseState` on the server.
+   - [x] Return safe errors for malformed output and Gateway failure.
+   - [x] Preserve the V0 intake route unchanged.
 
 3. [ ] **Integrate the structured-intake UI** *(reserved for v0)*
    - [ ] Replace the V0 result panel with a case-state view: claim category, factual summary, collected facts, missing facts, and proposed route.
@@ -143,8 +143,8 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Keep the categories panel contextual and responsive beside the narrative on wider screens.
 
 4. [ ] **Validate with deterministic tests**
-   - [ ] Mock each claim category into a complete and an incomplete `CaseState`.
-   - [ ] Test water damage, fire, storm, theft, liability, ambiguity, and exact gibberish.
+   - [x] Mock each claim category into a complete and an incomplete `CaseState`.
+   - [x] Test water damage, fire, storm, theft, liability, ambiguity, and exact gibberish.
    - [ ] Test missing facts, unsupported routes, contradictory facts, malformed response bodies, and Gateway failure.
    - [ ] Test responsive layout contracts and accessible labels/live regions.
    - [ ] Keep live Gateway testing to one or two smoke tests only; model calls are not the test suite.
