@@ -1,4 +1,4 @@
-# V0 Execution Plan - First Notice
+# V0 Execution Plan - Clearway
 
 ## Goal
 
@@ -72,11 +72,16 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Add representative sample narratives for water and storm damage.
    - [x] Test validation, malformed model output, Gateway failure, all claim types, ambiguous input, and responsive UI states with deterministic mocked UI tests.
 
-6. [ ] **Deploy the slice**
-   - [ ] Link the repository to a Vercel project.
-   - [ ] Configure `AI_GATEWAY_API_KEY` in Preview and Production.
-   - [ ] Run lint and production build, deploy, then smoke-test the live URL.
-   - [ ] Update the tracked README with setup, architecture, API contract, deployment URL, key decisions, and the V1/V2 extension seam.
+6. [x] **Deploy the preview slice**
+   - [x] Link the repository to a Vercel project.
+   - [x] Configure `AI_GATEWAY_API_KEY` in Preview as a sensitive environment variable.
+   - [x] Run lint, mocked tests, and a production build; deploy and smoke-test the protected Preview.
+   - [x] Update the tracked README with setup, architecture, API contract, Preview URL, key decisions, and the V1/V2 extension seam.
+
+### Production promotion *(explicitly deferred)*
+
+- [ ] Configure `AI_GATEWAY_API_KEY` in Production.
+- [ ] Deploy or promote the validated Preview to Production only with explicit approval.
 
 ## Deliberate exclusions
 

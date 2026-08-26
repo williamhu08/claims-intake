@@ -1,15 +1,15 @@
-# v0 interface prompt — First Notice V0
+# v0 interface prompt — Clearway V0
 
 Use this prompt in v0 when iterating on the visual implementation. The current
 repository keeps the production API contract and remains the source of truth.
 
 ```text
-Design a calm, accessible desktop-and-mobile web interface for “First Notice,”
+Design a calm, accessible desktop-and-mobile web interface for “Clearway,”
 an AI-assisted property insurance claims intake product. This is first-touch
 triage, not a coverage, liability, or settlement decision.
 
 The primary screen needs:
-- A compact top bar with the product name “First Notice” and the descriptor
+- A compact top bar with the product name “Clearway” and the descriptor
   “Property claims intake”.
 - A strong hero: “Tell us what happened.” Supporting copy should invite a
   claimant to describe an incident in ordinary language.

@@ -1,6 +1,6 @@
-# First Notice
+# Clearway
 
-First Notice is an AI-assisted, first-touch intake for ambiguous property
+Clearway is an AI-assisted, first-touch intake for ambiguous property
 claims. Instead of asking a claimant to complete a long form before they can
 get started, it accepts a plain-language description and returns a narrow,
 structured triage assessment:
@@ -14,15 +14,19 @@ settlement eligibility.
 
 ## V0 status
 
-The V0 backend contract and its AI Gateway path are live and verified. The
-claimant-facing UI is deliberately reserved for v0 and has not yet been
-integrated into this repository.
+The V0 interface, backend contract, and AI Gateway path are integrated and
+verified in a protected Vercel Preview:
+
+https://claims-intake-aid2h7x90-williamhu08s-projects.vercel.app
+
+The Preview requires access through the owner&apos;s Vercel account. Production is
+intentionally not configured or promoted yet.
 
 ## Why this problem
 
 Property claims are often reported with incomplete, emotionally loaded
 accounts: a claimant knows something went wrong, but not the insurer&apos;s
-categories or the facts that later determine routing. First Notice starts with
+categories or the facts that later determine routing. Clearway starts with
 the claimant&apos;s language, gives a clear initial classification, and makes the
 next interaction legible without pretending to make an insurance decision.
 
@@ -32,7 +36,7 @@ next interaction legible without pretending to make an insurance decision.
 Claimant narrative
         |
         v
-v0-generated intake interface (next)
+v0-generated intake interface
         |
         v
 POST /api/intake
@@ -48,7 +52,7 @@ Validated claimType, summary, confidence
 ```
 
 The API owns the schema and model instructions. This keeps credentials and
-model policy server-side; the future v0 interface will consume only the stable
+model policy server-side; the v0 interface consumes only the stable
 `/api/intake` contract.
 
 ## API contract
@@ -96,7 +100,8 @@ Then open `http://localhost:3000`.
 | `AI_MODEL` | No | Overrides the default `openai/gpt-5.2` model. |
 
 In Vercel, the key is configured as a sensitive **Preview** environment
-variable. It is not committed to the repository.
+variable. It is not committed to the repository; Production is intentionally
+not configured yet.
 
 ## Verification
 
@@ -118,8 +123,8 @@ a representative fire-damage narrative and returned a schema-valid
   gives later versions a stable case-state foundation.
 - **Neutral, triage-only language:** prevents the product from implying a
   coverage or settlement decision.
-- **v0 owns the first UI iteration:** the interface will be generated against
-  the proven API contract instead of being hand-built before visual exploration.
+- **v0 owns the first UI iteration:** the interface was generated against the
+  proven API contract instead of being hand-built before visual exploration.
 - **Preview before production:** the deployed slice is verified without
   promoting it to an official production release.
 
@@ -130,6 +135,6 @@ a representative fire-damage narrative and returned a schema-valid
 - **V2:** add targeted, multi-turn clarification, tools, explicit stop
   conditions, and durable case state. Before this work begins, review
   Udacity&apos;s `claims_intake_agent_solution`, especially `loop.py` and
-  `run.py`, and decide which orchestration patterns belong in this product.
+  `run.py`, and decide which orchestration patterns belong in Clearway.
 - **V3:** introduce policy lookup, evidence-backed routing, uncertainty
   escalation, and an adjuster-ready handoff.
