@@ -25,7 +25,7 @@ export function ClaimCategories() {
             incident is unclear, we&apos;ll say so rather than make assumptions.
           </p>
 
-          <ul className="mt-5 flex flex-col gap-3" aria-label="Possible claim categories">
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Possible claim categories">
             {claimTypeOptions.map((category) => (
               <li key={category.value} className="rounded-lg border border-border bg-card p-4">
                 <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
