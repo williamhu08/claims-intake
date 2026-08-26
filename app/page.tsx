@@ -43,9 +43,11 @@ export default function Home() {
           liability, fault, or payment, and it is not a decision on your claim.
         </div>
 
-        <div className="mt-8 grid gap-10 min-[36rem]:grid-cols-[minmax(0,1fr)_14rem] min-[36rem]:items-start min-[36rem]:gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.65fr)] lg:gap-12">
-          <IntakeForm />
+        <div className="mt-8">
           <ClaimCategories />
+          <div className="mt-10">
+            <IntakeForm />
+          </div>
         </div>
       </main>
 
