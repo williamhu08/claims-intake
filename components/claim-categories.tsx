@@ -2,7 +2,7 @@ import { claimTypeOptions } from "@/lib/claims/display";
 
 export function ClaimCategories() {
   return (
-    <section className="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-1" aria-labelledby="categories-heading">
+    <section className="border-t border-border pt-8 md:border-l md:border-t-0 md:pl-6 md:pt-1 lg:pl-8" aria-labelledby="categories-heading">
       <div className="max-w-2xl">
         <p className="text-sm font-medium text-accent">Possible categories</p>
         <h2
@@ -17,7 +17,7 @@ export function ClaimCategories() {
         </p>
       </div>
 
-      <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Possible claim categories">
+      <ul className="mt-5 flex flex-col gap-3" aria-label="Possible claim categories">
         {claimTypeOptions.map((category) => (
           <li key={category.value} className="rounded-lg border border-border bg-card p-4">
             <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
