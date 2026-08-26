@@ -68,8 +68,8 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Replace the temporary UI while preserving the API contract and its validation behavior.
 
 5. [ ] **Validate the complete flow**
-   - [ ] Submit the polished intake UI to `/api/intake`; show the returned category, neutral summary, and confidence percentage.
-   - [ ] Add representative sample narratives for water and storm damage.
+   - [x] Submit the polished intake UI to `/api/intake`; show the returned category, neutral summary, and confidence percentage.
+   - [x] Add representative sample narratives for water and storm damage.
    - [ ] Test validation, malformed model output, Gateway failure, all claim types, ambiguous input, and responsive UI states.
 
 6. [ ] **Deploy the slice**
