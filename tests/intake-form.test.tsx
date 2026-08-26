@@ -16,9 +16,35 @@ function mockJsonResponse(body: unknown, status = 200) {
     "fetch",
     vi.fn().mockResolvedValue({
       ok: status >= 200 && status < 300,
-      json: async () => body,
+      json: async () => toCaseStateFixture(body),
     }),
   );
+}
+
+function toCaseStateFixture(body: unknown) {
+  if (!body || typeof body !== "object") return body;
+  const result = body as Record<string, unknown>;
+  if (
+    typeof result.claimType !== "string" ||
+    typeof result.summary !== "string" ||
+    typeof result.confidence !== "number"
+  ) return body;
+
+  return {
+    claimType: result.claimType,
+    summary: result.summary,
+    classificationConfidence: result.confidence,
+    facts: [
+      { key: "incident_cause", label: "What caused the incident", status: "collected", value: "A mocked cause." , source: "claimant_narrative" },
+      { key: "damage_description", label: "What was damaged", status: "collected", value: "Mocked damage.", source: "claimant_narrative" },
+      { key: "affected_property", label: "What property is affected", status: "collected", value: "Mocked property.", source: "claimant_narrative" },
+      { key: "loss_timing", label: "When it happened", status: "collected", value: "Recently.", source: "claimant_narrative" },
+      { key: "active_loss_or_safety", label: "Whether loss or safety risk is active", status: "collected", value: "No active risk stated.", source: "claimant_narrative" },
+      { key: "injury_or_third_party", label: "Injury or third-party involvement", status: "not_applicable", source: "claimant_narrative" },
+    ],
+    missingFactKeys: [],
+    proposedRoute: { kind: "property_adjuster_review", rationale: "A mocked, non-binding intake recommendation.", confidence: 0.8 },
+  };
 }
 
 async function submitNarrative(narrative = validNarrative) {
@@ -141,7 +167,7 @@ describe("IntakeForm", () => {
     expect(screen.getByRole("button", { name: "Assessing…" })).toBeDisabled();
     resolveRequest!({
       ok: true,
-      json: async () => ({
+      json: async () => toCaseStateFixture({
         claimType: "water_damage",
         summary: "Mocked water assessment.",
         confidence: 0.9,

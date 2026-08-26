@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ClaimIntakeResult } from "@/lib/claims/schema";
+import type { CaseState } from "@/lib/claims/schema";
 import { claimTypeLabels, exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 
@@ -10,7 +10,7 @@ const MAX_LENGTH = 4000;
 
 export function IntakeForm() {
   const [narrative, setNarrative] = useState("");
-  const [result, setResult] = useState<ClaimIntakeResult | null>(null);
+  const [result, setResult] = useState<CaseState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +27,7 @@ export function IntakeForm() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/intake", {
+      const response = await fetch("/api/case-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ narrative }),
@@ -47,7 +47,7 @@ export function IntakeForm() {
         return;
       }
 
-      if (!isClaimIntakeResult(data)) {
+      if (!isCaseState(data)) {
         setError("We received an incomplete assessment. Please try again.");
         return;
       }
@@ -158,18 +158,18 @@ function getErrorMessage(data: unknown) {
   return "We couldn't complete the assessment. Please try again.";
 }
 
-function isClaimIntakeResult(data: unknown): data is ClaimIntakeResult {
+function isCaseState(data: unknown): data is CaseState {
   if (!data || typeof data !== "object") return false;
-
   const result = data as Record<string, unknown>;
   return (
     typeof result.claimType === "string" &&
     result.claimType in claimTypeLabels &&
     typeof result.summary === "string" &&
     result.summary.trim().length > 0 &&
-    typeof result.confidence === "number" &&
-    Number.isFinite(result.confidence) &&
-    result.confidence >= 0 &&
-    result.confidence <= 1
+    typeof result.classificationConfidence === "number" &&
+    Array.isArray(result.facts) &&
+    Array.isArray(result.missingFactKeys) &&
+    typeof result.proposedRoute === "object" &&
+    result.proposedRoute !== null
   );
 }
