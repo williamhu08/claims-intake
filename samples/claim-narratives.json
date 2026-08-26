@@ -1,0 +1,14 @@
+[
+  {
+    "id": "water-damage-kitchen-pipe",
+    "narrative": "A pipe burst under my kitchen sink overnight. Water spread across the kitchen floor and damaged the cabinets and flooring."
+  },
+  {
+    "id": "storm-damage-roof",
+    "narrative": "Heavy wind during last night's storm tore several shingles from my roof. Rain then leaked into the upstairs bedroom ceiling."
+  },
+  {
+    "id": "fire-smoke-garage",
+    "narrative": "Smoke from a small electrical fire in my garage damaged the wall and several stored items."
+  }
+]
