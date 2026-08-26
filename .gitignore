@@ -3,6 +3,7 @@
 /out
 .docs/
 .runs/
+AGENTS.md
 .DS_Store
 *.log
 .env*
