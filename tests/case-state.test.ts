@@ -162,18 +162,15 @@ describe("normalizeCaseState", () => {
     ).toThrow("must include a claimant-grounded value");
   });
 
-  it("rejects a value attached to a missing or unclear fact", () => {
-    expect(() =>
-      normalizeCaseState({
-        ...completeWaterAnalysis,
-        facts: [
-          {
-            key: "injury_or_third_party",
-            status: "missing",
-            value: "A neighbour may be involved.",
-          },
-        ],
-      }),
-    ).toThrow("cannot include a value");
+  it("does not trust a value attached to a missing or unclear fact", () => {
+    const result = normalizeCaseState({
+      ...completeWaterAnalysis,
+      facts: [
+        { key: "incident_cause", status: "unclear", value: "Unsupported cause." },
+      ],
+    });
+
+    expect(result.facts.find((fact) => fact.key === "incident_cause")).not.toHaveProperty("value");
+    expect(result.missingFactKeys).toContain("incident_cause");
   });
 });

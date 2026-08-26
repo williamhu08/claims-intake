@@ -116,10 +116,8 @@ export function normalizeCaseState(modelOutput: CaseAnalysisModelOutput): CaseSt
       throw new Error(`A collected ${fact.key} must include a claimant-grounded value.`);
     }
 
-    if (fact.status !== "collected" && fact.value) {
-      throw new Error(`An uncollected ${fact.key} cannot include a value.`);
-    }
-
+    // Ignore stray values on non-collected facts. They are not displayed or trusted;
+    // the status is authoritative and the canonical state omits the value.
     factsByKey.set(fact.key, fact);
   }
 
@@ -130,7 +128,7 @@ export function normalizeCaseState(modelOutput: CaseAnalysisModelOutput): CaseSt
       key,
       label: caseFactLabels[key],
       status: fact?.status ?? "missing",
-      ...(fact?.value ? { value: fact.value } : {}),
+      ...(fact?.status === "collected" && fact.value ? { value: fact.value } : {}),
       source: "claimant_narrative" as const,
     };
   });
