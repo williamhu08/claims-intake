@@ -65,7 +65,8 @@ export const proposedRouteLabels: Record<ProposedRouteKind, string> = {
 const modelCaseFactSchema = z.object({
   key: z.enum(caseFactKeyValues),
   status: z.enum(factStatusValues),
-  value: z.string().trim().min(1).max(280).optional(),
+  // Nullable keeps this field present in strict structured-output schemas while allowing non-collected facts to omit a value semantically.
+  value: z.string().trim().min(1).max(280).nullable(),
 });
 
 export const caseAnalysisModelOutputSchema = z.object({
