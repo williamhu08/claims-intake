@@ -67,10 +67,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Bring the selected v0-generated components and styling into this repository. This repository remains the source of truth.
    - [x] Replace the temporary UI while preserving the API contract and its validation behavior.
 
-5. [ ] **Validate the complete flow**
+5. [x] **Validate the complete flow**
    - [x] Submit the polished intake UI to `/api/intake`; show the returned category, neutral summary, and confidence percentage.
    - [x] Add representative sample narratives for water and storm damage.
-   - [ ] Test validation, malformed model output, Gateway failure, all claim types, ambiguous input, and responsive UI states.
+   - [x] Test validation, malformed model output, Gateway failure, all claim types, ambiguous input, and responsive UI states with deterministic mocked UI tests.
 
 6. [ ] **Deploy the slice**
    - [ ] Link the repository to a Vercel project.

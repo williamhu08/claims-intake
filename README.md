@@ -102,6 +102,7 @@ variable. It is not committed to the repository.
 
 ```bash
 npm run lint
+npm test
 npx next build --webpack
 ```
 
