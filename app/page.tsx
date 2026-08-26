@@ -1,4 +1,5 @@
 import { IntakeForm } from "@/components/intake-form";
+import { ClaimCategories } from "@/components/claim-categories";
 
 export default function Home() {
   return (
@@ -45,6 +46,8 @@ export default function Home() {
         <div className="mt-8">
           <IntakeForm />
         </div>
+
+        <ClaimCategories />
       </main>
 
       <footer className="mx-auto max-w-3xl px-6 pb-10">

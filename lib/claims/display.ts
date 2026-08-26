@@ -20,6 +20,43 @@ export const claimTypeDescriptions: Record<ClaimType, string> = {
   other_or_unclear: "The account does not map cleanly to one category.",
 };
 
+export const claimTypeOptions: Array<{
+  value: ClaimType;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "water_damage",
+    label: claimTypeLabels.water_damage,
+    description: claimTypeDescriptions.water_damage,
+  },
+  {
+    value: "fire_or_smoke",
+    label: claimTypeLabels.fire_or_smoke,
+    description: claimTypeDescriptions.fire_or_smoke,
+  },
+  {
+    value: "weather_or_storm",
+    label: claimTypeLabels.weather_or_storm,
+    description: claimTypeDescriptions.weather_or_storm,
+  },
+  {
+    value: "theft_or_vandalism",
+    label: claimTypeLabels.theft_or_vandalism,
+    description: claimTypeDescriptions.theft_or_vandalism,
+  },
+  {
+    value: "liability",
+    label: claimTypeLabels.liability,
+    description: claimTypeDescriptions.liability,
+  },
+  {
+    value: "other_or_unclear",
+    label: claimTypeLabels.other_or_unclear,
+    description: claimTypeDescriptions.other_or_unclear,
+  },
+];
+
 export type ExampleClaim = {
   label: string;
   narrative: string;

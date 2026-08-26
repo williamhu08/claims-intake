@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ClaimIntakeResult } from "@/lib/claims/schema";
-import { exampleClaims } from "@/lib/claims/display";
+import { claimTypeLabels, exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 
 const MIN_LENGTH = 20;
@@ -33,14 +33,26 @@ export function IntakeForm() {
         body: JSON.stringify({ narrative }),
       });
 
-      const data = await response.json();
+      let data: unknown;
 
-      if (!response.ok) {
-        setError(data?.error ?? "We couldn't complete the assessment. Please try again.");
+      try {
+        data = await response.json();
+      } catch {
+        setError("We received an unreadable response. Please try again.");
         return;
       }
 
-      setResult(data as ClaimIntakeResult);
+      if (!response.ok) {
+        setError(getErrorMessage(data));
+        return;
+      }
+
+      if (!isClaimIntakeResult(data)) {
+        setError("We received an incomplete assessment. Please try again.");
+        return;
+      }
+
+      setResult(data);
     } catch {
       setError("We couldn't reach the assessment service. Check your connection and try again.");
     } finally {
@@ -134,5 +146,30 @@ export function IntakeForm() {
 
       {result && <ResultPanel result={result} />}
     </div>
+  );
+}
+
+function getErrorMessage(data: unknown) {
+  if (data && typeof data === "object" && "error" in data) {
+    const error = (data as { error?: unknown }).error;
+    if (typeof error === "string" && error.trim()) return error;
+  }
+
+  return "We couldn't complete the assessment. Please try again.";
+}
+
+function isClaimIntakeResult(data: unknown): data is ClaimIntakeResult {
+  if (!data || typeof data !== "object") return false;
+
+  const result = data as Record<string, unknown>;
+  return (
+    typeof result.claimType === "string" &&
+    result.claimType in claimTypeLabels &&
+    typeof result.summary === "string" &&
+    result.summary.trim().length > 0 &&
+    typeof result.confidence === "number" &&
+    Number.isFinite(result.confidence) &&
+    result.confidence >= 0 &&
+    result.confidence <= 1
   );
 }
