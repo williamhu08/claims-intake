@@ -15,7 +15,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "First Notice — First Notice of Loss",
+  title: "First Notice — Property claim triage",
   description:
     "Describe a property incident in plain language and receive an instant AI triage assessment. Triage only — this does not determine coverage, liability, or payment.",
 };
