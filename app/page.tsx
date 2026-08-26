@@ -23,7 +23,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+      <main className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
         <div className="max-w-2xl">
           <p className="text-sm font-medium text-accent">Property claims</p>
           <h1 className="mt-2 font-serif text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl">
@@ -43,11 +43,10 @@ export default function Home() {
           liability, fault, or payment, and it is not a decision on your claim.
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.65fr)] lg:items-start lg:gap-12">
           <IntakeForm />
+          <ClaimCategories />
         </div>
-
-        <ClaimCategories />
       </main>
 
       <footer className="mx-auto max-w-3xl px-6 pb-10">

@@ -2,7 +2,7 @@ import { claimTypeOptions } from "@/lib/claims/display";
 
 export function ClaimCategories() {
   return (
-    <section className="mt-10 border-t border-border pt-8" aria-labelledby="categories-heading">
+    <section className="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-1" aria-labelledby="categories-heading">
       <div className="max-w-2xl">
         <p className="text-sm font-medium text-accent">Possible categories</p>
         <h2
