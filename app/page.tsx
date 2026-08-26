@@ -10,10 +10,10 @@ export default function Home() {
               className="flex h-7 w-7 items-center justify-center rounded-md bg-primary font-serif text-sm font-semibold text-primary-foreground"
               aria-hidden="true"
             >
-              FN
+              CW
             </span>
             <span className="text-sm font-semibold tracking-tight text-foreground">
-              First Notice
+              Clearway
             </span>
           </div>
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
