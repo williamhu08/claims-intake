@@ -13,6 +13,25 @@ After a claimant submits a narrative, Clearway should show:
 V1 remains a single-turn experience. It makes the system's understanding
 legible; V2 will ask the missing questions.
 
+## V0 follow-up applied: state-machine inspiration, not a copied loop
+
+The V0 follow-up identified Udacity's claims-intake loop as useful inspiration
+for explicit case state, missing-information tracking, targeted next steps,
+and stopping conditions. V1 adopts the **state discipline** now:
+
+```text
+claimant narrative → structured extraction → normalized CaseState → visible handoff recommendation
+```
+
+This is deliberately not yet a conversational agent loop. The V1 stop
+condition is explicit: after one validated analysis, render the complete state
+and identify what is missing. Do not ask a follow-up question, call a tool, or
+mutate the state again.
+
+The source repository has not yet been reviewed in this environment, so this
+plan is an adaptation of the stated design principles—not a claim that its
+`loop.py` or `run.py` implementation was copied or fully evaluated.
+
 ## Product boundary
 
 Clearway may extract and organize facts stated by the claimant. It must not
@@ -62,6 +81,15 @@ The exact fact values must remain concise statements grounded in the narrative.
 `missingFactKeys` is derived from the fact statuses in application code, so the
 model cannot create a contradictory second list.
 
+The V1 state lifecycle is intentionally designed to become V2's loop boundary:
+
+1. **Extract:** model proposes narrative-grounded facts and a proposed route.
+2. **Normalize:** application validates fact keys/statuses and derives missing
+   facts deterministically.
+3. **Present:** claimant sees what Clearway knows and does not know.
+4. **Stop (V1):** return the state once. V2 will replace this terminal step
+   with targeted clarification only when missing facts matter to routing.
+
 ## API contract
 
 Introduce `POST /api/case-analysis` for V1 rather than silently changing the
@@ -93,6 +121,8 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Add V1 Zod schemas and TypeScript types in `lib/claims`.
    - [ ] Centralize labels, fact ordering, allowed fact statuses, and route labels.
    - [ ] Implement deterministic derivation of `missingFactKeys` from fact statuses.
+   - [ ] Encode the V1 terminal stop condition: analysis returns one normalized
+     `CaseState` and never selects or asks a next question.
    - [ ] Write unit tests for invalid, contradictory, and incomplete state.
 
 2. [ ] **Build the server-owned analysis path**
