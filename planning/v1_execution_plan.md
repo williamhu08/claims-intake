@@ -142,12 +142,12 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Retain clear loading, validation, malformed-response, and API-error states.
    - [x] Keep the categories panel contextual and responsive beside the narrative on wider screens.
 
-4. [ ] **Validate with deterministic tests**
+4. [x] **Validate with deterministic tests**
    - [x] Mock each claim category into a complete and an incomplete `CaseState`.
    - [x] Test water damage, fire, storm, theft, liability, ambiguity, and exact gibberish.
-   - [ ] Test missing facts, unsupported routes, contradictory facts, malformed response bodies, and Gateway failure.
-   - [ ] Test responsive layout contracts and accessible labels/live regions.
-   - [ ] Keep live Gateway testing to one or two smoke tests only; model calls are not the test suite.
+   - [x] Test missing facts, unsupported routes, contradictory facts, malformed response bodies, and Gateway failure.
+   - [x] Test responsive layout contracts and accessible labels/live regions.
+   - [x] Keep live Gateway testing to one or two smoke tests only; model calls are not the test suite. No live model call was used for this test suite; any deployed smoke test belongs to Step 5.
 
 5. [ ] **Preview deploy and document V1**
    - [ ] Run lint, tests, and production build.
