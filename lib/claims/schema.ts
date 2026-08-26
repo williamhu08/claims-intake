@@ -3,9 +3,9 @@ import { z } from "zod";
 /** Input and claimant-facing display budgets for the intake contract. */
 export const MIN_CLAIM_NARRATIVE_LENGTH = 20;
 export const MAX_CLAIM_NARRATIVE_LENGTH = 4_000;
-export const MAX_CLAIM_SUMMARY_LENGTH = 360;
-export const MAX_CASE_FACT_VALUE_LENGTH = 280;
-export const MAX_ROUTE_RATIONALE_LENGTH = 280;
+export const MAX_CLAIM_SUMMARY_LENGTH = 500;
+export const MAX_CASE_FACT_VALUE_LENGTH = 400;
+export const MAX_ROUTE_RATIONALE_LENGTH = 400;
 
 export const claimTypeValues = [
   "water_damage",
