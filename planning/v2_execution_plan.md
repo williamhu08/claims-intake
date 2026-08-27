@@ -179,9 +179,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Start V2 from the claimant narrative by calling
      `POST /api/case-session/start`; do not treat the V1 `CaseState` as final
      or call `/api/case-analysis` from the claimant UI.
-   - [ ] Preserve the signed session token as an opaque client value and send
-     it back only through the V2 response contract; never let the browser edit
-     or reconstruct canonical session state.
+   - [ ] Preserve the `sessionToken` returned by `/api/case-session/start` (and
+     refreshed by `/api/case-session/respond`) as an opaque client value and
+     send it back only through the V2 response contract; never let the browser
+     edit or reconstruct canonical session state.
    - [ ] Render exactly one pending clarification question at a time, tied to
      the material fact key(s) returned by the server. Do not generate or
      rephrase questions in the browser.
