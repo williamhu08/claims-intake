@@ -172,6 +172,9 @@ Start V2 only when V1 can reliably answer:
 > What do we know, what do we still need, and what would we do if no more
 > information were available?
 
+The concrete V2 entry gate, bounded action set, stop conditions, and required
+tests are recorded in `planning/v2_handoff_criteria.md`.
+
 Before implementing V2, review Udacity's `claims_intake_agent_solution`,
 especially `loop.py` and `run.py`, and make an explicit adaptation decision for
 case-state updates, targeted questions, tool boundaries, and stopping rules.
