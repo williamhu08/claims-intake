@@ -10,6 +10,27 @@ This document defines the decision gate for starting V2. It prevents Clearway
 from adding “agentic” behavior as an unbounded prompt loop or from treating a
 model decision as an insurance decision.
 
+## Udacity source review and adaptation
+
+This plan now reflects source-level review of
+`/Users/williamhu/Udacity/03-dynamic-decomposition-solution`—especially
+`claims_intake/loop.py`, `tools.py`, `session.py`, `budget.py`, and
+`system_prompt.py`.
+
+The exercise's loop calls the model with tools and message history, then uses
+provider `stop_reason` as its primary control signal: `tool_use` executes tool
+calls and continues; `end_turn` returns; unexpected reasons raise. It sends all
+tool results from a turn back in one user message. A config-sourced token and
+wall-clock `Budget` is a safety net rather than a hard-coded iteration cap.
+Its `ClaimSession` owns accumulated facts and terminal outcome; tool schemas
+constrain actions, while the prompt guides dynamic choice of the next tool.
+
+Clearway adopts that separation of concerns, not the exercise wholesale. V2
+does **not** add Udacity's policy lookup, severity assessment, write-to-queue
+route tool, coverage rules, or four-category taxonomy. Those remain V3 or out
+of scope. Unlike its fixture harness, a Clearway clarification pauses for a
+real claimant response in the web UI before the session resumes.
+
 ## V1 foundation that V2 must preserve
 
 - `CaseState` remains application-owned and schema-validated.
@@ -35,8 +56,9 @@ Start V2 only when all of these are true:
 - [ ] The product team has written the exact decision rule for when a missing
   fact matters to a route. A question must change the next permitted action or
   reduce a material uncertainty.
-- [ ] The allowed V2 action vocabulary, turn budget, repeated-question policy,
-  and escalation conditions are agreed before implementation.
+- [ ] The allowed V2 action vocabulary, provider tool-stop semantics,
+  config-sourced token/wall-clock budget, repeated-question policy, and
+  escalation conditions are agreed before implementation.
 - [ ] Claimant-facing copy distinguishes: facts already understood, why one
   question matters, and when Clearway will hand the case to a person.
 - [ ] A decision is recorded on whether plain AI SDK tool use is sufficient or
@@ -62,7 +84,7 @@ application checks material uncertainty and turn budget
         |                                                |
         |                                                +--> evaluate again
         |
-        +-- ambiguity persists, safety needs review, or budget is exhausted
+        +-- ambiguity persists, safety needs review, or the safety budget is exhausted
                                                          |
                                                          v
                                                   escalate to a human
@@ -78,7 +100,7 @@ from that small action set based on validated state:
 Future evidence or policy lookup tools are V3 concerns. They are not an
 implicit V2 addition.
 
-## Required stop conditions
+## Required stop conditions and safety budget
 
 V2 must end the loop when any one of these is true:
 
@@ -86,13 +108,15 @@ V2 must end the loop when any one of these is true:
   remains.
 - The claimant cannot provide the material fact, or has already answered the
   equivalent question.
-- The maximum clarification-turn budget is reached.
+- The configurable safety budget is reached (token or wall-clock); it is a
+  safety net, not the normal decision rule for ending a claim.
 - A safety concern, conflicting account, third-party involvement, weak
   confidence, or unresolved ambiguity requires human review.
 
 Every terminal state must include a machine-readable `stopReason` and a
-claimant-facing explanation. The system must escalate rather than guess or
-repeat itself.
+claimant-facing explanation. At the model-tool layer, only a structured
+terminal stop may end the loop; unexpected provider stop reasons must surface
+as safe failures. The system must escalate rather than guess or repeat itself.
 
 ## Tests required before V2 is complete
 
