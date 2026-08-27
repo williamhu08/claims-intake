@@ -212,8 +212,12 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Preserve accessible loading, validation, malformed-response, API-error,
      retry, and reset states using semantic headings, labelled controls,
      `aria-live` for status updates, and `role="alert"` for actionable errors.
+     Treat retryable Gateway/network failures as retry-in-place (resubmit the
+     same pending question or answer); treat an invalid or expired session as
+     non-retryable and route straight to the reset path instead.
    - [ ] Reset the session safely by clearing the local view state and requiring
-     a fresh narrative submission; never reuse a terminal or expired token.
+     a fresh narrative submission; never reuse a terminal, invalid, or expired
+     token.
    - [ ] Keep the existing supported-category guidance contextual and ensure
      the form, question panel, history, and terminal result remain responsive
      at narrow and wide viewports.
