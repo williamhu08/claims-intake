@@ -31,9 +31,10 @@ and identify what is missing. Do not ask a follow-up question, call a tool, or
 mutate the state again. This creates the reliable state boundary from which V2
 can dynamically choose an allowed next action.
 
-The source repository has not yet been reviewed in this environment, so this
-plan is an adaptation of the stated design principles—not a claim that its
-`loop.py` or `run.py` implementation was copied or fully evaluated.
+Udacity's `03-dynamic-decomposition-solution` was reviewed locally after V1
+completion. Its source validates the state-and-tool-loop inspiration, but this
+V1 plan remains a product adaptation—not a copied implementation. The
+source-grounded V2 mapping is recorded in `planning/v2_handoff_criteria.md`.
 
 ## Product boundary
 
@@ -138,7 +139,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
 3. [x] **Integrate the structured-intake UI** *(reserved for v0)*
    - [x] Replace the V0 result panel with a case-state view: claim category, factual summary, collected facts, missing facts, and proposed route.
    - [x] Make fact provenance explicit: all displayed fact values come from the claimant narrative.
-   - [x] Explain that missing facts are not assumptions and will be addressed in the next step.
+   - [x] Explain that missing facts are not assumptions and will be addressed in the next step. Use claimant-facing questions and distinguish `missing` from `unclear` facts.
    - [x] Retain clear loading, validation, malformed-response, and API-error states.
    - [x] Keep the categories panel contextual and responsive beside the narrative on wider screens.
 
