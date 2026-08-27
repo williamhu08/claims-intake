@@ -172,7 +172,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
 
-4A. [ ] **Start a V2 claimant session** *(reserved for Vercel v0)*
+4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
+   Break this work into the following independently implementable parts:
+
+   **4A.** [ ] **Start a V2 claimant session**
    - [ ] Replace the one-turn V1 submission flow with the V2 lifecycle:
      narrative → session start → optional question → claimant response →
      refreshed state → terminal route or human review.
@@ -185,7 +188,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Preserve accessible narrative validation, loading, malformed-response,
      API-error, retry, and reset states.
 
-4B. [ ] **Ask and answer one clarification** *(reserved for Vercel v0)*
+   **4B.** [ ] **Ask and answer one clarification**
    - [ ] Render exactly one pending clarification question at a time, tied to
      the material fact key(s) returned by the server. Do not generate or
      rephrase questions in the browser.
@@ -200,7 +203,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      answers, including an explicit unable-to-answer entry when applicable.
      Never expose internal prompts, tool arguments, or signed session contents.
 
-4C. [ ] **Render progress and terminal outcomes** *(reserved for Vercel v0)*
+   **4C.** [ ] **Render progress and terminal outcomes**
    - [ ] Render the refreshed `CaseState` after each accepted response,
      including updated facts, provenance (`claimant_narrative` versus
      `claimant_response`), missing facts, and classification confidence.
@@ -213,7 +216,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Preserve the refreshed `sessionToken` returned by
      `/api/case-session/respond` as an opaque value for the next response.
 
-4D. [ ] **Recover, reset, and verify the claimant flow** *(reserved for Vercel v0)*
+   **4D.** [ ] **Recover, reset, and verify the claimant flow**
    - [ ] Treat retryable Gateway/network failures as retry-in-place by
      resubmitting the same pending question or answer; treat invalid or
      expired sessions as non-retryable and route directly to reset.
