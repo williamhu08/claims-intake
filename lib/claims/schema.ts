@@ -48,6 +48,8 @@ export const factStatusValues = [
   "not_applicable",
 ] as const;
 
+export const caseFactSourceValues = ["claimant_narrative", "claimant_response"] as const;
+
 export const proposedRouteKindValues = [
   "property_adjuster_review",
   "liability_review",
@@ -93,7 +95,7 @@ export const caseFactSchema = z.object({
   label: z.string(),
   status: z.enum(factStatusValues),
   value: z.string().min(1).max(MAX_CASE_FACT_VALUE_LENGTH).optional(),
-  source: z.literal("claimant_narrative"),
+  source: z.enum(caseFactSourceValues),
 });
 
 export const proposedRouteSchema = z.object({
@@ -158,6 +160,7 @@ export type ClaimIntakeRequest = z.infer<typeof claimIntakeRequestSchema>;
 export type ClaimIntakeResult = z.infer<typeof claimIntakeResultSchema>;
 export type CaseFactKey = (typeof caseFactKeyValues)[number];
 export type FactStatus = (typeof factStatusValues)[number];
+export type CaseFactSource = (typeof caseFactSourceValues)[number];
 export type ProposedRouteKind = (typeof proposedRouteKindValues)[number];
 export type ModelCaseFact = z.infer<typeof modelCaseFactSchema>;
 export type CaseAnalysisModelOutput = z.infer<typeof caseAnalysisModelOutputSchema>;

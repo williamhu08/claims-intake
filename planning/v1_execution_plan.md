@@ -136,7 +136,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Return safe errors for malformed output and Gateway failure.
    - [x] Preserve the V0 intake route unchanged.
 
-3. [x] **Integrate the structured-intake UI** *(reserved for v0)*
+3. [x] **Integrate the structured-intake UI** *(reserved for Vercel v0)*
    - [x] Replace the V0 result panel with a case-state view: claim category, factual summary, collected facts, missing facts, and proposed route.
    - [x] Make fact provenance explicit: all displayed fact values come from the claimant narrative.
    - [x] Explain that missing facts are not assumptions and will be addressed in the next step. Use claimant-facing questions and distinguish `missing` from `unclear` facts.

@@ -4,11 +4,34 @@
 > first supported clarification scenario. V2 must still validate every action
 > against the session schema and state before showing it to a claimant.
 
+## Why this needs its own decision record
+
+V2 cannot begin as a generic rule to “ask about missing facts.” That would
+recreate a long, fixed form and would not demonstrate dynamic decomposition.
+We need one narrow, defensible example where a missing fact is *material*—its
+answer can change the next permitted intake action—and where the system should
+also know when **not** to ask.
+
+Water-source ambiguity is that first example. It is common in property intake,
+has a clear claimant-facing question, and can distinguish a likely first-party
+property path from possible outside or third-party involvement without making
+a coverage or fault decision. This document freezes that product decision
+before V2 code turns it into eligibility checks, session transitions, and
+tests. Later V2 flows may need their own decision records; this is not a claim
+that water is the only important missing fact.
+
 ## Decision
 
 Clearway will support one targeted water-source clarification when the
 validated `CaseState` leaves the source of a water loss `missing` or `unclear`
 **and** that answer could change the next permitted intake route.
+
+The question matters because the **source of the damage** can change the
+appropriate intake-review path: water from the claimant's own plumbing or
+appliance may support property-adjuster review, while a possible neighbor,
+shared-system, or outside source may require liability review or human triage.
+This is only a routing distinction; Clearway does not decide coverage, fault,
+or responsibility.
 
 This is not a hard-coded “water claims always get a question” pipeline. The
 application exposes the clarification action only for an eligible material

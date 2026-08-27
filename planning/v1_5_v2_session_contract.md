@@ -29,6 +29,11 @@ decision, or access arbitrary tools. A claimant answer is first validated and
 then analyzed into a new application-owned `CaseState` before the next action
 is selected.
 
+Facts carried from V1 retain `source: "claimant_narrative"`. When a later
+claimant clarification supports a newly collected or updated fact, V2 records
+`source: "claimant_response"`; it must not make a later answer look as though
+it appeared in the original narrative.
+
 ## Terminal stop reasons
 
 ```ts

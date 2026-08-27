@@ -58,11 +58,11 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Require the model to classify only from stated facts, never invent missing details, and select `other_or_unclear` when the narrative is ambiguous.
    - [x] Return safe, user-readable errors without exposing credentials or raw provider failures.
 
-3. [x] **Prove the live path with a minimal UI** *(reserved for v0)*
+3. [x] **Prove the live path with a minimal UI** *(reserved for Vercel v0)*
    - [x] Connect a deliberately plain textarea and result view to `/api/intake`.
    - [x] Verify a complete input-to-structured-output flow before investing in visual implementation.
 
-4. [x] **Create the interface with v0** *(reserved for v0)*
+4. [x] **Create the interface with v0** *(reserved for Vercel v0)*
    - [x] Generate a calm, accessible insurer-style intake interface against the proven `/api/intake` contract: narrative textarea, example claims, submit action, result panel, loading state, validation state, and API-error state.
    - [x] Bring the selected v0-generated components and styling into this repository. This repository remains the source of truth.
    - [x] Replace the temporary UI while preserving the API contract and its validation behavior.
