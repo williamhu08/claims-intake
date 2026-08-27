@@ -173,10 +173,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      with an auditable action trace.
 
 4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
-   - [ ] **TODO for Vercel v0:** replace the V1 one-shot submission flow with
+   - [ ] Replace the V1 one-shot submission flow with
      `POST /api/case-session/start`, retain the returned `sessionToken`, and
      send each claimant answer to `POST /api/case-session/respond`.
-   - [ ] **TODO for Vercel v0:** render the session state explicitly: pending
+   - [ ] Render the session state explicitly: pending
      question, question history, refreshed facts/provenance, terminal
      non-binding route, human-review escalation, invalid/expired-session reset,
      and retryable Gateway failure.
