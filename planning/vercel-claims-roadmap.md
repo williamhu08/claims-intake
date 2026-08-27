@@ -33,6 +33,14 @@ The product is deliberately narrow: **first-touch triage for property claims**. 
 | **V3 — Make it trustworthy** | Produce an actionable, evidence-backed handoff. | Mock policy lookup, operational severity/urgency, routing, escalation for low confidence or unresolved facts, and an adjuster-ready handoff. | AI SDK, AI Gateway, and the selected agent/tool layer. |
 | **V4 — Make it compelling** | Deliver a polished, presentation-ready submission. | Demo scenarios, visual and interaction polish, reliable edge states, README and architecture notes, final deployment, and a concise presentation. | Full stack, used deliberately. |
 
+## **PRELIMINARY V3 PLAN — DEPENDS ON V2**
+
+The V3 mock-contract and handoff design is intentionally preliminary. It may
+not be implemented until V2 provides a validated terminal case session,
+clarification history, action trace, and stop reason. See
+`planning/v3_preliminary_plan.md` for the dependency contract, mock policy,
+severity, evidence, and handoff requirements.
+
 ## Six-hour target
 
 The realistic six-hour version is:
