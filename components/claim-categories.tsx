@@ -1,43 +1,61 @@
+"use client";
+
+import { useState } from "react";
 import { claimTypeOptions } from "@/lib/claims/display";
 
 export function ClaimCategories() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <section className="border-y border-border" aria-labelledby="categories-heading">
-      <details className="group">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-foreground [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block text-sm font-medium text-accent">Possible categories</span>
-            <span
-              id="categories-heading"
-              className="mt-1 block font-serif text-xl font-semibold text-foreground text-balance"
-            >
-              How we make an initial reading
-            </span>
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-4 py-4 text-left text-foreground"
+        aria-expanded={isOpen}
+        aria-controls="categories-content"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <span>
+          <span className="block text-sm font-medium text-accent">Possible categories</span>
+          <span
+            id="categories-heading"
+            className="mt-1 block font-serif text-xl font-semibold text-foreground text-balance"
+          >
+            How we make an initial reading
           </span>
-          <span className="font-mono text-lg text-muted-foreground" aria-hidden="true">
-            <span className="block group-open:hidden">+</span>
-            <span className="hidden group-open:block">−</span>
-          </span>
-        </summary>
+        </span>
+        <span className="font-mono text-lg text-muted-foreground" aria-hidden="true">
+          {isOpen ? "−" : "+"}
+        </span>
+      </button>
 
-        <div className="pb-6">
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground text-pretty">
-            We use the information you provide to suggest the closest category. If the
-            incident is unclear, we&apos;ll say so rather than make assumptions.
-          </p>
+      <div
+        id="categories-content"
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+        aria-hidden={!isOpen}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="pb-6">
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground text-pretty">
+              We use the information you provide to suggest the closest category. If the
+              incident is unclear, we&apos;ll say so rather than make assumptions.
+            </p>
 
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Possible claim categories">
-            {claimTypeOptions.map((category) => (
-              <li key={category.value} className="rounded-lg border border-border bg-card p-4">
-                <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">
-                  {category.description}
-                </p>
-              </li>
-            ))}
-          </ul>
+            <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Possible claim categories">
+              {claimTypeOptions.map((category) => (
+                <li key={category.value} className="rounded-lg border border-border bg-card p-4">
+                  <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">
+                    {category.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </details>
+      </div>
     </section>
   );
 }
