@@ -16,7 +16,7 @@ export function ClaimCategories() {
         onClick={() => setIsOpen((open) => !open)}
       >
         <span>
-          <span className="block text-sm font-medium text-accent">Possible categories</span>
+          <span className="block text-sm font-medium text-accent">Supported claim categories</span>
           <span
             id="categories-heading"
             className="mt-1 block font-serif text-xl font-semibold text-foreground text-balance"
