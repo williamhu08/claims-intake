@@ -23,6 +23,11 @@ export function ClaimCategories() {
           >
             How we make an initial reading
           </span>
+          {!isOpen && (
+            <span className="mt-2 block text-sm leading-relaxed text-muted-foreground">
+              Click to see the claim categories we support.
+            </span>
+          )}
         </span>
         <span className="font-mono text-lg text-muted-foreground" aria-hidden="true">
           {isOpen ? "−" : "+"}
@@ -39,8 +44,9 @@ export function ClaimCategories() {
         <div className="min-h-0 overflow-hidden">
           <div className="pb-6">
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground text-pretty">
-              We use the information you provide to suggest the closest category. If the
-              incident is unclear, we&apos;ll say so rather than make assumptions.
+              These are the claim categories we support. We use the information you provide
+              to suggest the closest match. If the incident is unclear, we&apos;ll say so rather
+              than make assumptions.
             </p>
 
             <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Possible claim categories">
