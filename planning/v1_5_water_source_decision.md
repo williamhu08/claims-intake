@@ -10,6 +10,13 @@ Clearway will support one targeted water-source clarification when the
 validated `CaseState` leaves the source of a water loss `missing` or `unclear`
 **and** that answer could change the next permitted intake route.
 
+The question matters because the **source of the damage** can change the
+appropriate intake-review path: water from the claimant's own plumbing or
+appliance may support property-adjuster review, while a possible neighbor,
+shared-system, or outside source may require liability review or human triage.
+This is only a routing distinction; Clearway does not decide coverage, fault,
+or responsibility.
+
 This is not a hard-coded “water claims always get a question” pipeline. The
 application exposes the clarification action only for an eligible material
 ambiguity; within that bounded action set, the model can choose to ask, propose
