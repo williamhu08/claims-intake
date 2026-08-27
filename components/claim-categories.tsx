@@ -16,12 +16,11 @@ export function ClaimCategories() {
         onClick={() => setIsOpen((open) => !open)}
       >
         <span>
-          <span className="block text-sm font-medium text-accent">Supported claim categories</span>
           <span
             id="categories-heading"
-            className="mt-1 block font-serif text-xl font-semibold text-foreground text-balance"
+            className="block font-serif text-xl font-semibold text-foreground text-balance"
           >
-            How we make an initial reading
+            Supported claim categories
           </span>
           {!isOpen && (
             <span className="mt-2 block text-sm leading-relaxed text-muted-foreground">
