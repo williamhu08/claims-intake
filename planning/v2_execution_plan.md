@@ -13,6 +13,20 @@ narrative → CaseState → choose one permitted next action
           → targeted question (only if material) → updated CaseState → route or escalate → stop
 ```
 
+## Why V2 is not V1 with another prompt
+
+V1 is a fixed, one-turn pipeline: one claimant narrative enters
+`/api/case-analysis`, the model returns a `CaseState`, and the flow ends. It
+cannot inspect a partial state and decide whether it should ask a new question.
+
+V2 is bounded **dynamic decomposition**. `/api/case-session/start` creates a
+validated initial state, and `/api/case-session/respond` resumes only from a
+server-signed state after a real claimant answer. On each server turn, the
+model can select one application-constrained action—ask, propose a non-binding
+route, or escalate—based on the current partial state. The application owns
+eligibility, provenance, stop conditions, and safety budgets; the model does
+not invent a next step or get arbitrary tool access.
+
 The first supported ambiguity is water source:
 
 - A burst pipe or clear first-party water loss can stop with a proposed property
@@ -159,6 +173,13 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      with an auditable action trace.
 
 4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
+   - [ ] **TODO for Vercel v0:** replace the V1 one-shot submission flow with
+     `POST /api/case-session/start`, retain the returned `sessionToken`, and
+     send each claimant answer to `POST /api/case-session/respond`.
+   - [ ] **TODO for Vercel v0:** render the session state explicitly: pending
+     question, question history, refreshed facts/provenance, terminal
+     non-binding route, human-review escalation, invalid/expired-session reset,
+     and retryable Gateway failure.
    - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
      answer, retry, and human-review copy without implying coverage or fault.
    - [ ] Start a V2 session from the claimant narrative rather than treating a
