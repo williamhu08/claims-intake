@@ -7,7 +7,10 @@ export function ClaimCategories() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="border-y border-border" aria-labelledby="categories-heading">
+    <section
+      className="border-y border-border transition-colors duration-200 hover:bg-muted/40"
+      aria-labelledby="categories-heading"
+    >
       <button
         type="button"
         className="flex w-full items-center justify-between gap-4 py-4 text-left text-foreground"
