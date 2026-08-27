@@ -15,8 +15,6 @@ narrative → CaseState → choose one permitted next action
 
 ## Why V2 is not V1 with another prompt
 
-> **Temporary annotation: added from non-v0 local.**
-
 V1 is a fixed, one-turn pipeline: one claimant narrative enters
 `/api/case-analysis`, the model returns a `CaseState`, and the flow ends. It
 cannot inspect a partial state and decide whether it should ask a new question.
@@ -175,6 +173,14 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      with an auditable action trace.
 
 4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
+   - [ ] Replace the V1 one-shot submission flow with
+     `POST /api/case-session/start`, retain the returned `sessionToken`, and
+     send each claimant answer to `POST /api/case-session/respond`.
+     *(Temporary annotation: added from non-v0 local.)*
+   - [ ] Render the session state explicitly: pending question, question
+     history, refreshed facts/provenance, terminal non-binding route,
+     human-review escalation, invalid/expired-session reset, and retryable
+     Gateway failure. *(Temporary annotation: added from non-v0 local.)*
    - [ ] Replace the one-turn V1 submission flow with a session lifecycle:
      narrative → session start → optional question → claimant response →
      refreshed state → terminal route or human review.
