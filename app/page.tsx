@@ -46,6 +46,14 @@ export default function Home() {
         <div className="mt-8">
           <ClaimCategories />
           <div className="mt-10">
+            <div className="mb-5">
+              <h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">
+                Start with what you know
+              </h2>
+              <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">
+                Share the details you have so we can make an initial assessment.
+              </p>
+            </div>
             <IntakeForm />
           </div>
         </div>
