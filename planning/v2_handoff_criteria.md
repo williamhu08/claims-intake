@@ -56,18 +56,18 @@ Start V2 only when all of these are true:
 
 - [x] V1 has a deployed Preview, a validated `CaseState`, deterministic tests,
   and an updated architecture/API README.
-- [ ] A specific claimant problem justifies a clarification turn. The first
+- [x] A specific claimant problem justifies a clarification turn. The first
   candidate is material ambiguity about incident cause, third-party
   involvement, or active safety/loss—not merely any missing field.
-- [ ] The product team has written the exact decision rule for when a missing
+- [x] The product team has written the exact decision rule for when a missing
   fact matters to a route. A question must change the next permitted action or
   reduce a material uncertainty.
-- [ ] The allowed V2 action vocabulary, provider tool-stop semantics,
+- [x] The allowed V2 action vocabulary, provider tool-stop semantics,
   config-sourced token/wall-clock budget, repeated-question policy, and
   escalation conditions are agreed before implementation.
-- [ ] Claimant-facing copy distinguishes: facts already understood, why one
+- [x] Claimant-facing copy distinguishes: facts already understood, why one
   question matters, and when Clearway will hand the case to a person.
-- [ ] A decision is recorded on whether plain AI SDK tool use is sufficient or
+- [x] A decision is recorded on whether plain AI SDK tool use is sufficient or
   whether eve materially improves orchestration. Eve is optional, not a
   requirement.
 

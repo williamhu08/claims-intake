@@ -34,6 +34,11 @@ The product is deliberately narrow: **first-touch triage for property claims**. 
 | **V3 — Make it trustworthy** | Produce an actionable, evidence-backed handoff. | Mock policy lookup, operational severity/urgency, routing, escalation for low confidence or unresolved facts, and an adjuster-ready handoff. | AI SDK, AI Gateway, and the selected agent/tool layer. |
 | **V4 — Make it compelling** | Deliver a polished, presentation-ready submission. | Demo scenarios, visual and interaction polish, reliable edge states, README and architecture notes, final deployment, and a concise presentation. | Full stack, used deliberately. |
 
+V1.5 implementation details live in the [execution plan](./v1_5_execution_plan.md),
+[water-source decision](./v1_5_water_source_decision.md), and
+[V2 session/test contract](./v1_5_v2_session_contract.md). They intentionally
+keep V2 bounded and defer policy, severity, and evidence work to V3.
+
 ## Six-hour target
 
 The realistic six-hour version is:
