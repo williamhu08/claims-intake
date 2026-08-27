@@ -13,7 +13,7 @@ export function ClaimCategories() {
     >
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left text-foreground"
+        className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left text-foreground"
         aria-expanded={isOpen}
         aria-controls="categories-content"
         onClick={() => setIsOpen((open) => !open)}
