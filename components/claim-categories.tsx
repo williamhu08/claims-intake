@@ -13,7 +13,7 @@ export function ClaimCategories() {
     >
       <button
         type="button"
-        className="group flex w-full items-center justify-between gap-4 px-6 py-4 text-left text-foreground"
+        className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left text-foreground"
         aria-expanded={isOpen}
         aria-controls="categories-content"
         onClick={() => setIsOpen((open) => !open)}
@@ -32,7 +32,7 @@ export function ClaimCategories() {
           )}
         </span>
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-foreground/80 font-mono text-lg leading-none text-foreground transition-colors group-hover:border-foreground group-hover:bg-muted"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-foreground/80 font-mono text-lg leading-none text-foreground transition-colors hover:border-foreground hover:bg-muted"
           aria-hidden="true"
         >
           {isOpen ? "−" : "+"}
