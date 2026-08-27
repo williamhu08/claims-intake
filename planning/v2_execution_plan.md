@@ -130,6 +130,9 @@ Update a step to `[x]` only when every bullet beneath it is complete.
 
 4. [ ] **Validate the bounded loop deterministically**
    - [ ] Mock the AI SDK tools/actions; no live model calls in the test suite.
+   - [ ] Add focused unit tests for session signing, action eligibility,
+     state-transition functions, clarification-history updates, stop-reason
+     selection, and action-trace validation before route-level tests.
    - [ ] Test clear water damage → property route → terminal stop.
    - [ ] Test ambiguous water source → one question → resolved property route.
    - [ ] Test no response, repeat question attempt, safety concern, unresolved
@@ -138,7 +141,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
    - [ ] Test claimant-facing question/history/escalation UI and responsive,
-     accessible states.
+     accessible states separately from the server/session unit suite.
 
 5. [ ] **Preview V2 and document the seam to V3**
    - [ ] Run lint, tests, and production build.

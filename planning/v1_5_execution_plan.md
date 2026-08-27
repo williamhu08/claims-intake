@@ -74,7 +74,25 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Define the deterministic fixture matrix and acceptance assertions that
      V2 must implement.
 
-6. [ ] **Approve the V2 build handoff**
+6. [ ] **Specify the V2 unit-test contract**
+   - [ ] Identify the pure application modules that V2 must unit test: session
+     signature verification, action eligibility, state transitions,
+     clarification-history updates, stop-reason selection, and trace
+     validation.
+   - [ ] Require mocked model/tool results for every unit test; a live Gateway
+     call is a Preview smoke test, never test-suite evidence.
+   - [ ] Freeze the minimum fixture matrix: clear first-party water damage,
+     ambiguous source resolved by one answer, possible third-party involvement,
+     active safety concern, claimant unable to answer, repeated/equivalent
+     question, tampered session, invalid action, budget exhaustion, and exact
+     gibberish.
+   - [ ] Require each fixture to assert the visible outcome, terminal
+     `stopReason`, bounded action trace, and that no unsupported route or
+     ungrounded fact was accepted.
+   - [ ] Separate route/session unit tests from claimant-flow UI tests so a
+     failed interface test cannot conceal an unsafe state transition.
+
+7. [ ] **Approve the V2 build handoff**
    - [ ] Reconcile all decisions with `v2_handoff_criteria.md` and mark its
      entry criteria complete.
    - [ ] Update `vercel-claims-roadmap.md` with only the concise V1.5/V2
@@ -87,7 +105,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
 - A reviewer can trace every proposed V2 action to a state condition and a
   claimant-visible outcome.
 - The first V2 scenario, action vocabulary, stop rules, session model, and
-  test fixtures are explicit enough to implement without redesigning during
-  coding.
+  unit-test contract are explicit enough to implement without redesigning
+  during coding.
 - The plan clearly states what remains V3 and why V2 will not become an
   unbounded prompt loop or a thin wrapper around a model.
