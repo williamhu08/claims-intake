@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+/** Input and claimant-facing display budgets for the intake contract. */
+export const MIN_CLAIM_NARRATIVE_LENGTH = 20;
+export const MAX_CLAIM_NARRATIVE_LENGTH = 4_000;
+export const MAX_CLAIM_SUMMARY_LENGTH = 500;
+export const MAX_CASE_FACT_VALUE_LENGTH = 400;
+export const MAX_ROUTE_RATIONALE_LENGTH = 400;
+
 export const claimTypeValues = [
   "water_damage",
   "fire_or_smoke",
@@ -12,8 +19,8 @@ export const claimTypeValues = [
 export const claimNarrativeSchema = z
   .string()
   .trim()
-  .min(20, "Describe what happened in at least 20 characters.")
-  .max(4_000, "Keep the description under 4,000 characters.");
+  .min(MIN_CLAIM_NARRATIVE_LENGTH, "Describe what happened in at least 20 characters.")
+  .max(MAX_CLAIM_NARRATIVE_LENGTH, "Keep the description under 4,000 characters.");
 
 export const claimIntakeRequestSchema = z.object({
   narrative: claimNarrativeSchema,
@@ -21,7 +28,7 @@ export const claimIntakeRequestSchema = z.object({
 
 export const claimIntakeResultSchema = z.object({
   claimType: z.enum(claimTypeValues),
-  summary: z.string().min(1).max(360),
+  summary: z.string().min(1).max(MAX_CLAIM_SUMMARY_LENGTH),
   confidence: z.number().min(0).max(1),
 });
 
@@ -66,17 +73,17 @@ const modelCaseFactSchema = z.object({
   key: z.enum(caseFactKeyValues),
   status: z.enum(factStatusValues),
   // Nullable keeps this field present in strict structured-output schemas while allowing non-collected facts to omit a value semantically.
-  value: z.string().trim().min(1).max(280).nullable(),
+  value: z.string().trim().min(1).max(MAX_CASE_FACT_VALUE_LENGTH).nullable(),
 });
 
 export const caseAnalysisModelOutputSchema = z.object({
   claimType: z.enum(claimTypeValues),
-  summary: z.string().trim().min(1).max(360),
+  summary: z.string().trim().min(1).max(MAX_CLAIM_SUMMARY_LENGTH),
   classificationConfidence: z.number().min(0).max(1),
   facts: z.array(modelCaseFactSchema).max(caseFactKeyValues.length),
   proposedRoute: z.object({
     kind: z.enum(proposedRouteKindValues),
-    rationale: z.string().trim().min(1).max(280),
+    rationale: z.string().trim().min(1).max(MAX_ROUTE_RATIONALE_LENGTH),
     confidence: z.number().min(0).max(1),
   }),
 });
@@ -85,19 +92,19 @@ export const caseFactSchema = z.object({
   key: z.enum(caseFactKeyValues),
   label: z.string(),
   status: z.enum(factStatusValues),
-  value: z.string().min(1).max(280).optional(),
+  value: z.string().min(1).max(MAX_CASE_FACT_VALUE_LENGTH).optional(),
   source: z.literal("claimant_narrative"),
 });
 
 export const proposedRouteSchema = z.object({
   kind: z.enum(proposedRouteKindValues),
-  rationale: z.string().min(1).max(280),
+  rationale: z.string().min(1).max(MAX_ROUTE_RATIONALE_LENGTH),
   confidence: z.number().min(0).max(1),
 });
 
 export const caseStateSchema = z.object({
   claimType: z.enum(claimTypeValues),
-  summary: z.string().min(1).max(360),
+  summary: z.string().min(1).max(MAX_CLAIM_SUMMARY_LENGTH),
   classificationConfidence: z.number().min(0).max(1),
   facts: z.array(caseFactSchema).length(caseFactKeyValues.length),
   missingFactKeys: z.array(z.enum(caseFactKeyValues)),
