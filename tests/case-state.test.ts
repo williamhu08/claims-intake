@@ -15,8 +15,8 @@ const completeWaterAnalysis: CaseAnalysisModelOutput = {
     { key: "damage_description", status: "collected", value: "The cabinet and floor were flooded." },
     { key: "affected_property", status: "collected", value: "Kitchen cabinet and floor." },
     { key: "loss_timing", status: "collected", value: "Overnight." },
-    { key: "active_loss_or_safety", status: "not_applicable" },
-    { key: "injury_or_third_party", status: "not_applicable" },
+    { key: "active_loss_or_safety", status: "not_applicable", value: null },
+    { key: "injury_or_third_party", status: "not_applicable", value: null },
   ],
   proposedRoute: {
     kind: "property_adjuster_review",
@@ -60,8 +60,8 @@ const completeFacts: CaseAnalysisModelOutput["facts"] = [
   { key: "damage_description", status: "collected", value: "Stated property damage." },
   { key: "affected_property", status: "collected", value: "The stated affected property." },
   { key: "loss_timing", status: "collected", value: "The stated timing." },
-  { key: "active_loss_or_safety", status: "not_applicable" },
-  { key: "injury_or_third_party", status: "not_applicable" },
+  { key: "active_loss_or_safety", status: "not_applicable", value: null },
+  { key: "injury_or_third_party", status: "not_applicable", value: null },
 ];
 
 describe("normalizeCaseState", () => {
@@ -121,7 +121,7 @@ describe("normalizeCaseState", () => {
     const result = normalizeCaseState({
       ...completeWaterAnalysis,
       facts: [
-        { key: "incident_cause", status: "unclear" },
+        { key: "incident_cause", status: "unclear", value: null },
         { key: "damage_description", status: "collected", value: "The basement carpet is wet." },
       ],
       proposedRoute: {
@@ -157,7 +157,7 @@ describe("normalizeCaseState", () => {
     expect(() =>
       normalizeCaseState({
         ...completeWaterAnalysis,
-        facts: [{ key: "incident_cause", status: "collected" }],
+        facts: [{ key: "incident_cause", status: "collected", value: null }],
       }),
     ).toThrow("must include a claimant-grounded value");
   });

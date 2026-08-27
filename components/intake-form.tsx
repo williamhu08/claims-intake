@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { CaseState } from "@/lib/claims/schema";
-import { claimTypeLabels, exampleClaims } from "@/lib/claims/display";
+import { caseStateSchema, type CaseState } from "@/lib/claims/schema";
+import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 
 const MIN_LENGTH = 20;
@@ -159,17 +159,5 @@ function getErrorMessage(data: unknown) {
 }
 
 function isCaseState(data: unknown): data is CaseState {
-  if (!data || typeof data !== "object") return false;
-  const result = data as Record<string, unknown>;
-  return (
-    typeof result.claimType === "string" &&
-    result.claimType in claimTypeLabels &&
-    typeof result.summary === "string" &&
-    result.summary.trim().length > 0 &&
-    typeof result.classificationConfidence === "number" &&
-    Array.isArray(result.facts) &&
-    Array.isArray(result.missingFactKeys) &&
-    typeof result.proposedRoute === "object" &&
-    result.proposedRoute !== null
-  );
+  return caseStateSchema.safeParse(data).success;
 }

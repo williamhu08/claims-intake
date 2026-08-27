@@ -142,18 +142,18 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Retain clear loading, validation, malformed-response, and API-error states.
    - [x] Keep the categories panel contextual and responsive beside the narrative on wider screens.
 
-4. [ ] **Validate with deterministic tests**
+4. [x] **Validate with deterministic tests**
    - [x] Mock each claim category into a complete and an incomplete `CaseState`.
    - [x] Test water damage, fire, storm, theft, liability, ambiguity, and exact gibberish.
-   - [ ] Test missing facts, unsupported routes, contradictory facts, malformed response bodies, and Gateway failure.
-   - [ ] Test responsive layout contracts and accessible labels/live regions.
-   - [ ] Keep live Gateway testing to one or two smoke tests only; model calls are not the test suite.
+   - [x] Test missing facts, unsupported routes, contradictory facts, malformed response bodies, and Gateway failure.
+   - [x] Test responsive layout contracts and accessible labels/live regions.
+   - [x] Keep live Gateway testing to one or two smoke tests only; model calls are not the test suite. No live model call was used for this test suite; any deployed smoke test belongs to Step 5.
 
-5. [ ] **Preview deploy and document V1**
-   - [ ] Run lint, tests, and production build.
-   - [ ] Deploy a protected Vercel Preview with the Preview Gateway credential.
-   - [ ] Smoke-test the deployed page and one live case-analysis request when credits are available.
-   - [ ] Update the README with the V1 state model, API contract, and V2 seam.
+5. [x] **Preview deploy and document V1**
+   - [x] Run lint, tests, and production build.
+   - [x] Deploy a protected Vercel Preview with the Preview Gateway credential.
+   - [x] Smoke-test the deployed page and one live case-analysis request when credits are available.
+   - [x] Update the README with the V1 state model, API contract, and V2 seam.
 
 ## Deliberate exclusions
 
