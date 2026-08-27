@@ -158,7 +158,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
 
-4. [ ] **Integrate the V2 claimant flow** *(reserved for v0)*
+4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
    - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
      answer, retry, and human-review copy without implying coverage or fault.
    - [ ] Start a V2 session from the claimant narrative rather than treating a
