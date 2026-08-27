@@ -143,19 +143,19 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      V1-origin facts remain `claimant_narrative`; newly learned facts are
      `claimant_response`.
 
-3. [ ] **Validate the server-owned loop deterministically**
-   - [ ] Implement V1.5's fixture matrix and assert its action/stop/provenance
+3. [x] **Validate the server-owned loop deterministically**
+   - [x] Implement V1.5's fixture matrix and assert its action/stop/provenance
      invariants before adding any live smoke check.
-   - [ ] Mock the AI SDK tools/actions; no live model calls in the test suite.
-   - [ ] Add focused unit tests for session signing, action eligibility,
+   - [x] Mock the AI SDK tools/actions; no live model calls in the test suite.
+   - [x] Add focused unit tests for session signing, action eligibility,
      state-transition functions, clarification-history updates, stop-reason
      selection, and action-trace validation before route-level tests.
-   - [ ] Test clear water damage → property route → terminal stop.
-   - [ ] Test ambiguous water source → one question → resolved property route.
-   - [ ] Test no response, repeat question attempt, safety concern, unresolved
+   - [x] Test clear water damage → property route → terminal stop.
+   - [x] Test ambiguous water source → one question → resolved property route.
+   - [x] Test no response, repeat question attempt, safety concern, unresolved
      ambiguity, invalid action, invalid signature, and exact gibberish → safe
      escalation.
-   - [ ] Assert every fixture reaches a terminal state in the allowed budget
+   - [x] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
 
 4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*

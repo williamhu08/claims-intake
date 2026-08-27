@@ -80,6 +80,31 @@ const question: CaseSessionAction = {
   whyItMatters: "This helps us send your intake to the right review team.",
 };
 
+function withFact(
+  state: CaseState,
+  key: CaseState["facts"][number]["key"],
+  status: CaseState["facts"][number]["status"],
+  value?: string,
+): CaseState {
+  const facts = state.facts.map((fact) =>
+    fact.key === key
+      ? {
+          ...fact,
+          status,
+          ...(status === "collected" && value ? { value } : { value: undefined }),
+        }
+      : fact,
+  );
+
+  return {
+    ...state,
+    facts,
+    missingFactKeys: facts
+      .filter((fact) => fact.status === "missing" || fact.status === "unclear")
+      .map((fact) => fact.key),
+  };
+}
+
 describe("V2 session contract", () => {
   it("accepts a pending, non-terminal signed-session payload shape", () => {
     const session = caseSessionStateSchema.parse({
@@ -179,6 +204,84 @@ describe("V2 session contract", () => {
     expect(isWaterSourceClarificationEligible(answered, 2)).toBe(false);
   });
 
+  it("turns one claimant-supplied first-party source into a provenance-marked property route", () => {
+    const pending = applyCaseSessionAction(createCaseSession(caseState, 1_800), question, 2);
+    const answered = recordClaimantAnswer(pending, "A pipe under my kitchen sink burst.");
+    const resolvedState = withFact(
+      {
+        ...answered.caseState,
+        proposedRoute: {
+          kind: "property_adjuster_review",
+          rationale: "The claimant identified a first-party burst pipe.",
+          confidence: 0.9,
+        },
+      },
+      "incident_cause",
+      "collected",
+      "A pipe under the kitchen sink burst.",
+    );
+    const caseStateWithResponseProvenance: CaseState = {
+      ...resolvedState,
+      facts: resolvedState.facts.map((fact) =>
+        fact.key === "incident_cause" ? { ...fact, source: "claimant_response" as const } : fact,
+      ),
+    };
+    const terminal = applyCaseSessionAction(
+      { ...answered, caseState: caseStateWithResponseProvenance },
+      {
+        kind: "propose_route",
+        route: "property_adjuster_review",
+        rationale: "The first-party source is now established.",
+      },
+      2,
+    );
+
+    expect(terminal.caseState.facts.find((fact) => fact.key === "incident_cause")?.source).toBe(
+      "claimant_response",
+    );
+    expect(terminal.terminal?.stopReason).toBe("route_supported");
+    expect(terminal.actionTrace.map((entry) => entry.kind)).toEqual([
+      "ask_clarifying_question",
+      "propose_route",
+    ]);
+  });
+
+  it("keeps claimant-stated possible third-party involvement as an intake route, not a fault finding", () => {
+    const thirdPartyState = withFact(
+      withFact(
+        {
+          ...caseState,
+          proposedRoute: {
+            kind: "liability_review",
+            rationale: "The claimant states that a neighbor may be involved.",
+            confidence: 0.82,
+          },
+        },
+        "incident_cause",
+        "collected",
+        "Water may be coming from the upstairs neighbor.",
+      ),
+      "injury_or_third_party",
+      "collected",
+      "The upstairs neighbor may be involved.",
+    );
+    const terminal = applyCaseSessionAction(
+      createCaseSession(thirdPartyState, 1_800),
+      {
+        kind: "propose_route",
+        route: "liability_review",
+        rationale: "The claimant-stated third-party involvement needs liability review.",
+      },
+      2,
+    );
+
+    expect(terminal.terminal).toMatchObject({
+      kind: "propose_route",
+      stopReason: "route_supported",
+    });
+    expect(terminal.terminal?.rationale).not.toMatch(/fault|responsib/i);
+  });
+
   it("rejects an ineligible question and a tampered or expired session token", () => {
     const now = new Date("2026-08-26T19:00:00.000Z");
     const session = createCaseSession(caseState, 60, () => now);
@@ -208,5 +311,87 @@ describe("V2 session contract", () => {
     expect(() =>
       verifyCaseSession(token, "test-secret", () => new Date("2026-08-26T19:01:01.000Z")),
     ).toThrow("expired");
+  });
+
+  it("routes clear first-party water damage and ends with an auditable terminal trace", () => {
+    const clearWaterState = withFact(
+      {
+        ...caseState,
+        proposedRoute: {
+          kind: "property_adjuster_review",
+          rationale: "A burst pipe in the claimant's home caused the damage.",
+          confidence: 0.9,
+        },
+      },
+      "incident_cause",
+      "collected",
+      "A burst pipe under the kitchen sink.",
+    );
+    const session = createCaseSession(clearWaterState, 1_800);
+    const terminal = applyCaseSessionAction(
+      session,
+      {
+        kind: "propose_route",
+        route: "property_adjuster_review",
+        rationale: "The first-party water source is established.",
+      },
+      2,
+    );
+
+    expect(terminal.terminal).toMatchObject({
+      kind: "propose_route",
+      stopReason: "route_supported",
+    });
+    expect(terminal.actionTrace).toHaveLength(1);
+    expect(() =>
+      applyCaseSessionAction(terminal, { kind: "escalate_to_human", stopReason: "unresolved_ambiguity", rationale: "No." }, 2),
+    ).toThrow("terminal");
+  });
+
+  it("escalates no-response, safety uncertainty, unresolved ambiguity, and gibberish safely", () => {
+    const noResponsePending = applyCaseSessionAction(createCaseSession(caseState, 1_800), question, 2);
+    const noResponse = recordClaimantAnswer(noResponsePending, "no_response");
+    const noResponseTerminal = applyCaseSessionAction(
+      noResponse,
+      {
+        kind: "escalate_to_human",
+        stopReason: "claimant_cannot_answer",
+        rationale: "The claimant could not identify the source.",
+      },
+      2,
+    );
+    const safetyState = withFact(caseState, "active_loss_or_safety", "unclear");
+    const gibberishState: CaseState = {
+      ...caseState,
+      claimType: "other_or_unclear",
+      summary: "dsfmbbgvjhksd dfasghjasgbkv",
+      proposedRoute: { kind: "human_triage_review", rationale: "No reliable facts are available.", confidence: 0 },
+    };
+
+    expect(noResponseTerminal.terminal?.stopReason).toBe("claimant_cannot_answer");
+    expect(isWaterSourceClarificationEligible(createCaseSession(safetyState, 1_800), 2)).toBe(false);
+    expect(
+      applyCaseSessionAction(
+        createCaseSession(safetyState, 1_800),
+        {
+          kind: "escalate_to_human",
+          stopReason: "safety_review",
+          rationale: "The active loss or safety status needs human review.",
+        },
+        2,
+      ).terminal?.stopReason,
+    ).toBe("safety_review");
+    expect(isWaterSourceClarificationEligible(createCaseSession(gibberishState, 1_800), 2)).toBe(false);
+    expect(
+      applyCaseSessionAction(
+        createCaseSession(gibberishState, 1_800),
+        {
+          kind: "escalate_to_human",
+          stopReason: "unresolved_ambiguity",
+          rationale: "A person should review the unsupported account.",
+        },
+        2,
+      ).terminal?.stopReason,
+    ).toBe("unresolved_ambiguity");
   });
 });

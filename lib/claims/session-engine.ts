@@ -84,9 +84,24 @@ export function applyCaseSessionAction(
 
   if (
     parsedAction.kind === "ask_clarifying_question" &&
-    !isWaterSourceClarificationEligible(session, maxClarifications)
+    (!parsedAction.factKeys.includes("incident_cause") ||
+      !isWaterSourceClarificationEligible(session, maxClarifications))
   ) {
     throw new Error("This clarification is not eligible for the current case state.");
+  }
+
+  if (parsedAction.kind === "propose_route") {
+    const cause = factFor(session.caseState, "incident_cause");
+    const safety = factFor(session.caseState, "active_loss_or_safety");
+
+    if (
+      parsedAction.route !== session.caseState.proposedRoute.kind ||
+      cause.status === "missing" ||
+      cause.status === "unclear" ||
+      safety.status === "unclear"
+    ) {
+      throw new Error("This route is not supported by the current case state.");
+    }
   }
 
   const traceEntry = { kind: parsedAction.kind, at: clock().toISOString() };
