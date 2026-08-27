@@ -13,7 +13,7 @@ export function ClaimCategories() {
     >
       <button
         type="button"
-        className="group flex w-full items-center justify-between gap-4 py-4 pr-4 text-left text-foreground"
+        className="group flex w-full items-center justify-between gap-4 px-6 py-4 text-left text-foreground"
         aria-expanded={isOpen}
         aria-controls="categories-content"
         onClick={() => setIsOpen((open) => !open)}
@@ -32,7 +32,7 @@ export function ClaimCategories() {
           )}
         </span>
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/40 font-mono text-lg leading-none text-muted-foreground transition-colors group-hover:border-foreground/70 group-hover:text-foreground"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-foreground/70 font-mono text-lg leading-none text-foreground transition-colors group-hover:border-foreground group-hover:bg-muted"
           aria-hidden="true"
         >
           {isOpen ? "−" : "+"}
@@ -47,7 +47,7 @@ export function ClaimCategories() {
         aria-hidden={!isOpen}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="pb-6">
+          <div className="px-6 pb-6">
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground text-pretty">
               These are the claim categories we support. We use the information you provide
               to suggest the closest match. If the incident is unclear, we&apos;ll say so rather
