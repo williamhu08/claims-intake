@@ -143,19 +143,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      V1-origin facts remain `claimant_narrative`; newly learned facts are
      `claimant_response`.
 
-3. [ ] **Integrate the V2 claimant flow** *(reserved for v0)*
-   - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
-     answer, retry, and human-review copy without implying coverage or fault.
-   - [ ] Start a V2 session from the claimant narrative rather than treating a
-     V1 result as final.
-   - [ ] Present one targeted, material question with an optional “I don&apos;t
-     know” path.
-   - [ ] Show the refreshed `CaseState`, question history, terminal route, or
-     human-review escalation clearly.
-   - [ ] Explain why the question matters without implying coverage or fault.
-   - [ ] Preserve accessible loading, error, retry, and reset states.
-
-4. [ ] **Validate the bounded loop deterministically**
+3. [ ] **Validate the server-owned loop deterministically**
    - [ ] Implement V1.5's fixture matrix and assert its action/stop/provenance
      invariants before adding any live smoke check.
    - [ ] Mock the AI SDK tools/actions; no live model calls in the test suite.
@@ -169,12 +157,24 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      escalation.
    - [ ] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
-   - [ ] Test claimant-facing question/history/escalation UI and responsive,
-     accessible states separately from the server/session unit suite.
 
-5. [ ] **Preview V2 and document the seam to V3**
+4. [ ] **Integrate the V2 claimant flow** *(reserved for v0)*
+   - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
+     answer, retry, and human-review copy without implying coverage or fault.
+   - [ ] Start a V2 session from the claimant narrative rather than treating a
+     V1 result as final.
+   - [ ] Present one targeted, material question with an optional “I don&apos;t
+     know” path.
+   - [ ] Show the refreshed `CaseState`, question history, terminal route, or
+     human-review escalation clearly.
+   - [ ] Explain why the question matters without implying coverage or fault.
+   - [ ] Preserve accessible loading, error, retry, and reset states.
+
+5. [ ] **Verify V2 end-to-end and document the seam to V3**
    - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,
      session, safety, provenance, and V3-boundary decisions.
+   - [ ] Test claimant-facing question/history/escalation UI and responsive,
+     accessible states separately from the server/session unit suite.
    - [ ] Run lint, tests, and production build.
    - [ ] Deploy a protected Preview only.
    - [ ] Make no more than two synthetic live Gateway smoke calls, recording
