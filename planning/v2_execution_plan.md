@@ -172,58 +172,60 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
 
-4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
-   - [ ] Replace the one-turn V1 submission flow with a session lifecycle:
+4A. [ ] **Start a V2 claimant session** *(reserved for Vercel v0)*
+   - [ ] Replace the one-turn V1 submission flow with the V2 lifecycle:
      narrative → session start → optional question → claimant response →
      refreshed state → terminal route or human review.
    - [ ] Start V2 from the claimant narrative by calling
      `POST /api/case-session/start`; do not treat the V1 `CaseState` as final
      or call `/api/case-analysis` from the claimant UI.
-   - [ ] Preserve the `sessionToken` returned by `/api/case-session/start` (and
-     refreshed by `/api/case-session/respond`) as an opaque client value and
-     send it back only through the V2 response contract; never let the browser
-     edit or reconstruct canonical session state.
+   - [ ] Preserve the `sessionToken` returned by `/api/case-session/start` as
+     an opaque client value; never let the browser edit or reconstruct
+     canonical session state.
+   - [ ] Preserve accessible narrative validation, loading, malformed-response,
+     API-error, retry, and reset states.
+
+4B. [ ] **Ask and answer one clarification** *(reserved for Vercel v0)*
    - [ ] Render exactly one pending clarification question at a time, tied to
      the material fact key(s) returned by the server. Do not generate or
      rephrase questions in the browser.
-   - [ ] Present the question with plain claimant-facing copy explaining why
-     the answer matters for routing, without implying coverage, fault,
-     liability, payment, or a final insurance decision.
-   - [ ] Provide a clearly optional “I don&apos;t know” / “I&apos;m not sure” action
-     that submits the contract&apos;s `no_response` answer rather than inventing
-     a value or leaving the session in an ambiguous client-only state.
+   - [ ] Explain why the answer matters for routing, without implying coverage,
+     fault, liability, payment, or a final insurance decision.
+   - [ ] Provide an optional “I don&apos;t know” / “I&apos;m not sure” action that
+     submits the contract&apos;s `no_response` answer rather than inventing a value.
    - [ ] Submit ordinary answers to `POST /api/case-session/respond` with the
      opaque session token and answer; disable duplicate submission while the
-     request is pending and preserve the current question until the response
-     is accepted.
-   - [ ] Show a compact question history containing prior questions and the
-     claimant&apos;s answers, including an explicit unable-to-answer entry when
-     applicable. Do not expose internal prompts, tool arguments, or signed
-     session contents.
+     request is pending and preserve the question until accepted.
+   - [ ] Show compact question history with prior questions and claimant
+     answers, including an explicit unable-to-answer entry when applicable.
+     Never expose internal prompts, tool arguments, or signed session contents.
+
+4C. [ ] **Render progress and terminal outcomes** *(reserved for Vercel v0)*
    - [ ] Render the refreshed `CaseState` after each accepted response,
      including updated facts, provenance (`claimant_narrative` versus
      `claimant_response`), missing facts, and classification confidence.
    - [ ] Render terminal outcomes distinctly: a non-binding proposed route with
      rationale, or a human-review escalation with a calm explanation. Both
-     outcomes must make clear that the system has not determined coverage or
-     fault.
+     must make clear that the system has not determined coverage or fault.
    - [ ] Handle server-declared stop reasons in claimant language, including
      resolved routing, unresolved ambiguity, inability to answer, safety
      review, and safety-budget exhaustion; do not expose raw error details.
-   - [ ] Preserve accessible loading, validation, malformed-response, API-error,
-     retry, and reset states using semantic headings, labelled controls,
-     `aria-live` for status updates, and `role="alert"` for actionable errors.
-     Treat retryable Gateway/network failures as retry-in-place (resubmit the
-     same pending question or answer); treat an invalid or expired session as
-     non-retryable and route straight to the reset path instead.
-   - [ ] Reset the session safely by clearing the local view state and requiring
-     a fresh narrative submission; never reuse a terminal, invalid, or expired
-     token.
-   - [ ] Keep the existing supported-category guidance contextual and ensure
-     the form, question panel, history, and terminal result remain responsive
-     at narrow and wide viewports.
+   - [ ] Preserve the refreshed `sessionToken` returned by
+     `/api/case-session/respond` as an opaque value for the next response.
+
+4D. [ ] **Recover, reset, and verify the claimant flow** *(reserved for Vercel v0)*
+   - [ ] Treat retryable Gateway/network failures as retry-in-place by
+     resubmitting the same pending question or answer; treat invalid or
+     expired sessions as non-retryable and route directly to reset.
+   - [ ] Reset safely by clearing local view state and requiring a fresh
+     narrative submission; never reuse a terminal, invalid, or expired token.
+   - [ ] Keep supported-category guidance contextual and ensure the form,
+     question panel, history, and terminal result remain responsive at narrow
+     and wide viewports.
+   - [ ] Use semantic headings, labelled controls, `aria-live` for status
+     updates, and `role="alert"` for actionable errors.
    - [ ] Add focused claimant-flow component/interaction tests with mocked V2
-     routes covering: immediate route, one clarification, “I don&apos;t know”,
+     routes covering immediate route, one clarification, “I don&apos;t know”,
      retry after failure, malformed response, human review, reset, and
      duplicate-submit prevention.
 
