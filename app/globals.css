@@ -69,3 +69,23 @@ body {
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
 }
+
+.category-panel {
+  transition: background 220ms ease;
+}
+
+.category-panel:hover {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--foreground) 7%, var(--background)),
+    color-mix(in oklch, var(--foreground) 2%, var(--background)) 38%,
+    color-mix(in oklch, var(--foreground) 2%, var(--background)) 62%,
+    color-mix(in oklch, var(--foreground) 7%, var(--background))
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-panel {
+    transition: none;
+  }
+}
