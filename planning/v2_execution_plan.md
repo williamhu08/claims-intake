@@ -35,6 +35,26 @@ The first supported ambiguity is water source:
 - The existing `/api/case-analysis` remains V1's terminal one-turn endpoint.
   V2 adds a separate case-session contract.
 
+## V1.5 implementation constraints
+
+Every remaining V2 step implements the approved V1.5 contract; it must not
+quietly redesign it. In particular:
+
+- Preserve the three-action boundary: ask one targeted clarification, propose
+  a non-binding route, or escalate to a human.
+- Apply the water-source materiality/eligibility rule before a model can ask
+  that first clarification; never turn missing facts into a generic form.
+- Preserve server-owned, signed session state; prior state, action history, or
+  terminal outcomes from the browser are untrusted until verified.
+- Preserve the terminal `stopReason` vocabulary, token/wall-clock safety
+  budget, two-question claimant-experience limit, and no-repeat rule.
+- Preserve claimant provenance: original facts use `claimant_narrative`; facts
+  learned in a clarification use `claimant_response`.
+- Keep V3 work out of V2: no policy lookup, severity, evidence ingestion,
+  actual queue writes, or coverage/fault/payment decisions.
+- Meet V1.5's deterministic unit-test contract with mocked model/tool results;
+  Preview model calls are smoke checks only.
+
 ## Session and action contract
 
 The server owns the canonical schemas and signs the compact session state that
@@ -105,20 +125,27 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Confirm direct AI SDK tool calling remains sufficient; record why eve
      is deferred.
 
-2. [ ] **Build the server-owned session engine**
-   - [ ] Add `POST /api/case-session/start` to create V1-grounded initial state
+2. [x] **Build the server-owned session engine**
+   - [x] Implement the V1.5 action/session contract without expanding its
+     action vocabulary or stop conditions.
+   - [x] Add `POST /api/case-session/start` to create V1-grounded initial state
      and return one validated V2 action.
-   - [ ] Add `POST /api/case-session/respond` to validate a signed session and
+   - [x] Add `POST /api/case-session/respond` to validate a signed session and
      claimant answer, update facts, and return the next action or terminal
      state.
-   - [ ] Define AI SDK tools for `ask_clarifying_question`, `propose_route`,
+   - [x] Define AI SDK tools for `ask_clarifying_question`, `propose_route`,
      and `escalate_to_human`; validate all inputs and never execute an external
      operational action.
-   - [ ] Return safe failures for malformed model action, invalid/tampered
+   - [x] Return safe failures for malformed model action, invalid/tampered
      session, budget exhaustion, and Gateway failure.
-   - [ ] Keep `/api/case-analysis` unchanged.
+   - [x] Keep `/api/case-analysis` unchanged.
+   - [x] Preserve fact provenance when a clarification adds information:
+     V1-origin facts remain `claimant_narrative`; newly learned facts are
+     `claimant_response`.
 
 3. [ ] **Integrate the V2 claimant flow** *(reserved for v0)*
+   - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
+     answer, retry, and human-review copy without implying coverage or fault.
    - [ ] Start a V2 session from the claimant narrative rather than treating a
      V1 result as final.
    - [ ] Present one targeted, material question with an optional “I don&apos;t
@@ -129,6 +156,8 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Preserve accessible loading, error, retry, and reset states.
 
 4. [ ] **Validate the bounded loop deterministically**
+   - [ ] Implement V1.5's fixture matrix and assert its action/stop/provenance
+     invariants before adding any live smoke check.
    - [ ] Mock the AI SDK tools/actions; no live model calls in the test suite.
    - [ ] Add focused unit tests for session signing, action eligibility,
      state-transition functions, clarification-history updates, stop-reason
@@ -144,6 +173,8 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      accessible states separately from the server/session unit suite.
 
 5. [ ] **Preview V2 and document the seam to V3**
+   - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,
+     session, safety, provenance, and V3-boundary decisions.
    - [ ] Run lint, tests, and production build.
    - [ ] Deploy a protected Preview only.
    - [ ] Make no more than two synthetic live Gateway smoke calls, recording

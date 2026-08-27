@@ -2,8 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { getCaseSessionConfig } from "@/lib/claims/session-config";
 import {
+  applyCaseSessionAction,
+  createCaseSession,
+  isWaterSourceClarificationEligible,
+  recordClaimantAnswer,
+  signCaseSession,
+  verifyCaseSession,
+} from "@/lib/claims/session-engine";
+import {
   caseSessionActionSchema,
   caseSessionStateSchema,
+  type CaseSessionAction,
 } from "@/lib/claims/session-schema";
 import type { CaseState } from "@/lib/claims/schema";
 
@@ -64,8 +73,8 @@ const caseState: CaseState = {
   },
 };
 
-const question = {
-  kind: "ask_clarifying_question" as const,
+const question: CaseSessionAction = {
+  kind: "ask_clarifying_question",
   question: "Do you know where the water came from?",
   factKeys: ["incident_cause"],
   whyItMatters: "This helps us send your intake to the right review team.",
@@ -154,5 +163,50 @@ describe("V2 session contract", () => {
         CASE_SESSION_MAX_CLARIFICATIONS: "0",
       }),
     ).toThrow("CASE_SESSION_MAX_CLARIFICATIONS");
+  });
+
+  it("allows one eligible water-source question, records the answer, and prevents a repeat", () => {
+    const now = new Date("2026-08-26T19:00:00.000Z");
+    const session = createCaseSession(caseState, 1_800, () => now);
+
+    expect(isWaterSourceClarificationEligible(session, 2)).toBe(true);
+
+    const pending = applyCaseSessionAction(session, question, 2, () => now);
+    const answered = recordClaimantAnswer(pending, "It may be coming from the upstairs neighbor.");
+
+    expect(answered.pendingAction).toBeUndefined();
+    expect(answered.clarificationHistory).toHaveLength(1);
+    expect(isWaterSourceClarificationEligible(answered, 2)).toBe(false);
+  });
+
+  it("rejects an ineligible question and a tampered or expired session token", () => {
+    const now = new Date("2026-08-26T19:00:00.000Z");
+    const session = createCaseSession(caseState, 60, () => now);
+
+    expect(() =>
+      applyCaseSessionAction(
+        {
+          ...session,
+          caseState: {
+            ...session.caseState,
+            facts: session.caseState.facts.map((fact) =>
+              fact.key === "incident_cause"
+                ? { ...fact, status: "collected" as const, value: "A burst pipe." }
+                : fact,
+            ),
+          },
+        },
+        question,
+        2,
+        () => now,
+      ),
+    ).toThrow("not eligible");
+
+    const token = signCaseSession(session, "test-secret");
+    expect(verifyCaseSession(token, "test-secret", () => now)).toEqual(session);
+    expect(() => verifyCaseSession(`${token}x`, "test-secret", () => now)).toThrow("signature");
+    expect(() =>
+      verifyCaseSession(token, "test-secret", () => new Date("2026-08-26T19:01:01.000Z")),
+    ).toThrow("expired");
   });
 });

@@ -46,23 +46,32 @@ const claimantExplanationSchema = z
   .min(1)
   .max(MAX_CLARIFICATION_EXPLANATION_LENGTH);
 
-export const askClarifyingQuestionActionSchema = z.object({
-  kind: z.literal("ask_clarifying_question"),
+export const askClarifyingQuestionInputSchema = z.object({
   question: claimantQuestionSchema,
   factKeys: factKeysSchema,
   whyItMatters: claimantExplanationSchema,
 });
 
-export const proposeRouteActionSchema = z.object({
-  kind: z.literal("propose_route"),
+export const askClarifyingQuestionActionSchema = askClarifyingQuestionInputSchema.extend({
+  kind: z.literal("ask_clarifying_question"),
+});
+
+export const proposeRouteInputSchema = z.object({
   route: z.enum(proposedRouteKindValues),
   rationale: z.string().trim().min(1).max(MAX_ROUTE_RATIONALE_LENGTH),
 });
 
-export const escalateToHumanActionSchema = z.object({
-  kind: z.literal("escalate_to_human"),
+export const proposeRouteActionSchema = proposeRouteInputSchema.extend({
+  kind: z.literal("propose_route"),
+});
+
+export const escalateToHumanInputSchema = z.object({
   stopReason: z.enum(stopReasonValues).exclude(["route_supported"]),
   rationale: z.string().trim().min(1).max(MAX_ROUTE_RATIONALE_LENGTH),
+});
+
+export const escalateToHumanActionSchema = escalateToHumanInputSchema.extend({
+  kind: z.literal("escalate_to_human"),
 });
 
 export const caseSessionActionSchema = z.discriminatedUnion("kind", [
