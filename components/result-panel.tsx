@@ -3,12 +3,22 @@ import { claimTypeDescriptions, claimTypeLabels } from "@/lib/claims/display";
 import { ConfidenceMeter } from "@/components/confidence-meter";
 
 type ResultPanelProps = { result: CaseState };
+type CaseFact = CaseState["facts"][number];
 
 const routeLabels = {
   property_adjuster_review: "Property adjuster review",
   liability_review: "Liability review",
   human_triage_review: "Human triage review",
 } as const;
+
+const missingFactQuestions: Record<CaseFact["key"], string> = {
+  incident_cause: "What caused the incident?",
+  damage_description: "What was damaged?",
+  affected_property: "What property was affected?",
+  loss_timing: "When did it happen?",
+  active_loss_or_safety: "Is the damage still happening or is anyone unsafe?",
+  injury_or_third_party: "Was anyone injured or is anyone else involved?",
+};
 
 export function ResultPanel({ result }: ResultPanelProps) {
   const collected = result.facts.filter((fact) => fact.status === "collected");
@@ -49,7 +59,41 @@ function FactList({ heading, facts, empty, missing = false }: { heading: string;
   return (
     <div>
       <h3 className="text-sm font-medium text-foreground">{heading}</h3>
-      {facts.length ? <ul className="mt-3 space-y-3">{facts.map((fact) => <li key={fact.key} className="rounded-lg border border-border bg-background p-3"><p className="text-xs font-medium text-muted-foreground">{fact.label}</p>{fact.value && <p className="mt-1 text-sm leading-relaxed text-foreground">{fact.value}</p>}{missing && <p className="mt-1 text-xs text-muted-foreground">Not stated — not an assumption.</p>}</li>)}</ul> : <p className="mt-3 text-sm text-muted-foreground">{empty}</p>}
+      {facts.length ? (
+        <ul className="mt-3 space-y-3">
+          {facts.map((fact) => (
+            <li key={fact.key} className="rounded-lg border border-border bg-background p-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                {missing ? missingFactQuestions[fact.key] : fact.label}
+              </p>
+              {fact.value && <p className="mt-1 text-sm leading-relaxed text-foreground">{fact.value}</p>}
+              {missing && <MissingFactExplanation fact={fact} />}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">{empty}</p>
+      )}
     </div>
   );
+}
+
+function MissingFactExplanation({ fact }: { fact: CaseFact }) {
+  if (fact.status === "unclear") {
+    return (
+      <p className="mt-1 text-xs text-muted-foreground">
+        It was mentioned, but the detail is still unclear.
+      </p>
+    );
+  }
+
+  if (fact.key === "active_loss_or_safety") {
+    return (
+      <p className="mt-1 text-xs text-muted-foreground">
+        We don&apos;t know yet—for example, whether water is still leaking, there is an electrical hazard, or the area is unsafe to enter.
+      </p>
+    );
+  }
+
+  return <p className="mt-1 text-xs text-muted-foreground">We don&apos;t have this detail yet, so we won&apos;t assume an answer.</p>;
 }

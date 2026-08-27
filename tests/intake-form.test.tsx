@@ -216,8 +216,11 @@ describe("IntakeForm", () => {
 
     expect(await screen.findByRole("heading", { name: "Collected facts" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Still needed" })).toBeInTheDocument();
-    expect(screen.getByText("Active loss or safety concern")).toBeInTheDocument();
-    expect(screen.getAllByText("Not stated — not an assumption.")).toHaveLength(2);
+    expect(screen.getByText("Is the damage still happening or is anyone unsafe?")).toBeInTheDocument();
+    expect(screen.getByText("It was mentioned, but the detail is still unclear.")).toBeInTheDocument();
+    expect(
+      screen.getByText(/We don't know yet—for example, whether water is still leaking/),
+    ).toBeInTheDocument();
     expect(screen.getByText("Property adjuster review")).toBeInTheDocument();
   });
 
