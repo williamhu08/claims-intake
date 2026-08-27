@@ -32,7 +32,7 @@ export function ClaimCategories() {
           )}
         </span>
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 border-[var(--circle-border)] font-mono text-lg leading-none text-foreground transition-colors hover:bg-muted"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 border-[var(--circle-border)] font-mono text-lg leading-none text-[var(--circle-border)] transition-colors hover:bg-muted"
           aria-hidden="true"
         >
           {isOpen ? "−" : "+"}
