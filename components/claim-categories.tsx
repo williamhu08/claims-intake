@@ -3,7 +3,7 @@ import { claimTypeOptions } from "@/lib/claims/display";
 export function ClaimCategories() {
   return (
     <section className="border-y border-border" aria-labelledby="categories-heading">
-      <details>
+      <details className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-foreground [&::-webkit-details-marker]:hidden">
           <span>
             <span className="block text-sm font-medium text-accent">Possible categories</span>
@@ -15,7 +15,8 @@ export function ClaimCategories() {
             </span>
           </span>
           <span className="font-mono text-lg text-muted-foreground" aria-hidden="true">
-            +
+            <span className="block group-open:hidden">+</span>
+            <span className="hidden group-open:block">−</span>
           </span>
         </summary>
 
