@@ -13,6 +13,22 @@ narrative → CaseState → choose one permitted next action
           → targeted question (only if material) → updated CaseState → route or escalate → stop
 ```
 
+## Why V2 is not V1 with another prompt
+
+> **Temporary annotation: added from non-v0 local.**
+
+V1 is a fixed, one-turn pipeline: one claimant narrative enters
+`/api/case-analysis`, the model returns a `CaseState`, and the flow ends. It
+cannot inspect a partial state and decide whether it should ask a new question.
+
+V2 is bounded **dynamic decomposition**. `/api/case-session/start` creates a
+validated initial state, and `/api/case-session/respond` resumes only from a
+server-signed state after a real claimant answer. On each server turn, the
+model can select one application-constrained action—ask, propose a non-binding
+route, or escalate—based on the current partial state. The application owns
+eligibility, provenance, stop conditions, and safety budgets; the model does
+not invent a next step or get arbitrary tool access.
+
 The first supported ambiguity is water source:
 
 - A burst pipe or clear first-party water loss can stop with a proposed property
@@ -159,16 +175,54 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      with an auditable action trace.
 
 4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
-   - [ ] Render the V1.5 claimant-facing question, why-it-matters, unable-to-
-     answer, retry, and human-review copy without implying coverage or fault.
-   - [ ] Start a V2 session from the claimant narrative rather than treating a
-     V1 result as final.
-   - [ ] Present one targeted, material question with an optional “I don&apos;t
-     know” path.
-   - [ ] Show the refreshed `CaseState`, question history, terminal route, or
-     human-review escalation clearly.
-   - [ ] Explain why the question matters without implying coverage or fault.
-   - [ ] Preserve accessible loading, error, retry, and reset states.
+   - [ ] Replace the one-turn V1 submission flow with a session lifecycle:
+     narrative → session start → optional question → claimant response →
+     refreshed state → terminal route or human review.
+   - [ ] Start V2 from the claimant narrative by calling
+     `POST /api/case-session/start`; do not treat the V1 `CaseState` as final
+     or call `/api/case-analysis` from the claimant UI.
+   - [ ] Preserve the signed session token as an opaque client value and send
+     it back only through the V2 response contract; never let the browser edit
+     or reconstruct canonical session state.
+   - [ ] Render exactly one pending clarification question at a time, tied to
+     the material fact key(s) returned by the server. Do not generate or
+     rephrase questions in the browser.
+   - [ ] Present the question with plain claimant-facing copy explaining why
+     the answer matters for routing, without implying coverage, fault,
+     liability, payment, or a final insurance decision.
+   - [ ] Provide a clearly optional “I don&apos;t know” / “I&apos;m not sure” action
+     that submits the contract&apos;s `no_response` answer rather than inventing
+     a value or leaving the session in an ambiguous client-only state.
+   - [ ] Submit ordinary answers to `POST /api/case-session/respond` with the
+     opaque session token and answer; disable duplicate submission while the
+     request is pending and preserve the current question until the response
+     is accepted.
+   - [ ] Show a compact question history containing prior questions and the
+     claimant&apos;s answers, including an explicit unable-to-answer entry when
+     applicable. Do not expose internal prompts, tool arguments, or signed
+     session contents.
+   - [ ] Render the refreshed `CaseState` after each accepted response,
+     including updated facts, provenance (`claimant_narrative` versus
+     `claimant_response`), missing facts, and classification confidence.
+   - [ ] Render terminal outcomes distinctly: a non-binding proposed route with
+     rationale, or a human-review escalation with a calm explanation. Both
+     outcomes must make clear that the system has not determined coverage or
+     fault.
+   - [ ] Handle server-declared stop reasons in claimant language, including
+     resolved routing, unresolved ambiguity, inability to answer, safety
+     review, and safety-budget exhaustion; do not expose raw error details.
+   - [ ] Preserve accessible loading, validation, malformed-response, API-error,
+     retry, and reset states using semantic headings, labelled controls,
+     `aria-live` for status updates, and `role="alert"` for actionable errors.
+   - [ ] Reset the session safely by clearing the local view state and requiring
+     a fresh narrative submission; never reuse a terminal or expired token.
+   - [ ] Keep the existing supported-category guidance contextual and ensure
+     the form, question panel, history, and terminal result remain responsive
+     at narrow and wide viewports.
+   - [ ] Add focused claimant-flow component/interaction tests with mocked V2
+     routes covering: immediate route, one clarification, “I don&apos;t know”,
+     retry after failure, malformed response, human review, reset, and
+     duplicate-submit prevention.
 
 5. [ ] **Verify V2 end-to-end and document the seam to V3**
    - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,
