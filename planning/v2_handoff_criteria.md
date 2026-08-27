@@ -2,6 +2,8 @@
 
 > **V1.5 is a design gate, not a claimant-facing product release.** It records
 > the decisions and constraints required before V2 agentic intake is built.
+> [V1.5 Execution Plan](./v1_5_execution_plan.md) is the checklist for
+> resolving this gate.
 
 ## Purpose
 
