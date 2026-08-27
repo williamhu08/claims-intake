@@ -96,13 +96,13 @@ loop.
 
 Update a step to `[x]` only when every bullet beneath it is complete.
 
-1. [ ] **Close the V1.5 decisions in code-level terms**
-   - [ ] Add a concise decision record for the ambiguous-water-source rule.
-   - [ ] Define the V2 action, stop-reason, clarification-history, and signed
+1. [x] **Close the V1.5 decisions in code-level terms**
+   - [x] Add a concise decision record for the ambiguous-water-source rule.
+   - [x] Define the V2 action, stop-reason, clarification-history, and signed
      session Zod schemas.
-   - [ ] Add configuration names for session signing, token/wall-clock budget,
+   - [x] Add configuration names for session signing, token/wall-clock budget,
      and clarification limit; document required Preview environment variables.
-   - [ ] Confirm direct AI SDK tool calling remains sufficient; record why eve
+   - [x] Confirm direct AI SDK tool calling remains sufficient; record why eve
      is deferred.
 
 2. [ ] **Build the server-owned session engine**
