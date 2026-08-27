@@ -3,21 +3,23 @@
 Clearway is an AI-assisted, first-touch intake for ambiguous property
 claims. Instead of asking a claimant to complete a long form before they can
 get started, it accepts a plain-language description and returns a narrow,
-structured triage assessment:
+structured case state:
 
 - `claimType`
 - `summary`
-- `confidence`
+- collected and missing facts
+- a proposed, non-binding route
+- confidence in the classification
 
 It intentionally does **not** decide coverage, liability, fault, payment, or
 settlement eligibility.
 
-## V0 status
+## V1 status
 
-The V0 interface, backend contract, and AI Gateway path are integrated and
+The V1 interface, case-state contract, and AI Gateway path are integrated and
 verified in a protected Vercel Preview:
 
-https://claims-intake-aid2h7x90-williamhu08s-projects.vercel.app
+https://claims-intake-ov1ck2c4q-williamhu08s-projects.vercel.app
 
 The Preview requires access through the owner&apos;s Vercel account. Production is
 intentionally not configured or promoted yet.
@@ -30,16 +32,16 @@ categories or the facts that later determine routing. Clearway starts with
 the claimant&apos;s language, gives a clear initial classification, and makes the
 next interaction legible without pretending to make an insurance decision.
 
-## V0 architecture
+## V1 architecture
 
 ```text
 Claimant narrative
         |
         v
-v0-generated intake interface
+Structured-intake interface
         |
         v
-POST /api/intake
+POST /api/case-analysis
         |
         v
 AI SDK generateText + Zod structured output
@@ -48,16 +50,17 @@ AI SDK generateText + Zod structured output
 Vercel AI Gateway (openai/gpt-5.2 by default)
         |
         v
-Validated claimType, summary, confidence
+Application-normalized CaseState
 ```
 
-The API owns the schema and model instructions. This keeps credentials and
-model policy server-side; the v0 interface consumes only the stable
-`/api/intake` contract.
+The API owns the schema, model instructions, and normalization. It derives the
+missing-fact list from fact statuses, attaches claimant-narrative provenance,
+and keeps credentials and model policy server-side. The frontend consumes only
+the stable `/api/case-analysis` contract.
 
 ## API contract
 
-`POST /api/intake`
+`POST /api/case-analysis`
 
 ```json
 {
@@ -70,16 +73,34 @@ The narrative must be trimmed and between 20 and 4,000 characters.
 ```json
 {
   "claimType": "water_damage",
-  "summary": "A pipe burst under the kitchen sink overnight...",
-  "confidence": 0.98
+  "summary": "A pipe burst under the kitchen sink damaged the cabinet and floor.",
+  "classificationConfidence": 0.98,
+  "facts": [
+    {
+      "key": "incident_cause",
+      "label": "What caused the incident",
+      "status": "collected",
+      "value": "A pipe burst under the kitchen sink.",
+      "source": "claimant_narrative"
+    }
+  ],
+  "missingFactKeys": ["loss_timing"],
+  "proposedRoute": {
+    "kind": "property_adjuster_review",
+    "rationale": "The narrative describes first-party water damage.",
+    "confidence": 0.91
+  }
 }
 ```
 
-`claimType` is one of `water_damage`, `fire_or_smoke`,
-`weather_or_storm`, `theft_or_vandalism`, `liability`, or
-`other_or_unclear`. The model is instructed to use only stated facts and to
-choose `other_or_unclear` when the account does not support a reliable
-classification.
+Each case includes all six canonical fact keys. A fact is `collected`,
+`missing`, `unclear`, or `not_applicable`; the server derives
+`missingFactKeys` from `missing` and `unclear` statuses. The route is a visible
+intake recommendation, never a coverage, fault, liability, payment, or
+settlement decision.
+
+The legacy V0 `POST /api/intake` endpoint remains temporarily for compatibility
+while the V1 case-analysis contract is adopted.
 
 ## Run locally
 
@@ -111,16 +132,18 @@ npm test
 npx next build --webpack
 ```
 
-The deployed backend was smoke-tested through Vercel-authenticated access with
-a representative fire-damage narrative and returned a schema-valid
-`fire_or_smoke` result.
+The deployed V1 backend was smoke-tested through Vercel-authenticated access
+with a synthetic burst-pipe narrative. It returned a schema-valid
+`water_damage` `CaseState` with grounded facts and a non-binding property
+adjuster recommendation.
 
-## Key V0 decisions
+## Key implementation decisions
 
-- **Single structured model call:** V0 proves useful classification without
-  hiding a workflow inside a long prompt.
-- **Zod-backed output:** schema validation makes the UI contract explicit and
-  gives later versions a stable case-state foundation.
+- **Single structured model call:** V1 makes the system's understanding visible
+  without pretending to already be a conversational agent.
+- **Application-owned state:** Zod-backed output plus deterministic
+  normalization makes facts, missing information, and route recommendations
+  explicit rather than leaving the product as a wrapper around a prompt.
 - **Neutral, triage-only language:** prevents the product from implying a
   coverage or settlement decision.
 - **v0 owns the first UI iteration:** the interface was generated against the
@@ -130,11 +153,9 @@ a representative fire-damage narrative and returned a schema-valid
 
 ## What comes next
 
-- **V1:** persist and display explicit case facts, missing facts, and a
-  proposed route.
-- **V2:** add targeted, multi-turn clarification, tools, explicit stop
-  conditions, and durable case state. Before this work begins, review
-  Udacity&apos;s `claims_intake_agent_solution`, especially `loop.py` and
-  `run.py`, and decide which orchestration patterns belong in Clearway.
+- **V2:** add bounded, targeted clarification based on the observed case state.
+  The agent will dynamically choose among permitted next actions rather than
+  run a fixed prompt chain; it will escalate rather than guess or loop
+  indefinitely.
 - **V3:** introduce policy lookup, evidence-backed routing, uncertainty
   escalation, and an adjuster-ready handoff.
