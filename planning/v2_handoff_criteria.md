@@ -1,10 +1,16 @@
-# V2 Handoff Criteria — Clearway Agentic Intake
+# V1.5 — V2 Handoff Criteria
+
+> **V1.5 is a design gate, not a claimant-facing product release.** It records
+> the decisions and constraints required before V2 agentic intake is built.
+> [V1.5 Execution Plan](./v1_5_execution_plan.md) is the checklist for
+> resolving this gate.
 
 ## Purpose
 
 V1 is complete: a claimant narrative becomes a validated, visible `CaseState`
 with grounded facts, derived missing information, and a non-binding intake
-route. V2 may now add a bounded clarification loop.
+route. V1.5 decides the contract for the bounded clarification loop that V2
+will implement.
 
 This document defines the decision gate for starting V2. It prevents Clearway
 from adding “agentic” behavior as an unbounded prompt loop or from treating a
