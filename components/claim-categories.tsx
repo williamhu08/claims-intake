@@ -8,7 +8,7 @@ export function ClaimCategories() {
 
   return (
     <section
-      className="category-panel border-y border-foreground/25 transition-colors duration-200"
+      className="category-panel border-y border-foreground/25 transition-colors duration-200 hover:border-foreground/50"
       aria-labelledby="categories-heading"
     >
       <button
