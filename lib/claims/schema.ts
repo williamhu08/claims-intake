@@ -24,6 +24,7 @@ export const claimNarrativeSchema = z
 
 export const claimIntakeRequestSchema = z.object({
   narrative: claimNarrativeSchema,
+  testingMode: z.boolean().optional().default(false),
 });
 
 export const claimIntakeResultSchema = z.object({

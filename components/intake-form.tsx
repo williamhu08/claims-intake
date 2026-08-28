@@ -23,6 +23,7 @@ export function IntakeForm() {
   const [requestState, setRequestState] = useState<"idle" | "submitting" | "active" | "responding" | "terminal" | "error">("idle");
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [testingMode, setTestingMode] = useState(true);
   const requestVersion = useRef(0);
   const abortController = useRef<AbortController | null>(null);
 
@@ -56,7 +57,7 @@ export function IntakeForm() {
       const response = await fetch("/api/case-session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ narrative: submittedNarrative }),
+        body: JSON.stringify({ narrative: submittedNarrative, testingMode }),
         signal: abortController.current.signal,
       });
       if (version !== requestVersion.current) return;
@@ -104,7 +105,7 @@ export function IntakeForm() {
       const response = await fetch("/api/case-session/respond", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionToken, answer: value }),
+        body: JSON.stringify({ sessionToken, answer: value, testingMode }),
       });
       const data: unknown = await response.json();
       if (!response.ok) throw new Error(getErrorMessage(data));
@@ -158,6 +159,11 @@ export function IntakeForm() {
             </button>
           ))}
         </div>
+
+        <label className="mt-5 flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm">
+          <input type="checkbox" checked={testingMode} onChange={(event) => setTestingMode(event.target.checked)} disabled={loading || hasActiveSession} className="mt-0.5 size-4 accent-primary" />
+          <span><span className="font-medium text-foreground">Testing mode</span><span className="block text-muted-foreground">Use deterministic mock responses without calling AI Gateway.</span></span>
+        </label>
 
         <div className="mt-5">
           <label htmlFor="narrative" className="block text-sm font-medium text-foreground">

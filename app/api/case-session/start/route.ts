@@ -9,6 +9,7 @@ import {
   signCaseSession,
 } from "@/lib/claims/session-engine";
 import { claimIntakeRequestSchema } from "@/lib/claims/schema";
+import { createMockStartSession } from "@/lib/claims/mock-session";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,14 @@ export async function POST(request: Request) {
     config = getCaseSessionConfig();
   } catch {
     return Response.json({ error: "Case sessions are not configured for this environment." }, { status: 503 });
+  }
+
+  if (parsedRequest.data.testingMode) {
+    const session = createMockStartSession(config.ttlSeconds);
+    return Response.json({
+      session,
+      sessionToken: signCaseSession(session, config.signingSecret),
+    });
   }
 
   if (!gatewayConfigured()) {

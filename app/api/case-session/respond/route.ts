@@ -13,6 +13,7 @@ import {
 } from "@/lib/claims/session-engine";
 import { MAX_CASE_FACT_VALUE_LENGTH } from "@/lib/claims/schema";
 import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
+import { createMockRespondedSession } from "@/lib/claims/mock-session";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,7 @@ const responseRequestSchema = z.object({
     .min(1)
     .max(MAX_CASE_FACT_VALUE_LENGTH)
     .or(z.literal("no_response")),
+  testingMode: z.boolean().optional().default(false),
 });
 
 function gatewayConfigured(): boolean {
@@ -64,6 +66,19 @@ export async function POST(request: Request) {
     config = getCaseSessionConfig();
   } catch {
     return Response.json({ error: "Case sessions are not configured for this environment." }, { status: 503 });
+  }
+
+  if (parsedRequest.data.testingMode) {
+    try {
+      const session = verifyCaseSession(parsedRequest.data.sessionToken, getCaseSessionConfig().signingSecret);
+      const nextSession = createMockRespondedSession(session, parsedRequest.data.answer);
+      return Response.json({
+        session: nextSession,
+        sessionToken: signCaseSession(nextSession, config.signingSecret),
+      });
+    } catch {
+      return Response.json({ error: "This testing session is invalid or has expired. Start again to continue." }, { status: 409 });
+    }
   }
 
   if (parsedRequest.data.answer !== "no_response" && !gatewayConfigured()) {
