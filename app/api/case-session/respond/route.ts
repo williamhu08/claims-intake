@@ -12,6 +12,7 @@ import {
   verifyCaseSession,
 } from "@/lib/claims/session-engine";
 import { MAX_CASE_FACT_VALUE_LENGTH } from "@/lib/claims/schema";
+import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
 
 export const runtime = "nodejs";
 
@@ -68,6 +69,11 @@ export async function POST(request: Request) {
       { error: "This case session is invalid or has expired. Start again to continue." },
       { status: 409 },
     );
+  }
+
+  const pendingAction = session.pendingAction;
+  if (parsedRequest.data.answer !== "no_response" && (!pendingAction || !isValidClarificationAnswer(pendingAction.answerType, parsedRequest.data.answer, pendingAction.options))) {
+    return Response.json({ error: "The answer does not match the requested format." }, { status: 400 });
   }
 
   try {

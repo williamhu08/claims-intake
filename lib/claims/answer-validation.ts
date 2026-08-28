@@ -22,6 +22,28 @@ export function isMoneyCandidate(value: string): boolean {
   return value === "" || MONEY_PATTERN.test(value);
 }
 
+export function isValidClarificationAnswer(type: string, value: string, options?: Array<{ value: string }>): boolean {
+  const trimmed = value.trim();
+  if (type === "free_text" || type === "address") return trimmed.length > 0;
+  if (type === "money" || type === "currency") return isValidMoney(trimmed);
+  if (type === "date") return isValidCalendarDate(trimmed);
+  if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
+  if (type === "single_choice") return options?.some((option) => option.value === trimmed) ?? false;
+  if (type === "multi_choice") {
+    const values = trimmed.split(",").filter(Boolean);
+    return values.length > 0 && new Set(values).size === values.length && values.every((value) => options?.some((option) => option.value === value));
+  }
+  if (type === "date_time") return !Number.isNaN(Date.parse(trimmed));
+  if (type === "integer") return /^\d+$/.test(trimmed);
+  if (type === "percentage") return /^(?:100|\d{1,2})(?:\.\d{1,2})?$/.test(trimmed) && Number(trimmed) <= 100;
+  if (type === "phone") return /^[+\d][\d ()-]{6,24}$/.test(trimmed);
+  if (type === "email") return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+  if (type === "postal_code") return /^[A-Za-z0-9][A-Za-z0-9 -]{2,11}$/.test(trimmed);
+  if (type === "url") return /^https?:\/\/[^\s]+$/i.test(trimmed);
+  if (type === "duration") return /^\d+\s*(?:minutes?|hours?|days?|weeks?|months?)$/i.test(trimmed);
+  return false;
+}
+
 export function isDateCandidate(value: string): boolean {
   if (value.length > 10) return false;
   if (value.includes("-") && !/^\d{4}(?:-[0-9]{1,2}(?:-[0-9]{1,2})?)?$/.test(value)) return false;

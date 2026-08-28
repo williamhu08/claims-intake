@@ -229,6 +229,7 @@ export function IntakeForm() {
             answerType={pendingAction.answerType}
             value={answer}
             onChange={setAnswer}
+            options={pendingAction.options}
             disabled={loading}
             describedBy="clarification-hint"
           />

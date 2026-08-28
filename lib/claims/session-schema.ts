@@ -46,14 +46,33 @@ const claimantExplanationSchema = z
   .min(1)
   .max(MAX_CLARIFICATION_EXPLANATION_LENGTH);
 
-export const clarificationAnswerTypeValues = ["free_text", "money", "date"] as const;
+export const clarificationAnswerTypeValues = [
+  "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
+  "integer", "percentage", "phone", "email", "date_time", "postal_code",
+  "address", "currency", "duration", "url",
+] as const;
 export const clarificationAnswerTypeSchema = z.enum(clarificationAnswerTypeValues);
+
+export const clarificationOptionSchema = z.object({
+  value: z.string().trim().min(1).max(80),
+  label: z.string().trim().min(1).max(160),
+});
+export const clarificationOptionsSchema = z.array(clarificationOptionSchema).min(2).max(12);
 
 export const askClarifyingQuestionInputSchema = z.object({
   question: claimantQuestionSchema,
   factKeys: factKeysSchema,
   whyItMatters: claimantExplanationSchema,
   answerType: clarificationAnswerTypeSchema.default("free_text"),
+  options: clarificationOptionsSchema.optional(),
+}).superRefine((value, context) => {
+  const needsOptions = value.answerType === "single_choice" || value.answerType === "multi_choice";
+  if (needsOptions && !value.options) {
+    context.addIssue({ code: "custom", path: ["options"], message: "Choice clarifications require options." });
+  }
+  if (!needsOptions && value.options) {
+    context.addIssue({ code: "custom", path: ["options"], message: "Options are only valid for choice clarifications." });
+  }
 });
 
 export const askClarifyingQuestionActionSchema = askClarifyingQuestionInputSchema.extend({
