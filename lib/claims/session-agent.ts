@@ -54,6 +54,7 @@ export async function analyzeClaimNarrative(
       description: "A structured, first-touch property-claim case state.",
       schema: caseAnalysisModelOutputSchema,
     }),
+    maxRetries: 0,
     timeout,
   });
 
@@ -83,6 +84,7 @@ export async function refreshCaseStateFromClarification(
       description: "A claimant-grounded case state refreshed after one clarification.",
       schema: caseAnalysisModelOutputSchema,
     }),
+    maxRetries: 0,
     timeout,
   });
 
@@ -170,7 +172,7 @@ export async function selectNextCaseSessionAction(
     prompt: `Validated case-session state:\n${JSON.stringify(session)}`,
     tools,
     toolChoice: "required",
-    maxRetries: 2,
+    maxRetries: 0,
     timeout,
   });
 

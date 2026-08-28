@@ -30,6 +30,16 @@ function gatewayConfigured(): boolean {
   return Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
 }
 
+function isRateLimitError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return /429|rate limit|quota|GatewayRateLimitError/i.test(message);
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -100,9 +110,18 @@ export async function POST(request: Request) {
       message: error instanceof Error ? error.message : "Unknown error",
     });
 
+    const isRateLimited = isRateLimitError(error);
+    const isUnauthorized = isUnauthorizedError(error);
+
     return Response.json(
-      { error: "We couldn't continue this case session. Please try again." },
-      { status: 502 },
+      {
+        error: isUnauthorized
+          ? "AI Gateway rejected the configured API key. Check that AI_GATEWAY_API_KEY is valid and enabled for the Preview/Development environment, then refresh the preview. Your answer has not been submitted."
+          : isRateLimited
+            ? "The assessment service is temporarily busy because the AI Gateway free-tier rate limit was reached. Wait a moment and try again, or add AI Gateway credits. Your answer has not been submitted."
+            : "This step could not be completed. Your answer has not been submitted. Please try again or check the project logs.",
+      },
+      { status: isUnauthorized ? 401 : isRateLimited ? 429 : 502 },
     );
   }
 }

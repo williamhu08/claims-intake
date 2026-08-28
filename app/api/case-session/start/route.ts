@@ -16,6 +16,11 @@ function gatewayConfigured(): boolean {
   return Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
 }
 
+function isRateLimitError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return /429|rate limit|quota|GatewayRateLimitError/i.test(message);
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -70,6 +75,10 @@ export async function POST(request: Request) {
       });
     } catch (error) {
       lastError = error;
+
+      // Retrying a rate-limited request cannot succeed and only consumes more of the
+      // free-tier per-minute budget, so fail fast instead of amplifying the burst.
+      if (isRateLimitError(error)) break;
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
     }
   }
