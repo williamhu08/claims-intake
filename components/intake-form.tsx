@@ -7,6 +7,7 @@ import {
 } from "@/lib/claims/session-schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
+import { ClarificationInput, isClarificationAnswerValid } from "@/components/clarification-input";
 
 const MIN_LENGTH = 20;
 const MAX_LENGTH = 4000;
@@ -15,12 +16,18 @@ export function IntakeForm() {
   const [narrative, setNarrative] = useState("");
   const [session, setSession] = useState<CaseSessionState | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [requestState, setRequestState] = useState<"idle" | "submitting" | "active" | "terminal" | "error">("idle");
+  const [requestState, setRequestState] = useState<"idle" | "submitting" | "active" | "responding" | "terminal" | "error">("idle");
+  const [answer, setAnswer] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
-  const loading = requestState === "submitting";
+  const loading = requestState === "submitting" || requestState === "responding";
+  const pendingAction = session?.pendingAction;
+  const answerIsValid = pendingAction
+    ? isClarificationAnswerValid(pendingAction.answerType, answer)
+    : false;
+  const isNoResponse = answer === "no_response";
   const hasActiveSession = Boolean(sessionToken);
   const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession;
 
@@ -71,6 +78,37 @@ export function IntakeForm() {
       setRequestState("error");
       setError("We couldn't reach the assessment service. Check your connection and try again.");
     }
+  }
+
+  async function submitAnswer(value: string) {
+    if (!sessionToken || !pendingAction || loading) return;
+    setRequestState("responding");
+    setError(null);
+
+    try {
+      const response = await fetch("/api/case-session/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionToken, answer: value }),
+      });
+      const data: unknown = await response.json();
+      if (!response.ok) throw new Error(getErrorMessage(data));
+      const parsed = parseSessionStartResponse(data);
+      if (!parsed) throw new Error("We received an incomplete session response. Please try again.");
+      setSession(parsed.session);
+      setSessionToken(parsed.sessionToken);
+      setAnswer("");
+      setRequestState(parsed.session.terminal ? "terminal" : "active");
+    } catch (error) {
+      setRequestState("error");
+      setError(error instanceof Error ? error.message : "We couldn't continue this assessment. Please try again.");
+    }
+  }
+
+  async function handleAnswerSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!answerIsValid || isNoResponse) return;
+    await submitAnswer(answer.trim());
   }
 
   function applyExample(text: string) {
@@ -180,14 +218,36 @@ export function IntakeForm() {
 
       {session?.terminal && <ResultPanel result={session.caseState} />}
 
-      {session?.pendingAction && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-xl border border-border bg-card p-4 text-sm text-foreground"
-        >
-          Your initial assessment is ready for the next step.
-        </div>
+      {pendingAction && (
+        <form onSubmit={handleAnswerSubmit} className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold text-foreground">{pendingAction.question}</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{pendingAction.whyItMatters}</p>
+          <label htmlFor="clarification-answer" className="mt-5 block text-sm font-medium text-foreground">
+            Your answer
+          </label>
+          <ClarificationInput
+            answerType={pendingAction.answerType}
+            value={answer}
+            onChange={setAnswer}
+            disabled={loading}
+            describedBy="clarification-hint"
+          />
+          <p id="clarification-hint" className="mt-2 text-sm text-muted-foreground">
+            {pendingAction.answerType === "date"
+              ? "Enter a real calendar date as YYYY-MM-DD."
+              : pendingAction.answerType === "money"
+                ? "Enter a non-negative amount with up to two decimal places."
+                : "Answer in your own words."}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button type="submit" disabled={!answerIsValid || loading} className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
+              {loading ? "Saving…" : "Continue"}
+            </button>
+            <button type="button" disabled={loading} onClick={() => submitAnswer("no_response")} className="text-sm font-medium text-muted-foreground underline underline-offset-4 disabled:opacity-50">
+              I don&apos;t know
+            </button>
+          </div>
+        </form>
       )}
     </div>
   );
@@ -197,6 +257,7 @@ export function IntakeForm() {
     setSession(null);
     setSessionToken(null);
     setRequestState("idle");
+    setAnswer("");
     setError(null);
   }
 }

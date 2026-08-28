@@ -46,10 +46,14 @@ const claimantExplanationSchema = z
   .min(1)
   .max(MAX_CLARIFICATION_EXPLANATION_LENGTH);
 
+export const clarificationAnswerTypeValues = ["free_text", "money", "date"] as const;
+export const clarificationAnswerTypeSchema = z.enum(clarificationAnswerTypeValues);
+
 export const askClarifyingQuestionInputSchema = z.object({
   question: claimantQuestionSchema,
   factKeys: factKeysSchema,
   whyItMatters: claimantExplanationSchema,
+  answerType: clarificationAnswerTypeSchema.default("free_text"),
 });
 
 export const askClarifyingQuestionActionSchema = askClarifyingQuestionInputSchema.extend({

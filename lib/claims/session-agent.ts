@@ -122,7 +122,7 @@ export async function selectNextCaseSessionAction(
     ...(canAskWaterSource
       ? {
           ask_clarifying_question: {
-            description: "Ask the one eligible material clarification question.",
+            description: "Ask the one eligible material clarification question. Choose free_text for an open response, money for a non-negative decimal amount, or date for a real calendar date in YYYY-MM-DD format.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }

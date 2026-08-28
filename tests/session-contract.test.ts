@@ -75,6 +75,7 @@ const caseState: CaseState = {
 
 const question: CaseSessionAction = {
   kind: "ask_clarifying_question",
+  answerType: "free_text",
   question: "Do you know where the water came from?",
   factKeys: ["incident_cause"],
   whyItMatters: "This helps us send your intake to the right review team.",

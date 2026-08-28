@@ -19,6 +19,7 @@ import {
   signCaseSession,
 } from "@/lib/claims/session-engine";
 import type { CaseState } from "@/lib/claims/schema";
+import type { CaseSessionAction } from "@/lib/claims/session-schema";
 
 const mockedAnalyze = vi.mocked(analyzeClaimNarrative);
 const mockedRefresh = vi.mocked(refreshCaseStateFromClarification);
@@ -41,10 +42,11 @@ const waterCaseState: CaseState = {
   proposedRoute: { kind: "human_triage_review", rationale: "The source is unclear.", confidence: 0.45 },
 };
 
-const sourceQuestion = {
-  kind: "ask_clarifying_question" as const,
+const sourceQuestion: CaseSessionAction = {
+  kind: "ask_clarifying_question",
+  answerType: "free_text",
   question: "Do you know where the water came from?",
-  factKeys: ["incident_cause" as const],
+  factKeys: ["incident_cause"],
   whyItMatters: "This helps us send your intake to the right review team.",
 };
 
