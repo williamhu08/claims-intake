@@ -8,6 +8,7 @@ import {
 } from "@/lib/claims/session-schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
+import { CaseStateSummary } from "@/components/case-state-summary";
 import {
   ClarificationInput,
   isClarificationAnswerValid,
@@ -290,7 +291,11 @@ export function IntakeForm() {
         </form>
       )}
 
-      {session?.terminal && <ResultPanel result={session.caseState} />}
+      {session && !session.terminal && (
+        <CaseStateSummary result={session.caseState} heading="Case state so far" />
+      )}
+
+      {session?.terminal && <ResultPanel session={session} />}
     </div>
   );
 

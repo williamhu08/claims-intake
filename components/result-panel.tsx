@@ -1,9 +1,8 @@
-import type { CaseState } from "@/lib/claims/schema";
-import { claimTypeDescriptions, claimTypeLabels } from "@/lib/claims/display";
-import { ConfidenceMeter } from "@/components/confidence-meter";
+import type { CaseSessionState } from "@/lib/claims/session-schema";
+import { stopReasonCopy } from "@/lib/claims/display";
+import { CaseStateSummary } from "@/components/case-state-summary";
 
-type ResultPanelProps = { result: CaseState };
-type CaseFact = CaseState["facts"][number];
+type ResultPanelProps = { session: CaseSessionState };
 
 const routeLabels = {
   property_adjuster_review: "Property adjuster review",
@@ -11,89 +10,47 @@ const routeLabels = {
   human_triage_review: "Human triage review",
 } as const;
 
-const missingFactQuestions: Record<CaseFact["key"], string> = {
-  incident_cause: "What caused the incident?",
-  damage_description: "What was damaged?",
-  affected_property: "What property was affected?",
-  loss_timing: "When did it happen?",
-  active_loss_or_safety: "Is the damage still happening or is anyone unsafe?",
-  injury_or_third_party: "Was anyone injured or is anyone else involved?",
-};
+export function ResultPanel({ session }: ResultPanelProps) {
+  const { terminal, caseState } = session;
+  if (!terminal) return null;
 
-export function ResultPanel({ result }: ResultPanelProps) {
-  const collected = result.facts.filter((fact) => fact.status === "collected");
-  const missing = result.facts.filter((fact) => result.missingFactKeys.includes(fact.key));
+  const copy = stopReasonCopy[terminal.stopReason];
 
   return (
-    <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <div className="flex items-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Case state</p>
-      </div>
-      <div className="mt-4 space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">Likely category</p>
-        <h2 className="font-serif text-2xl font-semibold text-foreground text-balance">{claimTypeLabels[result.claimType]}</h2>
-        <p className="text-sm text-muted-foreground text-pretty">{claimTypeDescriptions[result.claimType]}</p>
-      </div>
-      <div className="mt-6 space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">Factual summary</p>
-        <p className="leading-relaxed text-foreground text-pretty">{result.summary}</p>
-        <p className="text-xs text-muted-foreground">Facts shown here come from the claimant narrative.</p>
-      </div>
-      <div className="mt-6 grid gap-6 border-t border-border pt-6 sm:grid-cols-2">
-        <FactList heading="Collected facts" facts={collected} empty="No facts were confidently collected." />
-        <FactList heading="Still needed" facts={missing} empty="No additional facts are marked missing." missing />
-      </div>
-      <div className="mt-6 border-t border-border pt-6">
-        <p className="text-sm font-medium text-muted-foreground">Proposed next route</p>
-        <p className="mt-1 font-medium text-foreground">{routeLabels[result.proposedRoute.kind]}</p>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">{result.proposedRoute.rationale}</p>
-        <p className="mt-2 text-xs text-muted-foreground">This is a non-binding intake recommendation, not a coverage decision.</p>
-      </div>
-      <div className="mt-6 border-t border-border pt-6"><ConfidenceMeter value={result.classificationConfidence} /></div>
-    </section>
-  );
-}
+    <div className="space-y-6">
+      <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${terminal.kind === "propose_route" ? "bg-success" : "bg-accent"}`}
+            aria-hidden="true"
+          />
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {terminal.kind === "propose_route" ? "Proposed route" : "Human review"}
+          </p>
+        </div>
+        <h2 className="mt-3 font-serif text-2xl font-semibold text-foreground text-balance">{copy.heading}</h2>
+        <p className="mt-2 leading-relaxed text-foreground text-pretty">{copy.description}</p>
 
-function FactList({ heading, facts, empty, missing = false }: { heading: string; facts: CaseState["facts"]; empty: string; missing?: boolean }) {
-  return (
-    <div>
-      <h3 className="text-sm font-medium text-foreground">{heading}</h3>
-      {facts.length ? (
-        <ul className="mt-3 space-y-3">
-          {facts.map((fact) => (
-            <li key={fact.key} className="rounded-lg border border-border bg-background p-3">
-              <p className="text-xs font-medium text-muted-foreground">
-                {missing ? missingFactQuestions[fact.key] : fact.label}
-              </p>
-              {fact.value && <p className="mt-1 text-sm leading-relaxed text-foreground">{fact.value}</p>}
-              {missing && <MissingFactExplanation fact={fact} />}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-sm text-muted-foreground">{empty}</p>
-      )}
+        {terminal.kind === "propose_route" ? (
+          <div className="mt-6 border-t border-border pt-6">
+            <p className="text-sm font-medium text-muted-foreground">Suggested next step</p>
+            <p className="mt-1 font-medium text-foreground">{routeLabels[caseState.proposedRoute.kind]}</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">{terminal.rationale}</p>
+            <p className="mt-3 inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+              Preliminary — not a coverage or fault decision
+            </p>
+          </div>
+        ) : (
+          <div className="mt-6 border-t border-border pt-6">
+            <p className="text-sm leading-relaxed text-muted-foreground text-pretty">{copy.nextStep}</p>
+            <p className="mt-3 inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+              No coverage, fault, or payment decision has been made
+            </p>
+          </div>
+        )}
+      </section>
+
+      <CaseStateSummary result={caseState} heading="Final case state" />
     </div>
   );
-}
-
-function MissingFactExplanation({ fact }: { fact: CaseFact }) {
-  if (fact.status === "unclear") {
-    return (
-      <p className="mt-1 text-xs text-muted-foreground">
-        It was mentioned, but the detail is still unclear.
-      </p>
-    );
-  }
-
-  if (fact.key === "active_loss_or_safety") {
-    return (
-      <p className="mt-1 text-xs text-muted-foreground">
-        We don&apos;t know yet—for example, whether water is still leaking, there is an electrical hazard, or the area is unsafe to enter.
-      </p>
-    );
-  }
-
-  return <p className="mt-1 text-xs text-muted-foreground">We don&apos;t have this detail yet, so we won&apos;t assume an answer.</p>;
 }
