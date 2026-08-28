@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   caseSessionStateSchema,
   type CaseSessionState,
@@ -19,6 +19,8 @@ export function IntakeForm() {
   const [requestState, setRequestState] = useState<"idle" | "submitting" | "active" | "responding" | "terminal" | "error">("idle");
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const requestVersion = useRef(0);
+  const abortController = useRef<AbortController | null>(null);
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
@@ -36,6 +38,9 @@ export function IntakeForm() {
     if (!canSubmit) return;
 
     const submittedNarrative = narrative.trim();
+    const version = ++requestVersion.current;
+    abortController.current?.abort();
+    abortController.current = new AbortController();
     setRequestState("submitting");
     setError(null);
     setSession(null);
@@ -46,7 +51,9 @@ export function IntakeForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ narrative: submittedNarrative }),
+        signal: abortController.current.signal,
       });
+      if (version !== requestVersion.current) return;
 
       let data: unknown;
 
@@ -74,7 +81,9 @@ export function IntakeForm() {
       setSession(parsed.session);
       setSessionToken(parsed.sessionToken);
       setRequestState(parsed.session.terminal ? "terminal" : "active");
-    } catch {
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      if (version !== requestVersion.current) return;
       setRequestState("error");
       setError("We couldn't reach the assessment service. Check your connection and try again.");
     }
@@ -112,6 +121,8 @@ export function IntakeForm() {
   }
 
   function applyExample(text: string) {
+    abortController.current?.abort();
+    requestVersion.current += 1;
     setNarrative(text);
     setError(null);
     setSession(null);
@@ -254,6 +265,8 @@ export function IntakeForm() {
   );
 
   function resetSession() {
+    abortController.current?.abort();
+    requestVersion.current += 1;
     setNarrative("");
     setSession(null);
     setSessionToken(null);
