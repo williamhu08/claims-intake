@@ -244,6 +244,11 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Submit ordinary answers to `POST /api/case-session/respond` with the opaque session token; disable duplicate submission while pending and preserve the question until accepted.
    - [ ] Show compact question history with prior questions and claimant answers, including an explicit unable-to-answer entry when applicable. Never expose internal prompts, tool arguments, or signed session contents.
 
+   **Stretch goal.** [ ] **Generalize clarifications beyond water claims**
+   - [ ] Extend clarification eligibility to non-water claim types for missing or unclear material facts such as `active_loss_or_safety` and `injury_or_third_party`.
+   - [ ] Preserve the one-question-at-a-time rule, server-authoritative answer formats, escalation safeguards, and terminal-route validation.
+   - [ ] Add claim-type-specific server, component, interaction, and browser coverage before enabling the broader behavior by default.
+
    **4C.** [ ] **Render progress and terminal outcomes**
    - [ ] Render the refreshed `CaseState` after each accepted response,
      including updated facts, provenance (`claimant_narrative` versus
