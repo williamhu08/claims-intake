@@ -260,7 +260,7 @@ export function IntakeForm() {
         </form>
       )}
 
-      {session?.terminal && <ResultPanel result={session.caseState} />}
+      {session && <ResultPanel result={session.caseState} />}
     </div>
   );
 
