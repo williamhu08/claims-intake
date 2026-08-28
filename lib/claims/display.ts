@@ -78,4 +78,19 @@ export const exampleClaims: ExampleClaim[] = [
     narrative:
       "I came home to find the back door forced open and the frame splintered. A laptop and some jewelry are missing, and the bedroom had clearly been searched.",
   },
+  {
+    label: "Unknown water source",
+    narrative:
+      "I came home and found water damage on the kitchen floor and inside the cabinets. I don't know where the water came from or when it started.",
+  },
+  {
+    label: "Kitchen fire",
+    narrative:
+      "A pan of oil caught fire on the stove while I was cooking. The flames scorched the cabinets above and smoke damaged the ceiling and walls throughout the kitchen.",
+  },
+  {
+    label: "Slip and fall",
+    narrative:
+      "A delivery driver slipped on a wet entryway floor at my property and said his wrist was hurting afterward. He mentioned he might need to see a doctor.",
+  },
 ];
