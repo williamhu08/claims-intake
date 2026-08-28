@@ -7,7 +7,7 @@ import {
 
 export const runtime = "nodejs";
 
-const defaultModel = "openai/gpt-5.2";
+const defaultModel = "openai/gpt-5.6-luna";
 
 const triageInstructions = `You perform first-touch triage for ambiguous property insurance claims.
 

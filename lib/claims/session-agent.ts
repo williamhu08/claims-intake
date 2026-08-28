@@ -14,7 +14,7 @@ import {
 } from "@/lib/claims/session-schema";
 import { isWaterSourceClarificationEligible } from "@/lib/claims/session-engine";
 
-const defaultModel = "openai/gpt-5.2";
+const defaultModel = "openai/gpt-5.6-luna";
 
 const caseAnalysisInstructions = `You perform first-touch triage for ambiguous property insurance claims.
 
