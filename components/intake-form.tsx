@@ -243,10 +243,16 @@ export function IntakeForm() {
               <h2 className="text-lg font-semibold text-foreground">{entry.question}</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{entry.whyItMatters}</p>
               <p className="mt-5 text-sm font-medium text-foreground">Your answer</p>
-              <p className="mt-2 rounded-lg border border-input bg-muted/40 p-3 text-sm text-foreground">
-                {entry.answer === "no_response" || !entry.answer
-                  ? "I don't know"
-                  : entry.answer}
+              <ClarificationInput
+                answerType={entry.answerType}
+                value={entry.answer === "no_response" ? "I don't know" : entry.answer ?? ""}
+                onChange={() => undefined}
+                options={entry.options}
+                disabled
+                describedBy={`answered-clarification-${index}`}
+              />
+              <p id={`answered-clarification-${index}`} className="mt-2 text-sm text-muted-foreground">
+                Answer submitted.
               </p>
             </div>
           ))}
