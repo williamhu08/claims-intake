@@ -64,8 +64,9 @@ export async function POST(request: Request) {
 
   try {
     config = getCaseSessionConfig();
-  } catch {
-    return Response.json({ error: "Case sessions are not configured for this environment." }, { status: 503 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Case sessions are not configured for this environment.";
+    return Response.json({ error: message }, { status: 503 });
   }
 
   if (parsedRequest.data.testingMode) {
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
           ? "AI Gateway rejected the configured API key. Check that AI_GATEWAY_API_KEY is valid and enabled for the Preview/Development environment, then refresh the preview. Your answer has not been submitted."
           : isRateLimited
             ? "The assessment service is temporarily busy because the AI Gateway free-tier rate limit was reached. Wait a moment and try again, or add AI Gateway credits. Your answer has not been submitted."
-            : "This step could not be completed. Your answer has not been submitted. Please try again or check the project logs.",
+            : "This step could not be completed. Your answer has not been submitted. Check the server logs for the underlying error — a misconfigured AI_MODEL, a transient AI Gateway outage, or a bug in continueAfterAnswer are the likely causes.",
       },
       { status: isUnauthorized ? 401 : isRateLimited ? 429 : 502 },
     );

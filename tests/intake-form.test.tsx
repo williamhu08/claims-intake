@@ -151,7 +151,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "We received an incomplete assessment. Please try again.",
+      "The session response didn't match the expected shape. Check /api/case-session/start for a schema mismatch between the server payload and caseSessionStateSchema.",
     );
   });
 
@@ -170,7 +170,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "We received an unreadable response. Please try again.",
+      "The server sent a response that wasn't valid JSON. Check the server logs for a route crash or an unhandled error in /api/case-session/start.",
     );
   });
 
@@ -181,7 +181,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "We couldn't reach the assessment service. Check your connection and try again.",
+      "The request to /api/case-session/start failed before a response arrived. Check your network connection or the dev server console for a crashed request; your narrative is still available above.",
     );
   });
 

@@ -96,7 +96,7 @@ describe("POST /api/case-analysis", () => {
 
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({
-      error: "We couldn't complete the case analysis. Please try again.",
+      error: "We couldn't complete the case analysis. Check the server logs for the underlying AI Gateway or model error, then try again.",
     });
   });
 
@@ -107,7 +107,7 @@ describe("POST /api/case-analysis", () => {
 
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({
-      error: "We couldn't complete the case analysis. Please try again.",
+      error: "We couldn't complete the case analysis. Check the server logs for the underlying AI Gateway or model error, then try again.",
     });
   });
 });

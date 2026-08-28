@@ -69,7 +69,7 @@ export function IntakeForm() {
         data = await response.json();
       } catch {
         setRequestState("error");
-        setError("We received an unreadable response. Please try again.");
+        setError("The server sent a response that wasn't valid JSON. Check the server logs for a route crash or an unhandled error in /api/case-session/start.");
         return;
       }
 
@@ -82,7 +82,7 @@ export function IntakeForm() {
       const parsed = parseSessionStartResponse(data);
       if (!parsed) {
         setRequestState("error");
-        setError("We received an incomplete session response. Please try again.");
+        setError("The session response didn't match the expected shape. Check /api/case-session/start for a schema mismatch between the server payload and caseSessionStateSchema.");
         return;
       }
 
@@ -93,7 +93,7 @@ export function IntakeForm() {
       if (error instanceof DOMException && error.name === "AbortError") return;
       if (version !== requestVersion.current) return;
       setRequestState("error");
-      setError("The assessment service could not be reached. Check your connection and try again; your narrative is still available above.");
+      setError("The request to /api/case-session/start failed before a response arrived. Check your network connection or the dev server console for a crashed request; your narrative is still available above.");
     }
   }
 
@@ -111,14 +111,14 @@ export function IntakeForm() {
       const data: unknown = await response.json();
       if (!response.ok) throw new Error(getErrorMessage(data));
       const parsed = parseSessionStartResponse(data);
-      if (!parsed) throw new Error("We received an incomplete session response. Please try again.");
+      if (!parsed) throw new Error("The session response didn't match the expected shape. Check /api/case-session/respond for a schema mismatch between the server payload and caseSessionStateSchema.");
       setSession(parsed.session);
       setSessionToken(parsed.sessionToken);
       setAnswer("");
       setRequestState(parsed.session.terminal ? "terminal" : "active");
     } catch (error) {
       setRequestState("error");
-      setError(error instanceof Error ? error.message : "We couldn't continue this assessment. Please try again.");
+      setError(error instanceof Error ? error.message : "The request to /api/case-session/respond failed before a response arrived. Check the dev server console for the underlying error.");
     }
   }
 
@@ -349,7 +349,7 @@ function getErrorMessage(data: unknown) {
     if (typeof error === "string" && error.trim()) return error;
   }
 
-  return "The assessment could not be completed. Your narrative has not been submitted. This may be due to a temporary service error, unavailable AI Gateway quota, or invalid AI configuration; please try again or check the project logs.";
+  return "The assessment could not be completed and your narrative has not been submitted. Check the server logs for the specific AI Gateway error (invalid AI_GATEWAY_API_KEY, exhausted quota, or an unrecognized AI_MODEL value) before retrying.";
 }
 
 function parseSessionStartResponse(data: unknown) {
