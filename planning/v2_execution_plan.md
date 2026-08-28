@@ -230,43 +230,19 @@ Update a step to `[x]` only when every bullet beneath it is complete.
       - [x] Preserve accessible narrative validation, loading, malformed-response,
         API-error, retry, and reset states.
 
-   **4B.** [ ] **Ask and answer one clarification**
-   - [ ] Render exactly one pending clarification question at a time, tied to
-     the material fact key(s) returned by the server. Do not generate or
-     rephrase questions in the browser.
-   - [ ] Treat the server response as the source of truth for the answer type.
-     The pending action must declare whether the claimant should provide free
-     text, a monetary amount, or a calendar date; the UI must not infer the
-     type from the question wording.
-   <!--- AI-added clarification: Monetary and date answers are a good example of
-   how using AI helped surface additional product details that needed deliberate
-   thought. This step was added to make those dynamic answer formats and their
-   input restrictions explicit. --->
-   - [ ] For monetary answers, render a dedicated input that accepts only a
-     non-negative decimal amount with at most two digits after the decimal
-     point (for example, `2100.35`). Reject a second decimal point, extra
-     fractional digits, signs, letters, whitespace, and malformed insertion
-     patterns such as `.200.35`, `200.35.`, or `20.0.35` before submission.
-   - [ ] For date answers, render a dedicated `YYYY-MM-DD` input. Accept only
-     numeric characters while editing, guide the claimant with the required
-     format, validate that the completed value is a real calendar date, and
-     submit only the canonical format.
-   - [ ] For free-text answers, use a labelled text input or textarea with the
-     server&apos;s length constraints and preserve the optional “I don&apos;t know” path.
-   - [ ] Keep format restrictions usable for keyboard, paste, deletion, and
-     mobile input; do not rely on `input type="number"` for currency and do
-     not rely on browser locale-dependent date controls when the contract
-     requires `YYYY-MM-DD`.
-   - [ ] Explain why the answer matters for routing, without implying coverage,
-     fault, liability, payment, or a final insurance decision.
-   - [ ] Provide an optional “I don&apos;t know” / “I&apos;m not sure” action that
-     submits the contract&apos;s `no_response` answer rather than inventing a value.
-   - [ ] Submit ordinary answers to `POST /api/case-session/respond` with the
-     opaque session token and answer; disable duplicate submission while the
-     request is pending and preserve the question until accepted.
-   - [ ] Show compact question history with prior questions and claimant
-     answers, including an explicit unable-to-answer entry when applicable.
-     Never expose internal prompts, tool arguments, or signed session contents.
+   **4B.** [x] **Ask and answer one clarification**
+   - [x] Render exactly one pending clarification question at a time, tied to the material fact key(s) returned by the server. Do not generate or rephrase questions in the browser.
+   - [x] Treat the server response as the source of truth for the answer type. The pending action declares the supported answer format; the UI does not infer it from the question wording.
+   - [x] Support the approved non-upload formats: `free_text`, `money`, `date`, `yes_no`, `single_choice`, `multi_choice`, `integer`, `percentage`, `phone`, `email`, `date_time`, `postal_code`, `address`, `currency`, `duration`, and `url`. `file_upload` and `photo_upload` are explicitly out of scope.
+   - [x] For monetary and currency answers, render dedicated inputs with non-negative decimal validation and at most two fractional digits; reject malformed insertion patterns before submission.
+   - [x] For date answers, render a dedicated `YYYY-MM-DD` input, reject malformed candidates, and validate that the completed value is a real calendar date before submission.
+   - [x] For free-text and address answers, use labelled controls with server-declared constraints and preserve the optional “I don’t know” path.
+   - [x] For `single_choice` and `multi_choice`, render only server-provided options; enforce exactly one selection or one-or-more selections respectively.
+   - [x] Keep format restrictions usable for keyboard, paste, deletion, and mobile input; do not rely on locale-dependent date controls or `input type="number"` for currency.
+   - [x] Explain why the answer matters for routing without implying coverage, fault, liability, payment, or a final insurance decision.
+   - [x] Provide an optional “I don’t know” / “I’m not sure” action that submits the contract’s `no_response` answer rather than inventing a value.
+   - [x] Submit ordinary answers to `POST /api/case-session/respond` with the opaque session token; disable duplicate submission while pending and preserve the question until accepted.
+   - [ ] Show compact question history with prior questions and claimant answers, including an explicit unable-to-answer entry when applicable. Never expose internal prompts, tool arguments, or signed session contents.
 
    **4C.** [ ] **Render progress and terminal outcomes**
    - [ ] Render the refreshed `CaseState` after each accepted response,
