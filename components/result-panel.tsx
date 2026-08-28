@@ -1,7 +1,5 @@
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { stopReasonCopy } from "@/lib/claims/display";
-import { CaseStateSummary } from "@/components/case-state-summary";
-
 type ResultPanelProps = { session: CaseSessionState };
 
 const routeLabels = {
@@ -49,8 +47,6 @@ export function ResultPanel({ session }: ResultPanelProps) {
           </div>
         )}
       </section>
-
-      <CaseStateSummary result={caseState} heading="Final case state" />
     </div>
   );
 }

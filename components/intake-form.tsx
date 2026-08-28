@@ -140,7 +140,8 @@ export function IntakeForm() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+      <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
         aria-busy={isSubmittingNarrative}
@@ -291,11 +292,29 @@ export function IntakeForm() {
         </form>
       )}
 
-      {session && !session.terminal && (
-        <CaseStateSummary result={session.caseState} heading="Case state so far" />
-      )}
-
       {session?.terminal && <ResultPanel session={session} />}
+      </div>
+
+      <aside className="lg:sticky lg:top-6">
+        <details open className="rounded-xl border border-border bg-card shadow-sm">
+          <summary className="cursor-pointer list-none p-5 font-medium text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
+            <span className="flex items-center justify-between gap-3">
+              <span>Case state</span>
+              <span className="text-xs font-normal text-muted-foreground">{session ? "Updated" : "Waiting for narrative"}</span>
+            </span>
+          </summary>
+          <div className="border-t border-border p-5">
+            {session ? (
+              <CaseStateSummary result={session.caseState} heading="Case state so far" />
+            ) : (
+              <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+                <p>Your case state will appear here as soon as you submit your description.</p>
+                <p>We&apos;ll show the information collected, what still needs clarification, and where each fact came from.</p>
+              </div>
+            )}
+          </div>
+        </details>
+      </aside>
     </div>
   );
 
