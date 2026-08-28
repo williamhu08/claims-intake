@@ -9,7 +9,7 @@ import type { CaseSessionAction, CaseSessionState } from "@/lib/claims/session-s
 export const MOCK_WATER_SOURCE_QUESTION: CaseSessionAction = {
   kind: "ask_clarifying_question" as const,
   answerType: "free_text" as const,
-  question: "Do you know what the water came from (for example a supply line/plumbing leak, dishwasher/fridge/ice maker, sink or drain backup, roof/window leak, HVAC/condensation, or unknown)?",
+  question: "Do you know what the water came from?",
   factKeys: ["incident_cause"],
   whyItMatters: "Identifying the source helps determine the right handling, mitigation steps, and which specialists may be needed.",
 };

@@ -151,7 +151,7 @@ export async function selectNextCaseSessionAction(
       ? {
           ask_clarifying_question: {
             description:
-              "Ask the one eligible material clarification question about the water source (incident_cause). Always use answerType single_choice with exactly these options: Supply line/plumbing leak; Dishwasher, fridge, or ice maker; Sink or drain backup; Roof or window leak; HVAC or condensation; Unknown. Use the exact question: Do you know what the water came from? Use whyItMatters to explain that identifying the source helps determine the appropriate intake path. Do not use a vague free-text question or invent additional categories.",
+              "Ask the one eligible material clarification question about the water source (incident_cause). Always use answerType free_text. Use the exact question: Do you know what the water came from? Use whyItMatters to explain that identifying the source helps determine the appropriate intake path. The claimant may describe any source in their own words; do not force a dropdown or invent a constrained list of categories.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }
