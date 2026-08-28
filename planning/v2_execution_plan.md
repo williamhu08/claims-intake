@@ -234,6 +234,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
         API-error, retry, and reset states.
 
    **4B.** [x] **Ask and answer one clarification**
+   - [x] Add Testing mode for local and Preview QA. Testing mode is explicitly labeled in the frontend, defaults off, is unavailable in production, and uses deterministic responses without calling the AI model.
    - [x] Render exactly one pending clarification question at a time, tied to the material fact key(s) returned by the server. Do not generate or rephrase questions in the browser.
    - [x] Treat the server response as the source of truth for the answer type. The pending action declares the supported answer format; the UI does not infer it from the question wording.
    - [x] Support the approved non-upload formats: `free_text`, `money`, `date`, `yes_no`, `single_choice`, `multi_choice`, `integer`, `percentage`, `phone`, `email`, `date_time`, `postal_code`, `address`, `currency`, `duration`, and `url`. `file_upload` and `photo_upload` are explicitly out of scope.

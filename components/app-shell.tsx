@@ -19,7 +19,7 @@ export function AppShell({ isProduction, children }: { isProduction: boolean; ch
           <div className="flex items-center gap-4">
             {isProduction ? null : (
               <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-muted-foreground">
-                <span>Testing mode</span>
+                <span title="Uses deterministic mock responses and does not call the AI model">Testing mode <span className="font-normal text-muted-foreground/80">(no AI calls)</span></span>
                 <button
                   type="button"
                   role="switch"
