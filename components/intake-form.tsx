@@ -7,7 +7,11 @@ import {
 } from "@/lib/claims/session-schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
-import { ClarificationInput, isClarificationAnswerValid } from "@/components/clarification-input";
+import {
+  ClarificationInput,
+  isClarificationAnswerValid,
+  type ClarificationAnswerType,
+} from "@/components/clarification-input";
 
 const MIN_LENGTH = 20;
 const MAX_LENGTH = 4000;
@@ -245,11 +249,7 @@ export function IntakeForm() {
             describedBy="clarification-hint"
           />
           <p id="clarification-hint" className="mt-2 text-sm text-muted-foreground">
-            {pendingAction.answerType === "date"
-              ? "Enter a real calendar date as YYYY-MM-DD."
-              : pendingAction.answerType === "money"
-                ? "Enter a non-negative amount with up to two decimal places."
-                : "Answer in your own words."}
+            {clarificationHint(pendingAction.answerType)}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button type="submit" disabled={!answerIsValid || loading} className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
@@ -273,6 +273,43 @@ export function IntakeForm() {
     setRequestState("idle");
     setAnswer("");
     setError(null);
+  }
+}
+
+function clarificationHint(answerType: ClarificationAnswerType) {
+  switch (answerType) {
+    case "date":
+      return "Enter a real calendar date as YYYY-MM-DD.";
+    case "date_time":
+      return "Enter a date and time.";
+    case "money":
+    case "currency":
+      return "Enter a non-negative amount with up to two decimal places.";
+    case "yes_no":
+      return "Choose yes or no.";
+    case "single_choice":
+      return "Choose one option.";
+    case "multi_choice":
+      return "Select one or more options that apply.";
+    case "integer":
+      return "Enter a whole number.";
+    case "percentage":
+      return "Enter a percentage between 0 and 100.";
+    case "phone":
+      return "Enter a phone number, digits only or with spaces, parentheses, or dashes.";
+    case "email":
+      return "Enter a valid email address.";
+    case "postal_code":
+      return "Enter a valid postal or ZIP code.";
+    case "url":
+      return "Enter a link starting with http:// or https://.";
+    case "duration":
+      return "Enter a duration, for example \"3 days\" or \"2 hours\".";
+    case "address":
+      return "Enter the full address.";
+    case "free_text":
+    default:
+      return "Answer in your own words.";
   }
 }
 
