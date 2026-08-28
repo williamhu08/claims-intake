@@ -182,6 +182,21 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Start V2 from the claimant narrative by calling
      `POST /api/case-session/start`; do not treat the V1 `CaseState` as final
      or call `/api/case-analysis` from the claimant UI.
+   - [ ] Implement the start request as a client-side state transition with
+     explicit `idle`, `submitting`, `active`, `terminal`, and `error` states;
+     disable the submit control during `submitting` and prevent duplicate
+     session-start requests.
+   - [ ] Send exactly `{ narrative }` in the request body after trimming the
+     value, while preserving the existing 20–4000 character validation and
+     showing validation feedback before any network request.
+   - [ ] Validate the complete response shape before committing UI state:
+     require both a valid `session` snapshot and a non-empty `sessionToken`;
+     if either is missing or malformed, discard the response and show the
+     malformed-response error without retaining a partial token.
+   - [ ] Branch from the server-declared initial snapshot: hand a pending
+     question to 4B, and hand an immediate route, human-review result, or
+     other terminal stop to 4C. The UI must not assume that session start
+     always produces a question.
    - [ ] Preserve the `sessionToken` returned by `/api/case-session/start` as
      an opaque client value; never let the browser edit or reconstruct
      canonical session state.
