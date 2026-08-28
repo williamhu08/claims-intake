@@ -199,6 +199,12 @@ Update a step to `[x]` only when every bullet beneath it is complete.
         question to 4B, and hand an immediate route, human-review result, or
         other terminal stop to 4C. The UI must not assume that session start
         always produces a question.
+      <!--- Decision rationale: The sessionToken identifies and authenticates the
+      particular case-assessment session across clarification requests. The
+      server signs it with CASE_SESSION_SIGNING_SECRET and verifies that
+      signature before trusting the session state, so the browser cannot alter
+      facts, provenance, status, or routing outcomes. The token is opaque to
+      the client; it is not a password or an AI text token. --->
       - [x] Preserve the `sessionToken` returned by `/api/case-session/start` as
         an opaque client value; never let the browser edit or reconstruct
         canonical session state.
