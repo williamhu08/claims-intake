@@ -83,14 +83,17 @@ export async function POST(request: Request) {
 
     const message = error instanceof Error ? error.message : "Unknown startup failure.";
     const isRateLimited = /429|rate limit|quota/i.test(message);
+    const isUnauthorized = /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
 
     return Response.json(
       {
-        error: isRateLimited
-          ? "The assessment service is temporarily busy. Please wait a moment and try again."
-          : "The assessment could not be completed. Your narrative has not been submitted. This may be due to a temporary service error, unavailable AI Gateway quota, or invalid AI configuration; please try again or check the project logs.",
+        error: isUnauthorized
+          ? "AI Gateway rejected the configured API key. Check that AI_GATEWAY_API_KEY is valid and enabled for the Preview/Development environment, then refresh the preview. Your narrative has not been submitted."
+          : isRateLimited
+            ? "The assessment service is temporarily busy because the AI Gateway quota may be exhausted. Add credits or try again later. Your narrative has not been submitted."
+            : "The assessment could not be completed. Your narrative has not been submitted. This may be due to a temporary service error or invalid AI configuration; please try again or check the project logs.",
       },
-      { status: isRateLimited ? 429 : 502 },
+      { status: isUnauthorized ? 401 : isRateLimited ? 429 : 502 },
     );
   }
 }
