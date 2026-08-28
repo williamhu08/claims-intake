@@ -28,7 +28,9 @@ export function IntakeForm() {
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
-  const loading = requestState === "submitting" || requestState === "responding";
+  const isSubmittingNarrative = requestState === "submitting";
+  const isRespondingToClarification = requestState === "responding";
+  const loading = isSubmittingNarrative || isRespondingToClarification;
   const pendingAction = session?.pendingAction;
   const answerIsValid = pendingAction
     ? isClarificationAnswerValid(pendingAction.answerType, answer)
@@ -138,7 +140,7 @@ export function IntakeForm() {
     <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
-        aria-busy={loading}
+        aria-busy={isSubmittingNarrative}
         className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8"
       >
         <div className="flex flex-wrap items-center gap-2">
@@ -190,7 +192,7 @@ export function IntakeForm() {
         </div>
 
         <div className="sr-only" aria-live="polite" aria-atomic="true">
-          {loading ? "Starting your assessment." : ""}
+          {isSubmittingNarrative ? "Starting your assessment." : ""}
         </div>
 
         <button
@@ -198,7 +200,7 @@ export function IntakeForm() {
           disabled={!canSubmit}
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
-          {loading ? (
+          {isSubmittingNarrative ? (
             <>
               <span
                 className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
@@ -251,7 +253,7 @@ export function IntakeForm() {
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button type="submit" disabled={!answerIsValid || loading} className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
-              {loading ? "Saving…" : "Continue"}
+              {isRespondingToClarification ? "Saving…" : "Continue"}
             </button>
             <button type="button" disabled={loading} onClick={() => submitAnswer("no_response")} className="text-sm font-medium text-muted-foreground underline underline-offset-4 disabled:opacity-50">
               I don&apos;t know
