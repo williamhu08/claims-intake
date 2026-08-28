@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { caseSessionStateSchema, type CaseSessionState } from "@/lib/claims/session-schema";
+import { caseStateSchema, type CaseState } from "@/lib/claims/schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 
@@ -10,8 +10,7 @@ const MAX_LENGTH = 4000;
 
 export function IntakeForm() {
   const [narrative, setNarrative] = useState("");
-  const [session, setSession] = useState<CaseSessionState | null>(null);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [result, setResult] = useState<CaseState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,11 +24,10 @@ export function IntakeForm() {
 
     setLoading(true);
     setError(null);
-    setSession(null);
-    setSessionToken(null);
+    setResult(null);
 
     try {
-      const response = await fetch("/api/case-session/start", {
+      const response = await fetch("/api/case-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ narrative }),
@@ -49,14 +47,12 @@ export function IntakeForm() {
         return;
       }
 
-      const parsedSession = parseSessionStartResponse(data);
-      if (!parsedSession) {
-        setError("We received an incomplete session response. Please try again.");
+      if (!isCaseState(data)) {
+        setError("We received an incomplete assessment. Please try again.");
         return;
       }
 
-      setSession(parsedSession.session);
-      setSessionToken(parsedSession.sessionToken);
+      setResult(data);
     } catch {
       setError("We couldn't reach the assessment service. Check your connection and try again.");
     } finally {
@@ -67,8 +63,7 @@ export function IntakeForm() {
   function applyExample(text: string) {
     setNarrative(text);
     setError(null);
-    setSession(null);
-    setSessionToken(null);
+    setResult(null);
   }
 
   return (
@@ -102,7 +97,6 @@ export function IntakeForm() {
             name="narrative"
             value={narrative}
             onChange={(e) => setNarrative(e.target.value)}
-            readOnly={Boolean(sessionToken)}
             rows={7}
             maxLength={MAX_LENGTH}
             placeholder="e.g. A pipe burst under the kitchen sink overnight and flooded the cabinet and floor..."
@@ -133,22 +127,12 @@ export function IntakeForm() {
                 className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
                 aria-hidden="true"
               />
-              Starting assessment…
+              Assessing…
             </>
           ) : (
             "Get initial assessment"
           )}
         </button>
-
-        {sessionToken && (
-          <button
-            type="button"
-            onClick={resetSession}
-            className="mt-4 block text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Edit narrative / start over
-          </button>
-        )}
       </form>
 
       {error && (
@@ -160,26 +144,9 @@ export function IntakeForm() {
         </div>
       )}
 
-      {session?.terminal && <ResultPanel result={session.caseState} />}
-
-      {session?.pendingAction && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-xl border border-border bg-card p-5 text-sm text-foreground"
-        >
-          Your initial assessment is ready for the next step.
-        </div>
-      )}
+      {result && <ResultPanel result={result} />}
     </div>
   );
-
-  function resetSession() {
-    setNarrative("");
-    setSession(null);
-    setSessionToken(null);
-    setError(null);
-  }
 }
 
 function getErrorMessage(data: unknown) {
@@ -191,17 +158,6 @@ function getErrorMessage(data: unknown) {
   return "We couldn't complete the assessment. Please try again.";
 }
 
-function parseSessionStartResponse(data: unknown) {
-  if (!data || typeof data !== "object") return null;
-
-  const payload = data as { session?: unknown; sessionToken?: unknown };
-  const parsedSession = caseSessionStateSchema.safeParse(payload.session);
-  if (!parsedSession.success || typeof payload.sessionToken !== "string" || !payload.sessionToken.trim()) {
-    return null;
-  }
-
-  return {
-    session: parsedSession.data,
-    sessionToken: payload.sessionToken,
-  };
+function isCaseState(data: unknown): data is CaseState {
+  return caseStateSchema.safeParse(data).success;
 }
