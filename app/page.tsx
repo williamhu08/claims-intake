@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-dvh">
       <AppShell isProduction={process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production"}>
-        <main className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
+        <main className="mx-auto max-w-7xl px-6 py-10 sm:py-14">
           <div className="max-w-2xl">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Claim triage</p>
             <p className="mt-2 text-sm font-medium text-muted-foreground">Property claims</p>
