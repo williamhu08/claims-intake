@@ -8,7 +8,8 @@ export default function Home() {
       <AppShell isProduction={process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production"}>
         <main className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
           <div className="max-w-2xl">
-            <p className="text-sm font-medium text-accent">Property claims</p>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Claim triage</p>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">Property claims</p>
             <h1 className="mt-2 font-serif text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl">Tell us what happened, and we&apos;ll route it for you.</h1>
             <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">Describe the incident in your own words. We provide an instant initial reading of the claim category so it reaches the right team faster.</p>
           </div>
