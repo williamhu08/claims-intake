@@ -188,7 +188,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
         explicit `idle`, `submitting`, `active`, `terminal`, and `error` states;
         disable the submit control during `submitting` and prevent duplicate
         session-start requests.
-      - [ ] Send exactly `{ narrative }` in the request body after trimming the
+      - [x] Send exactly `{ narrative }` in the request body after trimming the
         value, while preserving the existing 20–4000 character validation and
         showing validation feedback before any network request.
       - [x] Validate the complete response shape before committing UI state:
@@ -208,7 +208,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
         which clears the current session, token, question history, and results;
         the edited narrative must begin a new session rather than modifying the
         existing one.
-      - [ ] Preserve accessible narrative validation, loading, malformed-response,
+      - [x] Preserve accessible narrative validation, loading, malformed-response,
         API-error, retry, and reset states.
 
    **4B.** [ ] **Ask and answer one clarification**

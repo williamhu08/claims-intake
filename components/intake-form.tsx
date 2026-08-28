@@ -28,6 +28,7 @@ export function IntakeForm() {
     event.preventDefault();
     if (!canSubmit) return;
 
+    const submittedNarrative = narrative.trim();
     setRequestState("submitting");
     setError(null);
     setSession(null);
@@ -37,7 +38,7 @@ export function IntakeForm() {
       const response = await fetch("/api/case-session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ narrative }),
+        body: JSON.stringify({ narrative: submittedNarrative }),
       });
 
       let data: unknown;
@@ -45,11 +46,13 @@ export function IntakeForm() {
       try {
         data = await response.json();
       } catch {
+        setRequestState("error");
         setError("We received an unreadable response. Please try again.");
         return;
       }
 
       if (!response.ok) {
+        setRequestState("error");
         setError(getErrorMessage(data));
         return;
       }
@@ -80,7 +83,11 @@ export function IntakeForm() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <form
+        onSubmit={handleSubmit}
+        aria-busy={loading}
+        className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8"
+      >
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Try an example
@@ -127,6 +134,10 @@ export function IntakeForm() {
               {trimmedLength}/{MAX_LENGTH}
             </span>
           </div>
+        </div>
+
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {loading ? "Starting your assessment." : ""}
         </div>
 
         <button
