@@ -184,8 +184,11 @@ Update a step to `[x]` only when every bullet beneath it is complete.
       replace its V1 submission behavior with the V2 session-start request,
       preserve the returned opaque `sessionToken`, validate the server snapshot,
       handle loading and error states, lock the submitted narrative, and route
-      the initial response to 4B or 4C. The signing secret remains server-only;
-      the frontend never receives or manages `CASE_SESSION_SIGNING_SECRET`.
+      the initial response to 4B or 4C. These changes are behavioral only:
+      4A does not introduce new display icons or require a visual redesign;
+      existing controls and status indicators may be reused. The signing secret
+      remains server-only; the frontend never receives or manages
+      `CASE_SESSION_SIGNING_SECRET`.
 
       - [x] Replace the one-turn V1 submission flow with the V2 lifecycle:
         narrative → session start → optional question → claimant response →
