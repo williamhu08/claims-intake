@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { ClaimCategories } from "@/components/claim-categories";
-import { IntakeForm } from "@/components/intake-form";
+import { ClaimIntakeSection } from "@/components/claim-intake-section";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
             <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">Describe the incident in your own words. We provide an instant initial reading of the claim category so it reaches the right team faster.</p>
           </div>
           <div role="note" className="mt-6 rounded-lg border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground text-pretty">This is an early triage assessment only. It does not determine coverage, liability, fault, or payment, and it is not a decision on your claim.</div>
-          <div className="mt-8"><ClaimCategories /><div className="mt-10"><div className="mb-5"><h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">Start with what you know</h2><p className="mt-2 leading-relaxed text-muted-foreground text-pretty">Share the details you have so we can make an initial assessment.</p></div><IntakeForm /></div></div>
+          <div className="mt-8"><ClaimCategories /><div className="mt-10"><ClaimIntakeSection /></div></div>
         </main>
       </AppShell>
 

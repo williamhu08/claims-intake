@@ -8,7 +8,6 @@ import {
 } from "@/lib/claims/session-schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
-import { CaseStateSummary } from "@/components/case-state-summary";
 import {
   ClarificationInput,
   isClarificationAnswerValid,
@@ -18,7 +17,11 @@ import {
 const MIN_LENGTH = 20;
 const MAX_LENGTH = 4000;
 
-export function IntakeForm() {
+type IntakeFormProps = {
+  onSessionChange?: (session: CaseSessionState | null) => void;
+};
+
+export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const testingMode = useTestingMode();
   const [narrative, setNarrative] = useState("");
   const [session, setSession] = useState<CaseSessionState | null>(null);
@@ -42,6 +45,11 @@ export function IntakeForm() {
   const hasActiveSession = Boolean(sessionToken);
   const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession;
 
+  function updateSession(nextSession: CaseSessionState | null) {
+    setSession(nextSession);
+    onSessionChange?.(nextSession);
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!canSubmit) return;
@@ -52,7 +60,7 @@ export function IntakeForm() {
     abortController.current = new AbortController();
     setRequestState("submitting");
     setError(null);
-    setSession(null);
+    updateSession(null);
     setSessionToken(null);
 
     try {
@@ -87,7 +95,7 @@ export function IntakeForm() {
         return;
       }
 
-      setSession(parsed.session);
+      updateSession(parsed.session);
       setSessionToken(parsed.sessionToken);
       setRequestState(parsed.session.terminal ? "terminal" : "active");
     } catch (error) {
@@ -113,7 +121,7 @@ export function IntakeForm() {
       if (!response.ok) throw new Error(getErrorMessage(data));
       const parsed = parseSessionStartResponse(data);
       if (!parsed) throw new Error("The session response didn't match the expected shape. Check /api/case-session/respond for a schema mismatch between the server payload and caseSessionStateSchema.");
-      setSession(parsed.session);
+      updateSession(parsed.session);
       setSessionToken(parsed.sessionToken);
       setAnswer("");
       setRequestState(parsed.session.terminal ? "terminal" : "active");
@@ -134,14 +142,13 @@ export function IntakeForm() {
     requestVersion.current += 1;
     setNarrative(text);
     setError(null);
-    setSession(null);
+    updateSession(null);
     setSessionToken(null);
     setRequestState("idle");
   }
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
-      <div className="space-y-6">
+    <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
         aria-busy={isSubmittingNarrative}
@@ -293,28 +300,6 @@ export function IntakeForm() {
       )}
 
       {session?.terminal && <ResultPanel session={session} />}
-      </div>
-
-      <aside className="lg:sticky lg:top-6">
-        <details open className="rounded-xl border border-border bg-card shadow-sm">
-          <summary className="cursor-pointer list-none p-5 font-medium text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
-            <span className="flex items-center justify-between gap-3">
-              <span>Case state</span>
-              <span className="text-xs font-normal text-muted-foreground">{session ? "Updated" : "Waiting for narrative"}</span>
-            </span>
-          </summary>
-          <div className="border-t border-border p-5">
-            {session ? (
-              <CaseStateSummary result={session.caseState} heading="Case state so far" />
-            ) : (
-              <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-                <p>Your case state will appear here as soon as you submit your description.</p>
-                <p>We&apos;ll show the information collected, what still needs clarification, and where each fact came from.</p>
-              </div>
-            )}
-          </div>
-        </details>
-      </aside>
     </div>
   );
 
@@ -322,7 +307,7 @@ export function IntakeForm() {
     abortController.current?.abort();
     requestVersion.current += 1;
     setNarrative("");
-    setSession(null);
+    updateSession(null);
     setSessionToken(null);
     setRequestState("idle");
     setAnswer("");

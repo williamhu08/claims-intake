@@ -24,8 +24,8 @@ export function CaseStateSummary({ result, heading = "Case state" }: CaseStateSu
   const missing = result.facts.filter((fact) => result.missingFactKeys.includes(fact.key));
 
   return (
-    <section aria-live="polite" className="rounded-xl border border-accent/40 bg-accent/5 p-5 shadow-sm sm:p-6">
-      <div className="flex items-center justify-between gap-3 border-b border-accent/20 pb-4">
+    <section aria-live="polite" className="bg-transparent p-0">
+      <div className="flex items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
           <p className="text-xs font-medium uppercase tracking-wider text-accent">{heading}</p>
