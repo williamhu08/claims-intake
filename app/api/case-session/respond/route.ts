@@ -32,7 +32,7 @@ function gatewayConfigured(): boolean {
 
 function isRateLimitError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : "";
-  return /429|rate limit|quota|GatewayRateLimitError/i.test(message);
+  return /429|rate[- ]?limit|quota|GatewayRateLimitError/i.test(message);
 }
 
 function isUnauthorizedError(error: unknown): boolean {

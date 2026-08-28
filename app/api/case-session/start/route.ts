@@ -18,7 +18,7 @@ function gatewayConfigured(): boolean {
 
 function isRateLimitError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : "";
-  return /429|rate limit|quota|GatewayRateLimitError/i.test(message);
+  return /429|rate[- ]?limit|quota|GatewayRateLimitError/i.test(message);
 }
 
 export async function POST(request: Request) {
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     });
 
     const message = error instanceof Error ? error.message : "Unknown startup failure.";
-    const isRateLimited = /429|rate limit|quota/i.test(message);
+    const isRateLimited = /429|rate[- ]?limit|quota/i.test(message);
     const isUnauthorized = /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
 
     return Response.json(
