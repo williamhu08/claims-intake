@@ -55,7 +55,12 @@ export const clarificationAnswerTypeSchema = z.enum(clarificationAnswerTypeValue
 
 export const clarificationOptionSchema = z.object({
   value: z.string().trim().min(1).max(80),
-  label: z.string().trim().min(1).max(160),
+  label: z
+    .string()
+    .trim()
+    .min(1)
+    .max(160)
+    .transform((label) => label.replace(/\s*\?+$/, "")),
 });
 export const clarificationOptionsSchema = z.array(clarificationOptionSchema).min(2).max(12);
 
