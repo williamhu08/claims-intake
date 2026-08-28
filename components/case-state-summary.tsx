@@ -24,10 +24,15 @@ export function CaseStateSummary({ result, heading = "Case state" }: CaseStateSu
   const missing = result.facts.filter((fact) => result.missingFactKeys.includes(fact.key));
 
   return (
-    <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <div className="flex items-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{heading}</p>
+    <section aria-live="polite" className="rounded-xl border border-accent/40 bg-accent/5 p-5 shadow-sm sm:p-6">
+      <div className="flex items-center justify-between gap-3 border-b border-accent/20 pb-4">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+          <p className="text-xs font-medium uppercase tracking-wider text-accent">{heading}</p>
+        </div>
+        <span className="rounded-full border border-accent/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent">
+          Live snapshot
+        </span>
       </div>
       <div className="mt-4 space-y-1">
         <p className="text-sm font-medium text-muted-foreground">Likely category</p>
