@@ -246,7 +246,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Explain why the answer matters for routing without implying coverage, fault, liability, payment, or a final insurance decision.
    - [x] Provide an optional “I don’t know” / “I’m not sure” action that submits the contract’s `no_response` answer rather than inventing a value.
    - [x] Submit ordinary answers to `POST /api/case-session/respond` with the opaque session token; disable duplicate submission while pending and preserve the question until accepted.
-   - [ ] Show compact question history with prior questions and claimant answers, including an explicit unable-to-answer entry when applicable. Never expose internal prompts, tool arguments, or signed session contents.
+   - [x] Show compact question history with prior questions and claimant answers, including an explicit unable-to-answer entry when applicable. Never expose internal prompts, tool arguments, or signed session contents.
 
    **Stretch goal.** [ ] **Generalize clarifications beyond water claims**
    - [ ] Extend clarification eligibility to non-water claim types for missing or unclear material facts such as `active_loss_or_safety` and `injury_or_third_party`.
