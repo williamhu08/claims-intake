@@ -319,7 +319,7 @@ function getErrorMessage(data: unknown) {
     if (typeof error === "string" && error.trim()) return error;
   }
 
-  return "We couldn't complete the assessment. Please try again.";
+  return "The assessment could not be completed. Your narrative has not been submitted. This may be due to a temporary service error, unavailable AI Gateway quota, or invalid AI configuration; please try again or check the project logs.";
 }
 
 function parseSessionStartResponse(data: unknown) {

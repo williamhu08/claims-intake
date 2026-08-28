@@ -88,7 +88,7 @@ export async function POST(request: Request) {
       {
         error: isRateLimited
           ? "The assessment service is temporarily busy. Please wait a moment and try again."
-          : "The assessment could not be completed. Please try again; your narrative has not been submitted.",
+          : "The assessment could not be completed. Your narrative has not been submitted. This may be due to a temporary service error, unavailable AI Gateway quota, or invalid AI configuration; please try again or check the project logs.",
       },
       { status: isRateLimited ? 429 : 502 },
     );
