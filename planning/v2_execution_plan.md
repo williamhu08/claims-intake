@@ -185,6 +185,12 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Preserve the `sessionToken` returned by `/api/case-session/start` as
      an opaque client value; never let the browser edit or reconstruct
      canonical session state.
+   - [ ] Once a session starts, make the submitted narrative read-only so the
+     claimant&apos;s active session remains tied to the exact text that was
+     analyzed. Provide an explicit “Edit narrative” / “Start over” action,
+     which clears the current session, token, question history, and results;
+     the edited narrative must begin a new session rather than modifying the
+     existing one.
    - [ ] Preserve accessible narrative validation, loading, malformed-response,
      API-error, retry, and reset states.
 
