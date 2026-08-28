@@ -89,7 +89,7 @@ export function IntakeForm() {
       if (error instanceof DOMException && error.name === "AbortError") return;
       if (version !== requestVersion.current) return;
       setRequestState("error");
-      setError("We couldn't reach the assessment service. Check your connection and try again.");
+      setError("The assessment service could not be reached. Check your connection and try again; your narrative is still available above.");
     }
   }
 

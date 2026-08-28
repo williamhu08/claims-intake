@@ -170,7 +170,7 @@ export async function selectNextCaseSessionAction(
     prompt: `Validated case-session state:\n${JSON.stringify(session)}`,
     tools,
     toolChoice: "required",
-    maxRetries: 0,
+    maxRetries: 2,
     timeout,
   });
 

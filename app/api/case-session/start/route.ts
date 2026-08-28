@@ -46,33 +46,51 @@ export async function POST(request: Request) {
     return Response.json({ error: "AI Gateway is not configured for this environment." }, { status: 503 });
   }
 
-  try {
-    const caseState = await analyzeClaimNarrative(
-      parsedRequest.data.narrative,
-      config.maxInputTokens,
-      config.maxWallClockMs,
-    );
-    const session = createCaseSession(caseState, config.ttlSeconds);
-    const action = await selectNextCaseSessionAction(
-      session,
-      config.maxClarifications,
-      config.maxInputTokens,
-      config.maxWallClockMs,
-    );
-    const nextSession = applyCaseSessionAction(session, action, config.maxClarifications);
+  let lastError: unknown;
 
-    return Response.json({
-      session: nextSession,
-      sessionToken: signCaseSession(nextSession, config.signingSecret),
-    });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const caseState = await analyzeClaimNarrative(
+        parsedRequest.data.narrative,
+        config.maxInputTokens,
+        config.maxWallClockMs,
+      );
+      const session = createCaseSession(caseState, config.ttlSeconds);
+      const action = await selectNextCaseSessionAction(
+        session,
+        config.maxClarifications,
+        config.maxInputTokens,
+        config.maxWallClockMs,
+      );
+      const nextSession = applyCaseSessionAction(session, action, config.maxClarifications);
+
+      return Response.json({
+        session: nextSession,
+        sessionToken: signCaseSession(nextSession, config.signingSecret),
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
+    }
+  }
+
+  try {
+    throw lastError;
   } catch (error) {
     console.error("Case-session start failed", {
       message: error instanceof Error ? error.message : "Unknown error",
     });
 
+    const message = error instanceof Error ? error.message : "Unknown startup failure.";
+    const isRateLimited = /429|rate limit|quota/i.test(message);
+
     return Response.json(
-      { error: "We couldn't start this case session. Please try again." },
-      { status: 502 },
+      {
+        error: isRateLimited
+          ? "The assessment service is temporarily busy. Please wait a moment and try again."
+          : "The assessment could not be completed. Please try again; your narrative has not been submitted.",
+      },
+      { status: isRateLimited ? 429 : 502 },
     );
   }
 }
