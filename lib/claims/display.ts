@@ -88,9 +88,4 @@ export const exampleClaims: ExampleClaim[] = [
     narrative:
       "A pan of oil caught fire on the stove while I was cooking. The flames scorched the cabinets above and smoke damaged the ceiling and walls throughout the kitchen.",
   },
-  {
-    label: "Slip and fall",
-    narrative:
-      "A delivery driver slipped on a wet entryway floor at my property and said his wrist was hurting afterward. He mentioned he might need to see a doctor.",
-  },
 ];
