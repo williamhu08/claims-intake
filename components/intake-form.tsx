@@ -233,6 +233,26 @@ export function IntakeForm() {
         </div>
       )}
 
+      {session && session.clarificationHistory.length > 0 && (
+        <div className="space-y-4">
+          {session.clarificationHistory.map((entry, index) => (
+            <div
+              key={`${entry.question}-${index}`}
+              className="rounded-xl border border-border bg-card p-5"
+            >
+              <h2 className="text-lg font-semibold text-foreground">{entry.question}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{entry.whyItMatters}</p>
+              <p className="mt-5 text-sm font-medium text-foreground">Your answer</p>
+              <p className="mt-2 rounded-lg border border-input bg-muted/40 p-3 text-sm text-foreground">
+                {entry.answer === "no_response" || !entry.answer
+                  ? "I don't know"
+                  : entry.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
       {pendingAction && (
         <form onSubmit={handleAnswerSubmit} className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-lg font-semibold text-foreground">{pendingAction.question}</h2>
