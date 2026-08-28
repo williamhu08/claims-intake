@@ -231,8 +231,6 @@ export function IntakeForm() {
         </div>
       )}
 
-      {session?.terminal && <ResultPanel result={session.caseState} />}
-
       {pendingAction && (
         <form onSubmit={handleAnswerSubmit} className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-lg font-semibold text-foreground">{pendingAction.question}</h2>
@@ -261,6 +259,8 @@ export function IntakeForm() {
           </div>
         </form>
       )}
+
+      {session?.terminal && <ResultPanel result={session.caseState} />}
     </div>
   );
 
