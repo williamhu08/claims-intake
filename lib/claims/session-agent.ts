@@ -151,7 +151,7 @@ export async function selectNextCaseSessionAction(
       ? {
           ask_clarifying_question: {
             description:
-              "Ask the one eligible material clarification question about the water source (incident_cause). Always use answerType free_text. Use the exact question: Do you know what the water came from? Use whyItMatters to explain that identifying the source helps determine the appropriate intake path. The claimant may describe any source in their own words; do not force a dropdown or invent a constrained list of categories.",
+              "Ask the one eligible material clarification question about the water source (incident_cause). Always use answerType free_text. Use the exact question: What do you believe caused the water damage? If you are not sure, tell us what you noticed—for example, a burst pipe, appliance leak, drain backup, roof or window leak, condensation, or something else. Use whyItMatters to explain that identifying the likely source helps determine the appropriate intake path and immediate mitigation guidance. The claimant may describe any source in their own words; do not force a dropdown or treat the examples as an exhaustive list.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }
