@@ -192,6 +192,25 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Render exactly one pending clarification question at a time, tied to
      the material fact key(s) returned by the server. Do not generate or
      rephrase questions in the browser.
+   - [ ] Treat the server response as the source of truth for the answer type.
+     The pending action must declare whether the claimant should provide free
+     text, a monetary amount, or a calendar date; the UI must not infer the
+     type from the question wording.
+   - [ ] For monetary answers, render a dedicated input that accepts only a
+     non-negative decimal amount with at most two digits after the decimal
+     point (for example, `2100.35`). Reject a second decimal point, extra
+     fractional digits, signs, letters, whitespace, and malformed insertion
+     patterns such as `.200.35`, `200.35.`, or `20.0.35` before submission.
+   - [ ] For date answers, render a dedicated `YYYY-MM-DD` input. Accept only
+     numeric characters while editing, guide the claimant with the required
+     format, validate that the completed value is a real calendar date, and
+     submit only the canonical format.
+   - [ ] For free-text answers, use a labelled text input or textarea with the
+     server&apos;s length constraints and preserve the optional “I don&apos;t know” path.
+   - [ ] Keep format restrictions usable for keyboard, paste, deletion, and
+     mobile input; do not rely on `input type="number"` for currency and do
+     not rely on browser locale-dependent date controls when the contract
+     requires `YYYY-MM-DD`.
    - [ ] Explain why the answer matters for routing, without implying coverage,
      fault, liability, payment, or a final insurance decision.
    - [ ] Provide an optional “I don&apos;t know” / “I&apos;m not sure” action that
@@ -231,6 +250,11 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      routes covering immediate route, one clarification, “I don&apos;t know”,
      retry after failure, malformed response, human review, reset, and
      duplicate-submit prevention.
+   - [ ] Add answer-type fixtures and tests for free text, valid/invalid
+     monetary input, and valid/invalid `YYYY-MM-DD` input, including paste and
+     malformed-character rejection. Before frontend implementation, align the
+     V2 action schema and route tests with the answer-type field so the dynamic
+     contract is explicit and schema-validated end to end.
 
 5. [ ] **Verify V2 end-to-end and document the seam to V3**
    - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,
