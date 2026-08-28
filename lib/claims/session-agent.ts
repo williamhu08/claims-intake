@@ -111,6 +111,32 @@ export async function refreshCaseStateFromClarification(
   };
 }
 
+/**
+ * The model occasionally returns an `answerType`/`options` pair that don't agree
+ * (for example, `options` attached to a `free_text` answer, or a choice
+ * `answerType` with no `options`). Reconcile the mismatch here so a single
+ * malformed tool call self-heals into a valid, renderable action instead of
+ * throwing a Zod error that aborts the whole request.
+ */
+function normalizeAskClarifyingQuestionInput(input: unknown) {
+  if (!input || typeof input !== "object") return input;
+
+  const candidate = input as { answerType?: unknown; options?: unknown };
+  const answerType = typeof candidate.answerType === "string" ? candidate.answerType : "free_text";
+  const needsOptions = answerType === "single_choice" || answerType === "multi_choice";
+  const hasValidOptions = Array.isArray(candidate.options) && candidate.options.length >= 2;
+
+  if (needsOptions && !hasValidOptions) {
+    return { ...candidate, answerType: "free_text", options: undefined };
+  }
+
+  if (!needsOptions && candidate.options !== undefined) {
+    return { ...candidate, options: undefined };
+  }
+
+  return candidate;
+}
+
 export async function selectNextCaseSessionAction(
   session: CaseSessionState,
   maxClarifications: number,
@@ -162,7 +188,10 @@ export async function selectNextCaseSessionAction(
 
   switch (toolCall.toolName) {
     case "ask_clarifying_question":
-      return { kind: toolCall.toolName, ...askClarifyingQuestionInputSchema.parse(toolCall.input) };
+      return {
+        kind: toolCall.toolName,
+        ...askClarifyingQuestionInputSchema.parse(normalizeAskClarifyingQuestionInput(toolCall.input)),
+      };
     case "propose_route":
       return { kind: toolCall.toolName, ...proposeRouteInputSchema.parse(toolCall.input) };
     case "escalate_to_human":
