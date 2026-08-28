@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTestingMode } from "@/components/app-shell";
 import {
   caseSessionStateSchema,
   type CaseSessionState,
@@ -17,13 +18,13 @@ const MIN_LENGTH = 20;
 const MAX_LENGTH = 4000;
 
 export function IntakeForm() {
+  const testingMode = useTestingMode();
   const [narrative, setNarrative] = useState("");
   const [session, setSession] = useState<CaseSessionState | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [requestState, setRequestState] = useState<"idle" | "submitting" | "active" | "responding" | "terminal" | "error">("idle");
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [testingMode, setTestingMode] = useState(true);
   const requestVersion = useRef(0);
   const abortController = useRef<AbortController | null>(null);
 
@@ -159,11 +160,6 @@ export function IntakeForm() {
             </button>
           ))}
         </div>
-
-        <label className="mt-5 flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm">
-          <input type="checkbox" checked={testingMode} onChange={(event) => setTestingMode(event.target.checked)} disabled={loading || hasActiveSession} className="mt-0.5 size-4 accent-primary" />
-          <span><span className="font-medium text-foreground">Testing mode</span><span className="block text-muted-foreground">Use deterministic mock responses without calling AI Gateway.</span></span>
-        </label>
 
         <div className="mt-5">
           <label htmlFor="narrative" className="block text-sm font-medium text-foreground">
