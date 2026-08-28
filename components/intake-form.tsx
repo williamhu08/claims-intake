@@ -163,7 +163,10 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
               key={example.label}
               type="button"
               onClick={() => applyExample(example.narrative)}
-              className="rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              disabled={testingMode && example.label !== "Unknown water source"}
+              aria-disabled={testingMode && example.label !== "Unknown water source"}
+              title={testingMode && example.label !== "Unknown water source" ? "Only Unknown water source is available in testing mode" : undefined}
+              className="rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-border disabled:hover:text-foreground"
             >
               {example.label}
             </button>
