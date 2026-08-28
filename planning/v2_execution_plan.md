@@ -196,6 +196,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      The pending action must declare whether the claimant should provide free
      text, a monetary amount, or a calendar date; the UI must not infer the
      type from the question wording.
+   <!--- AI-added clarification: Monetary and date answers are a good example of
+   how using AI helped surface additional product details that needed deliberate
+   thought. This step was added to make those dynamic answer formats and their
+   input restrictions explicit. --->
    - [ ] For monetary answers, render a dedicated input that accepts only a
      non-negative decimal amount with at most two digits after the decimal
      point (for example, `2100.35`). Reject a second decimal point, extra
