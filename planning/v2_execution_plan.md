@@ -254,17 +254,25 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [ ] Add claim-type-specific server, component, interaction, and browser coverage before enabling the broader behavior by default.
 
    **4C.** [ ] **Render progress and terminal outcomes**
-   - [ ] Render the refreshed `CaseState` after each accepted response,
-     including updated facts, provenance (`claimant_narrative` versus
-     `claimant_response`), missing facts, and classification confidence.
-   - [ ] Render terminal outcomes distinctly: a non-binding proposed route with
-     rationale, or a human-review escalation with a calm explanation. Both
-     must make clear that the system has not determined coverage or fault.
-   - [ ] Handle server-declared stop reasons in claimant language, including
-     resolved routing, unresolved ambiguity, inability to answer, safety
-     review, and safety-budget exhaustion; do not expose raw error details.
-   - [ ] Preserve the refreshed `sessionToken` returned by
-     `/api/case-session/respond` as an opaque value for the next response.
+   - [ ] Render the refreshed `CaseState` after each accepted response.
+     - [ ] Keep the original narrative and clarification card in document order; place the updated case state below the accepted answer rather than replacing the question panel.
+     - [ ] Show the likely claim category, factual summary, collected facts, and still-needed facts from the server snapshot.
+     - [ ] Display provenance for each fact as claimant narrative or claimant response, using claimant-friendly labels rather than internal enum names.
+     - [ ] Show classification confidence as a readable percentage or qualitative label only when supplied by the server; do not imply certainty about coverage or fault.
+     - [ ] Preserve the latest server snapshot after every successful response, including when another clarification remains pending.
+   - [ ] Render terminal outcomes distinctly: a non-binding proposed route with rationale, or a human-review escalation with a calm explanation. Both must make clear that the system has not determined coverage or fault.
+     - [ ] For a proposed route, show the destination team/path, the routing rationale, and a “preliminary/non-binding” notice.
+     - [ ] For human review, explain that a person needs to review the claim and avoid presenting the escalation as a denial, acceptance, liability finding, or payment decision.
+     - [ ] Hide the answer controls once the session is terminal while retaining the narrative, clarification history, and final case state for review.
+   - [ ] Handle server-declared stop reasons in claimant language, including resolved routing, unresolved ambiguity, inability to answer, safety review, and safety-budget exhaustion; do not expose raw error details.
+     - [ ] Map each stop reason to stable copy in one display helper so server enum changes cannot leak into the UI.
+     - [ ] Include a clear next step where appropriate: proceed to the proposed route, wait for human review, or provide another narrative after reset.
+     - [ ] Treat `no_response` as “The claimant could not provide that detail” rather than as a missing or guessed fact.
+     - [ ] Use `aria-live` for terminal status updates and `role="alert"` only for actionable failures, not ordinary routing results.
+   - [ ] Preserve the refreshed `sessionToken` returned by `/api/case-session/respond` as an opaque value for the next response.
+     - [ ] Replace the previous token only after the response passes schema validation and is accepted by the server.
+     - [ ] Never render, log, decode, or place the token in a URL; keep it in client state for the active session.
+     - [ ] Ensure the next clarification submission uses the newest token, not the token from the initial `/start` response.
 
    **4D.** [ ] **Recover, reset, and verify the claimant flow**
    - [ ] Treat retryable Gateway/network failures as retry-in-place by
