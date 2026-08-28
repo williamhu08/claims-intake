@@ -1,4 +1,4 @@
-ok limport type { ClaimIntakeResult, CaseFactSource } from "@/lib/claims/schema";
+import type { ClaimIntakeResult, CaseFactSource } from "@/lib/claims/schema";
 import type { StopReason } from "@/lib/claims/session-schema";
 
 type ClaimType = ClaimIntakeResult["claimType"];
