@@ -6,7 +6,7 @@ export const TestingModeContext = createContext(false);
 export const useTestingMode = () => useContext(TestingModeContext);
 
 export function AppShell({ isProduction, children }: { isProduction: boolean; children: React.ReactNode }) {
-  const [testingMode, setTestingMode] = useState(!isProduction);
+  const [testingMode, setTestingMode] = useState(false);
 
   return (
     <>
