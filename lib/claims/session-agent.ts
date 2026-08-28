@@ -122,7 +122,7 @@ export async function selectNextCaseSessionAction(
     ...(canAskWaterSource
       ? {
           ask_clarifying_question: {
-            description: "Ask the one eligible material clarification question. Choose free_text for an open response, money for a non-negative decimal amount, or date for a real calendar date in YYYY-MM-DD format.",
+            description: "Ask the one eligible material clarification question: the water source (incident_cause). Choose the answerType that best matches the expected response (free_text for an open description, money for a non-negative decimal amount, date for a real calendar date in YYYY-MM-DD format, yes_no, single_choice, or multi_choice for a bounded set of known water sources); provide options only when answerType is single_choice or multi_choice.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }

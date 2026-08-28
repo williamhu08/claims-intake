@@ -395,4 +395,26 @@ describe("V2 session contract", () => {
       ).terminal?.stopReason,
     ).toBe("unresolved_ambiguity");
   });
+
+  it("rejects a proposed route while active loss or safety status remains unclear, even if the route kind matches", () => {
+    const safetyState = withFact(caseState, "active_loss_or_safety", "unclear");
+    const resolvedCauseSafetyState = withFact(
+      safetyState,
+      "incident_cause",
+      "collected",
+      "A pipe under the kitchen sink burst.",
+    );
+
+    expect(() =>
+      applyCaseSessionAction(
+        createCaseSession(resolvedCauseSafetyState, 1_800),
+        {
+          kind: "propose_route",
+          route: resolvedCauseSafetyState.proposedRoute.kind,
+          rationale: "The first-party source is established.",
+        },
+        2,
+      ),
+    ).toThrow("not supported");
+  });
 });
