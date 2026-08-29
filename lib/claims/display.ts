@@ -35,8 +35,8 @@ export const stopReasonCopy: Record<
   },
   safety_review: {
     heading: "Needs human review",
-    description: "This case may involve an active safety concern, so it needs a person to review it right away.",
-    nextStep: "If you are in immediate danger, contact emergency services now. A member of the claims team will also follow up.",
+    description: "Your answers indicate that the loss may still be active or that a specific area may not be safe. A claims professional should review those details before the case is routed.",
+    nextStep: "Stay clear of any area you believe is unsafe. If there is immediate danger, contact emergency services; otherwise, a member of the claims team will follow up about the affected area and next steps.",
   },
   safety_budget_exhausted: {
     heading: "Needs human review",
