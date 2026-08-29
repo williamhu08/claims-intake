@@ -359,6 +359,15 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     if (!disabled) onChange(nextValue);
   };
 
+  if (answerType === "yes_no") {
+    return (
+      <select {...readOnlySelectProps} aria-label="Your answer" value={value} disabled={disabled} onChange={(event) => handleSelectChange(event.target.value)}>
+        <option value="">Select an answer</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    );
+  }
   if (answerType === "single_choice") {
     return (
       <select {...readOnlySelectProps} value={value} disabled={disabled} onChange={(event) => handleSelectChange(event.target.value)}>
@@ -395,7 +404,7 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     return <PhoneAnswerInput value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
   const inputType = answerType === "email" ? "email" : answerType === "url" ? "url" : answerType === "address" || answerType === "free_text" ? "text" : "text";
-  const inputMode: "numeric" | "text" = ["money", "currency", "integer", "percentage", "postal_code"].includes(answerType) ? "numeric" : "text";
+  const inputMode: "numeric" | "text" = ["money", "integer", "percentage", "postal_code"].includes(answerType) ? "numeric" : "text";
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const next = event.target.value;
     // Filtered at the keystroke level (rather than only flagged invalid
