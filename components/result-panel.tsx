@@ -1,6 +1,7 @@
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";
+import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
 type ResultPanelProps = { session: CaseSessionState };
 
 const missingFactLabels: Record<CaseSessionState["caseState"]["facts"][number]["key"], string> = {
@@ -32,26 +33,18 @@ function reviewReason(stopReason: keyof typeof stopReasonCopy) {
 }
 
 export function ResultPanel({ session }: ResultPanelProps) {
-  const { terminal, caseState, clarificationHistory } = session;
+  const { terminal, caseState } = session;
   if (!terminal) return null;
 
   // Poison pill: a terminal case must never carry an unresolved fact that was
-  // never actually put to the claimant. Fail loudly instead of silently
-  // rendering an incomplete "final" result — the CaseSessionErrorBoundary that
-  // wraps this component catches this and offers a safe recovery path.
-  //
-  // The two terminal kinds have different tolerances:
-  // - propose_route ("this case is fully assessed and ready to route") must have
-  //   ZERO unresolved facts, asked or not — a route proposal is a claim that
-  //   every fact is confirmed.
-  // - escalate_to_human may have unresolved facts (that's the expected,
-  //   documented reason a case escalates — "Details still to confirm" is exactly
-  //   what the human reviewer needs to see), but ONLY facts that were actually
-  //   asked. An unasked fact riding along on an escalation is the same bug class
-  //   as the API route shortcut fixed previously: a claimant declining one fact
-  //   must never excuse skipping a different, never-asked fact.
-  const askedFactKeys = new Set(clarificationHistory.flatMap((entry) => entry.factKeys));
-  const unaskedMissingFacts = caseState.missingFactKeys.filter((key) => !askedFactKeys.has(key));
+  // never actually put to the claimant. This is a defense-in-depth backstop —
+  // IntakeForm already checks getUnaskedMissingFacts BEFORE ever rendering this
+  // component, so this should be unreachable in practice. It exists in case a
+  // future caller renders ResultPanel without that proactive guard: fail loudly
+  // instead of silently rendering an incomplete "final" result. The
+  // CaseSessionErrorBoundary that wraps this component catches this and shows
+  // the same safe fallback IntakeForm's proactive guard would have shown.
+  const unaskedMissingFacts = getUnaskedMissingFacts(session);
   // Read the raw kind as a string before any narrowing checks below, so the
   // exhaustiveness guard can still report an unexpected value at runtime even
   // though the static type only ever admits the two known literals.

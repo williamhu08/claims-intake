@@ -9,6 +9,8 @@ import {
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
+import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";
+import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
 import {
   ClarificationInput,
   isClarificationAnswerValid,
@@ -333,9 +335,19 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       )}
 
       {session?.terminal && (
-        <CaseSessionErrorBoundary key={sessionToken ?? "no-session"} onReset={resetSession}>
-          <ResultPanel session={session} />
-        </CaseSessionErrorBoundary>
+        getUnaskedMissingFacts(session).length === 0 ? (
+          // Proactive guard: only reaches ResultPanel once every missing fact has
+          // actually been put to the claimant. The CaseSessionErrorBoundary below
+          // remains as a defense-in-depth backstop for any other render failure.
+          <CaseSessionErrorBoundary key={sessionToken ?? "no-session"} onReset={resetSession}>
+            <ResultPanel session={session} />
+          </CaseSessionErrorBoundary>
+        ) : (
+          // The terminal case still has a fact that was never asked — never render
+          // an incomplete "final" result. Show the same safe fallback instead of
+          // attempting ResultPanel at all.
+          <CaseSessionInvariantFallback onReset={resetSession} />
+        )
       )}
 
       {session?.terminal && (
