@@ -361,6 +361,32 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     if (!disabled) onChange(nextValue);
   };
 
+  if (answerType === "single_choice") {
+    return (
+      <select {...readOnlySelectProps} value={value} disabled={disabled} onChange={(event) => handleSelectChange(event.target.value)}>
+        <option value="">Choose one</option>
+        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
+    );
+  }
+  if (answerType === "multi_choice") {
+    const selectedValues = new Set(value.split(",").filter(Boolean));
+    return (
+      <fieldset className="mt-2 space-y-2" aria-describedby={describedBy}>
+        <legend className="sr-only">Select all that apply</legend>
+        {options.map((option) => (
+          <label key={option.value} className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-3 text-sm text-foreground">
+            <input type="checkbox" checked={selectedValues.has(option.value)} disabled={disabled} onChange={(event) => {
+              const next = new Set(selectedValues);
+              if (event.target.checked) next.add(option.value); else next.delete(option.value);
+              onChange([...next].join(","));
+            }} />
+            <span>{option.label}</span>
+          </label>
+        ))}
+      </fieldset>
+    );
+  }
   if (answerType === "date") {
     return <DateAnswerSelect value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
@@ -377,7 +403,7 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     // Filtered at the keystroke level (rather than only flagged invalid
     // afterward) so a non-numeric character, or a 6th postal-code digit,
     // never lands in the field in the first place.
-    if (answerType === "money" || answerType === "currency") { if (!isMoneyCandidate(next)) return; }
+    if (answerType === "money" || answerType === "currency" || answerType === "percentage") { if (!isMoneyCandidate(next)) return; }
     if (answerType === "integer") { if (!isIntegerCandidate(next)) return; }
     if (answerType === "postal_code") { if (!isPostalCodeCandidate(next)) return; }
     onChange(next);
