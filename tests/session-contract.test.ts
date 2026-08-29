@@ -223,9 +223,9 @@ describe("V2 session contract", () => {
   it("uses named safe defaults and rejects missing secret or invalid budget", () => {
     expect(getCaseSessionConfig({ CASE_SESSION_SIGNING_SECRET: "test-secret" })).toMatchObject({
       ttlSeconds: 1800,
+      maxClarifications: 6,
       maxInputTokens: 12000,
       maxWallClockMs: 10000,
-      maxClarifications: 2,
     });
     expect(() => getCaseSessionConfig({})).toThrow("CASE_SESSION_SIGNING_SECRET");
     expect(() =>
@@ -435,9 +435,41 @@ describe("V2 session contract", () => {
 
     expect(noResponseTerminal.terminal?.stopReason).toBe("claimant_cannot_answer");
     expect(isWaterSourceClarificationEligible(createCaseSession(safetyState, 1_800), 2)).toBe(true);
-    expect(
+
+    // A safety escalation may not short-circuit the session while a safety concern
+    // (or any other fact) has never actually been put to the claimant.
+    expect(() =>
       applyCaseSessionAction(
         createCaseSession(safetyState, 1_800),
+        {
+          kind: "escalate_to_human",
+          stopReason: "safety_review",
+          rationale: "The active loss or safety status needs human review.",
+        },
+        2,
+      ),
+    ).toThrow("remain unresolved");
+
+    // Once the safety concern is the only unresolved fact and it has been asked,
+    // a human safety review is the correct terminal action.
+    const othersCollectedSafetyUnclear = withFact(withAllFactsCollected(caseState), "active_loss_or_safety", "unclear");
+    const safetyAsked = recordClaimantAnswer(
+      applyCaseSessionAction(
+        createCaseSession(othersCollectedSafetyUnclear, 1_800),
+        {
+          kind: "ask_clarifying_question",
+          answerType: "free_text",
+          question: "Is the area currently safe, or is the loss still active?",
+          factKeys: ["active_loss_or_safety"],
+          whyItMatters: "An active loss or unsafe area should be reviewed by a person.",
+        },
+        2,
+      ),
+      "I am not sure",
+    );
+    expect(
+      applyCaseSessionAction(
+        safetyAsked,
         {
           kind: "escalate_to_human",
           stopReason: "safety_review",

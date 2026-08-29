@@ -31,8 +31,11 @@ export function isClarificationEligible(
     return false;
   }
 
+  const alreadyAsked = new Set(session.clarificationHistory.flatMap((entry) => entry.factKeys));
+
   return session.caseState.facts.some(
-    (fact) => fact.status === "missing" || fact.status === "unclear",
+    (fact) =>
+      (fact.status === "missing" || fact.status === "unclear") && !alreadyAsked.has(fact.key),
   );
 }
 
@@ -93,19 +96,16 @@ export function applyCaseSessionAction(
   }
 
   if (parsedAction.kind === "escalate_to_human") {
-    const safetyFact = factFor(session.caseState, "active_loss_or_safety");
-    const isActualSafetyStop =
-      parsedAction.stopReason === "safety_review" &&
-      (safetyFact.status === "unclear" || /^active:/i.test(safetyFact.value ?? ""));
-    const isBudgetStop = parsedAction.stopReason === "safety_budget_exhausted";
-    const isClaimantUnableToAnswer = parsedAction.stopReason === "claimant_cannot_answer";
+    // A human escalation may only terminate the session once every unresolved fact
+    // has actually been put to the claimant. The one exception is a claimant who
+    // explicitly declined to answer — that fact genuinely cannot be resolved by
+    // asking again, so a human follow-up is the correct next step.
+    const alreadyAsked = new Set(session.clarificationHistory.flatMap((entry) => entry.factKeys));
+    const hasUnaskedUnresolvedFact = unresolvedFacts.some((fact) => !alreadyAsked.has(fact.key));
+    const budgetRemains = session.clarificationHistory.length < maxClarifications;
+    const claimantDeclined = parsedAction.stopReason === "claimant_cannot_answer";
 
-    if (
-      unresolvedFacts.length > 0 &&
-      !isActualSafetyStop &&
-      !isBudgetStop &&
-      !isClaimantUnableToAnswer
-    ) {
+    if (hasUnaskedUnresolvedFact && budgetRemains && !claimantDeclined) {
       throw new Error("This escalation is premature while relevant case details remain unresolved.");
     }
   }
