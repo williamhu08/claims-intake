@@ -414,7 +414,12 @@ describe("V2 session contract", () => {
   });
 
   it("escalates no-response, safety uncertainty, unresolved ambiguity, and gibberish safely", () => {
-    const noResponsePending = applyCaseSessionAction(createCaseSession(caseState, 1_800), question, 2);
+    // incident_cause must be the ONLY unresolved fact here: escalating with
+    // claimant_cannot_answer is only valid once every unresolved fact has been
+    // asked, and this stopReason must never excuse skipping unasked facts that
+    // are unrelated to the one the claimant actually declined to answer.
+    const onlyIncidentCauseUnresolved = withFact(withAllFactsCollected(caseState), "incident_cause", "unclear");
+    const noResponsePending = applyCaseSessionAction(createCaseSession(onlyIncidentCauseUnresolved, 1_800), question, 2);
     const noResponse = recordClaimantAnswer(noResponsePending, "no_response");
     const noResponseTerminal = applyCaseSessionAction(
       noResponse,
@@ -486,6 +491,26 @@ describe("V2 session contract", () => {
           kind: "escalate_to_human",
           stopReason: "unresolved_ambiguity",
           rationale: "A person should review the unsupported account.",
+        },
+        2,
+      ),
+    ).toThrow("remain unresolved");
+  });
+
+  it("does not let claimant_cannot_answer excuse escalating past a different, never-asked fact", () => {
+    // Regression test: declining one fact (incident_cause) must not let the model
+    // pick stopReason "claimant_cannot_answer" to escalate while an unrelated,
+    // never-asked fact (active_loss_or_safety) remains unresolved.
+    const noResponsePending = applyCaseSessionAction(createCaseSession(caseState, 1_800), question, 2);
+    const noResponse = recordClaimantAnswer(noResponsePending, "no_response");
+
+    expect(() =>
+      applyCaseSessionAction(
+        noResponse,
+        {
+          kind: "escalate_to_human",
+          stopReason: "claimant_cannot_answer",
+          rationale: "The claimant could not identify the source.",
         },
         2,
       ),

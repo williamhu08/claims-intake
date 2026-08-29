@@ -97,15 +97,17 @@ export function applyCaseSessionAction(
 
   if (parsedAction.kind === "escalate_to_human") {
     // A human escalation may only terminate the session once every unresolved fact
-    // has actually been put to the claimant. The one exception is a claimant who
-    // explicitly declined to answer — that fact genuinely cannot be resolved by
-    // asking again, so a human follow-up is the correct next step.
+    // has actually been put to the claimant, regardless of the chosen stopReason.
+    // A claimant who explicitly declined to answer a fact that WAS asked is already
+    // covered here — that fact is in `alreadyAsked`, so it is not "unasked". The
+    // stopReason must never bypass this check for facts that were never asked: doing
+    // so previously let an unrelated declined fact (e.g. loss_timing) excuse escalating
+    // past a completely different, never-asked fact (e.g. active_loss_or_safety).
     const alreadyAsked = new Set(session.clarificationHistory.flatMap((entry) => entry.factKeys));
     const hasUnaskedUnresolvedFact = unresolvedFacts.some((fact) => !alreadyAsked.has(fact.key));
     const budgetRemains = session.clarificationHistory.length < maxClarifications;
-    const claimantDeclined = parsedAction.stopReason === "claimant_cannot_answer";
 
-    if (hasUnaskedUnresolvedFact && budgetRemains && !claimantDeclined) {
+    if (hasUnaskedUnresolvedFact && budgetRemains) {
       throw new Error("This escalation is premature while relevant case details remain unresolved.");
     }
   }
