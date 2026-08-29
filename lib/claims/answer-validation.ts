@@ -50,7 +50,7 @@ export function isPostalCodeCandidate(value: string): boolean {
  * place (rather than being typed and then flagged invalid).
  */
 export function isIntegerCandidate(value: string): boolean {
-  return /^\d*$/.test(value);
+  return /^(?:|0|[1-9]\d*)$/.test(value);
 }
 
 /**
@@ -114,7 +114,7 @@ export function isValidClarificationAnswer(type: string, value: string, options?
     return values.length > 0 && new Set(values).size === values.length && values.every((value) => options?.some((option) => option.value === value));
   }
   if (type === "date_time") return isValidDateTime(trimmed);
-  if (type === "integer") return /^\d+$/.test(trimmed);
+  if (type === "integer") return /^(?:0|[1-9]\d*)$/.test(trimmed);
   if (type === "percentage") return isValidPercentage(trimmed);
   if (type === "phone") return /^[+\d][\d ()-]{6,24}$/.test(trimmed);
   if (type === "email") return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
