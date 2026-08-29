@@ -1,11 +1,14 @@
 import { AppShell } from "@/components/app-shell";
 import { ClaimCategories } from "@/components/claim-categories";
 import { ClaimIntakeSection } from "@/components/claim-intake-section";
+import { SandboxSection } from "@/components/sandbox-section";
 
 export default function Home() {
+  const isProduction = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+
   return (
     <div className="min-h-dvh">
-      <AppShell isProduction={process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production"}>
+      <AppShell isProduction={isProduction}>
         <main className="mx-auto max-w-7xl px-6 py-10 sm:py-14">
           <div className="max-w-2xl">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Claim triage</p>
@@ -15,6 +18,7 @@ export default function Home() {
           </div>
           <div role="note" className="mt-6 rounded-lg border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground text-pretty">This is an early triage assessment only. It does not determine coverage, liability, fault, or payment, and it is not a decision on your claim.</div>
           <div className="mt-8"><ClaimCategories /><div className="mt-10"><ClaimIntakeSection /></div></div>
+          <SandboxSection isProduction={isProduction} />
         </main>
       </AppShell>
 
