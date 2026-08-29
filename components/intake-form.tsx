@@ -385,7 +385,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
 function clarificationHint(answerType: ClarificationAnswerType) {
   switch (answerType) {
     case "date":
-      return "Enter a real calendar date as YYYY-MM-DD.";
+      return "Select the year, then the month, then the day.";
     case "date_time":
       return "Enter a date and time.";
     case "money":

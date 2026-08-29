@@ -63,8 +63,15 @@ export const claimTypeDescriptions: Record<ClaimType, string> = {
   other_or_unclear: "The account does not map cleanly to one category.",
 };
 
+// This list only surfaces the categories a claimant's account can actually be
+// classified into. "other_or_unclear" is deliberately excluded here — it is an
+// internal fallback the model selects when a narrative doesn't map cleanly to
+// a real category, not something to advertise as a "supported" category a
+// claimant could knowingly submit under. It remains a valid ClaimType for that
+// internal classification/routing use (see claimTypeLabels/claimTypeDescriptions
+// above, and app/api/intake/route.ts).
 export const claimTypeOptions: Array<{
-  value: ClaimType;
+  value: Exclude<ClaimType, "other_or_unclear">;
   label: string;
   description: string;
 }> = [
@@ -92,11 +99,6 @@ export const claimTypeOptions: Array<{
     value: "liability",
     label: claimTypeLabels.liability,
     description: claimTypeDescriptions.liability,
-  },
-  {
-    value: "other_or_unclear",
-    label: claimTypeLabels.other_or_unclear,
-    description: claimTypeDescriptions.other_or_unclear,
   },
 ];
 

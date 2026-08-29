@@ -1,6 +1,15 @@
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MONEY_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;
 
+/**
+ * Number of days in a given month (1-12) of a given calendar year, leap-year
+ * aware for February. Shared by the date-of-loss dropdowns (to build the "day"
+ * option list) and isValidCalendarDate (to validate a full YYYY-MM-DD string).
+ */
+export function getDaysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
 export function isValidCalendarDate(value: string): boolean {
   const match = DATE_PATTERN.exec(value);
   if (!match) return false;
@@ -10,8 +19,7 @@ export function isValidCalendarDate(value: string): boolean {
   const day = Number(match[3]);
   if (month < 1 || month > 12 || day < 1) return false;
 
-  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  return day <= daysInMonth;
+  return day <= getDaysInMonth(year, month);
 }
 
 export function isValidMoney(value: string): boolean {
