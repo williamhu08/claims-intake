@@ -32,21 +32,36 @@ function reviewReason(stopReason: keyof typeof stopReasonCopy) {
 }
 
 export function ResultPanel({ session }: ResultPanelProps) {
-  const { terminal, caseState } = session;
+  const { terminal, caseState, clarificationHistory } = session;
   if (!terminal) return null;
 
-  // Poison pill: a route proposal ("this case is fully assessed and ready to
-  // route") must never carry unresolved facts — that combination means the
-  // session engine's contract was violated upstream. Fail loudly instead of
-  // silently rendering an incomplete "final" result. The CaseSessionErrorBoundary
-  // that wraps this component catches this and offers a safe recovery path.
+  // Poison pill: a terminal case must never carry an unresolved fact that was
+  // never actually put to the claimant. Fail loudly instead of silently
+  // rendering an incomplete "final" result — the CaseSessionErrorBoundary that
+  // wraps this component catches this and offers a safe recovery path.
   //
-  // escalate_to_human is exempt: unresolved facts are the expected, documented
-  // reason a case escalates, and "Details still to confirm" is exactly what the
-  // human reviewer needs to see in that case.
+  // The two terminal kinds have different tolerances:
+  // - propose_route ("this case is fully assessed and ready to route") must have
+  //   ZERO unresolved facts, asked or not — a route proposal is a claim that
+  //   every fact is confirmed.
+  // - escalate_to_human may have unresolved facts (that's the expected,
+  //   documented reason a case escalates — "Details still to confirm" is exactly
+  //   what the human reviewer needs to see), but ONLY facts that were actually
+  //   asked. An unasked fact riding along on an escalation is the same bug class
+  //   as the API route shortcut fixed previously: a claimant declining one fact
+  //   must never excuse skipping a different, never-asked fact.
+  const askedFactKeys = new Set(clarificationHistory.flatMap((entry) => entry.factKeys));
+  const unaskedMissingFacts = caseState.missingFactKeys.filter((key) => !askedFactKeys.has(key));
+
   if (terminal.kind === "propose_route" && caseState.missingFactKeys.length > 0) {
     throw new Error(
       `ResultPanel invariant violated: a route proposal was terminal while facts remained unresolved (${caseState.missingFactKeys.join(", ")}).`,
+    );
+  }
+
+  if (terminal.kind === "escalate_to_human" && unaskedMissingFacts.length > 0) {
+    throw new Error(
+      `ResultPanel invariant violated: escalation was terminal while facts were never asked (${unaskedMissingFacts.join(", ")}).`,
     );
   }
 
