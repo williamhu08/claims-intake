@@ -11,6 +11,7 @@ import {
   isValidDateTime,
   isValidMoney,
   isValidPercentage,
+  isValidPhone,
   isValidPostalCode,
 } from "@/lib/claims/answer-validation";
 
@@ -36,7 +37,6 @@ interface Props {
 
 const patterns: Partial<Record<ClarificationAnswerType, RegExp>> = {
   integer: /^\d+$/,
-  phone: /^[+\d][\d ()-]{6,24}$/,
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   url: /^https?:\/\/[^\s]+$/i,
 };
@@ -52,6 +52,7 @@ export function isClarificationAnswerValid(type: ClarificationAnswerType, value:
   if (type === "multi_choice") return trimmed.split(",").filter(Boolean).length > 0;
   if (type === "date_time") return isValidDateTime(trimmed);
   if (type === "percentage") return isValidPercentage(trimmed);
+  if (type === "phone") return isValidPhone(trimmed);
   if (type === "postal_code") return isValidPostalCode(trimmed);
   return patterns[type]?.test(trimmed) ?? false;
 }
@@ -301,6 +302,55 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
   );
 }
 
+function PhoneAnswerInput({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
+  const phoneParts = value.match(/^\(?([0-9]{0,3})\)?-?([0-9]{0,3})-?([0-9]{0,4})$/);
+  const areaCode = phoneParts?.[1] ?? "";
+  const prefix = phoneParts?.[2] ?? "";
+  const lineNumber = phoneParts?.[3] ?? "";
+  const formattedAreaCode = value.startsWith("(") ? areaCode : areaCode;
+  const isInvalid = value.length > 0 && !isValidPhone(value);
+  const refs: Array<HTMLInputElement | null> = [];
+
+  function updatePart(part: "area" | "prefix" | "line", next: string, input: HTMLInputElement) {
+    if (disabled || !/^\d{0,4}$/.test(next)) return;
+    const nextArea = part === "area" ? next : areaCode;
+    const nextPrefix = part === "prefix" ? next : prefix;
+    const nextLine = part === "line" ? next : lineNumber;
+    const nextValue = value.startsWith("(") ? `(${nextArea})-${nextPrefix}-${nextLine}` : `${nextArea}-${nextPrefix}-${nextLine}`;
+    onChange(nextValue);
+    if (next.length === (part === "line" ? 4 : 3)) {
+      refs[{ area: 0, prefix: 1, line: 2 }[part] + 1]?.focus();
+    }
+  }
+
+  const inputClass = (part: "area" | "prefix" | "line") => `w-${part === "line" ? "16" : "12"} rounded-lg border bg-background px-2 py-3 text-center text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring ${isInvalid ? "border-destructive text-destructive" : "border-input"}`;
+  const inputProps = (part: "area" | "prefix" | "line", current: string, maxLength: number, index: number) => ({
+    ref: (element: HTMLInputElement | null) => { refs[index] = element; },
+    value: current,
+    maxLength,
+    inputMode: "numeric" as const,
+    placeholder: "_".repeat(maxLength),
+    disabled,
+    "aria-invalid": isInvalid,
+    "aria-describedby": describedBy,
+    "aria-label": part === "area" ? "Area code" : part === "prefix" ? "Phone prefix" : "Line number",
+    className: inputClass(part),
+    onChange: (event: ChangeEvent<HTMLInputElement>) => updatePart(part, event.target.value, event.currentTarget),
+  });
+
+  return (
+    <div aria-label="Phone number" className="mt-2 flex items-center gap-1">
+      <span aria-hidden="true" className="text-lg text-muted-foreground">(</span>
+      <input {...inputProps("area", formattedAreaCode, 3, 0)} />
+      <span aria-hidden="true" className="text-lg text-muted-foreground">)</span>
+      <span aria-hidden="true" className="text-lg text-muted-foreground">-</span>
+      <input {...inputProps("prefix", prefix, 3, 1)} />
+      <span aria-hidden="true" className="text-lg text-muted-foreground">-</span>
+      <input {...inputProps("line", lineNumber, 4, 2)} />
+    </div>
+  );
+}
+
 export function ClarificationInput({ answerType, value, onChange, options = [], disabled, describedBy }: Props) {
   const readOnlySelectProps = {
     "aria-disabled": disabled,
@@ -317,40 +367,8 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
   if (answerType === "date_time") {
     return <DateTimeAnswerSelect value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
-  if (answerType === "yes_no") {
-    return (
-      <select
-        aria-label="Your answer"
-        value={value}
-        onChange={(event) => handleSelectChange(event.target.value)}
-        {...readOnlySelectProps}
-      >
-        <option value="" disabled={disabled && value !== ""}>Select an answer</option>
-        <option value="yes" disabled={disabled && value !== "yes"}>Yes</option>
-        <option value="no" disabled={disabled && value !== "no"}>No</option>
-      </select>
-    );
-  }
-  if (answerType === "single_choice") {
-    return (
-      <select
-        aria-label="Your answer"
-        value={value}
-        onChange={(event) => handleSelectChange(event.target.value)}
-        {...readOnlySelectProps}
-      >
-        <option value="" disabled={disabled && value !== ""}>Select an option</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value} disabled={disabled && value !== option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  }
-  if (answerType === "multi_choice") {
-    const selected = new Set(value ? value.split(",") : []);
-    return <fieldset className="mt-2 flex flex-col gap-3" aria-describedby={describedBy}><legend className="sr-only">Select one or more options</legend>{options.map((option) => <label key={option.value} className="flex items-center gap-2 text-foreground"><input type="checkbox" checked={selected.has(option.value)} disabled={disabled} onChange={(e) => { const next = new Set(selected); if (e.target.checked) { next.add(option.value); } else { next.delete(option.value); } onChange([...next].join(",")); }} />{option.label}</label>)}</fieldset>;
+  if (answerType === "phone") {
+    return <PhoneAnswerInput value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
   const inputType = answerType === "email" ? "email" : answerType === "url" ? "url" : answerType === "address" || answerType === "free_text" ? "text" : "text";
   const inputMode: "numeric" | "text" = ["money", "currency", "integer", "percentage", "postal_code"].includes(answerType) ? "numeric" : "text";

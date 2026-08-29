@@ -103,6 +103,12 @@ export function isValidCurrency(value: string): boolean {
   return CURRENCY_PATTERN.test(value) && Number.isFinite(Number(value));
 }
 
+const PHONE_PATTERN = /^(?:\d{3}-\d{3}-\d{4}|\(\d{3}\)-\d{3}-\d{4})$/;
+
+export function isValidPhone(value: string): boolean {
+  return PHONE_PATTERN.test(value);
+}
+
 export function isMoneyCandidate(value: string): boolean {
   return value === "" || MONEY_PATTERN.test(value);
 }
@@ -122,7 +128,7 @@ export function isValidClarificationAnswer(type: string, value: string, options?
   if (type === "date_time") return isValidDateTime(trimmed);
   if (type === "integer") return /^(?:0|[1-9]\d*)$/.test(trimmed);
   if (type === "percentage") return isValidPercentage(trimmed);
-  if (type === "phone") return /^[+\d][\d ()-]{6,24}$/.test(trimmed);
+  if (type === "phone") return isValidPhone(trimmed);
   if (type === "email") return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   if (type === "postal_code") return isValidPostalCode(trimmed);
   if (type === "url") return /^https?:\/\/[^\s]+$/i.test(trimmed);
