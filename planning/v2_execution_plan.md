@@ -288,15 +288,15 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      and wide viewports.
    - [x] Use semantic headings, labelled controls, `aria-live` for status
      updates, and `role="alert"` for actionable errors.
-   - [ ] Add focused claimant-flow component/interaction tests with mocked V2
-     routes covering immediate route, one clarification, “I don&apos;t know”,
-     retry after failure, malformed response, human review, reset, and
-     duplicate-submit prevention.
    - [x] Add answer-type fixtures and tests for free text, valid/invalid
      monetary input, and valid/invalid `YYYY-MM-DD` input, including paste and
      malformed-character rejection. Before frontend implementation, align the
      V2 action schema and route tests with the answer-type field so the dynamic
      contract is explicit and schema-validated end to end.
+   - [x] Add focused claimant-flow component/interaction tests with mocked V2
+     routes covering immediate route, one clarification, “I don&apos;t know”,
+     retry after failure, malformed response, human review, reset, and
+     duplicate-submit prevention.
 
 5. [ ] **Verify V2 end-to-end and document the seam to V3**
    - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,

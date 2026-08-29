@@ -241,6 +241,43 @@ describe("IntakeForm", () => {
     expect(screen.getByText("Property adjuster review")).toBeInTheDocument();
   });
 
+  it("prevents duplicate initial submissions while the request is pending", async () => {
+    let resolveRequest: (value: unknown) => void;
+    const pendingResponse = new Promise((resolve) => { resolveRequest = resolve; });
+    const fetchMock = vi.fn().mockReturnValue(pendingResponse);
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<IntakeForm />);
+    await user.type(screen.getByRole("textbox", { name: "Describe what happened" }), validNarrative);
+    const button = screen.getByRole("button", { name: "Get initial assessment" });
+    await user.click(button);
+    await user.click(button);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    resolveRequest!({ ok: true, json: async () => toSessionResponse({ claimType: "water_damage", summary: "Mocked water assessment.", confidence: 0.9 }) });
+  });
+
+  it("offers retry after a transient failure and preserves the narrative", async () => {
+    const fetchMock = vi.fn()
+      .mockRejectedValueOnce(new Error("Network error"))
+      .mockResolvedValueOnce({ ok: true, json: async () => toSessionResponse({ claimType: "water_damage", summary: "Recovered assessment.", confidence: 0.9 }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<IntakeForm />);
+    await submitNarrative();
+    expect(await screen.findByRole("button", { name: "Try again" })).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByRole("heading", { name: "Water damage" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("offers a safe reset after a malformed session", async () => {
+    mockJsonResponse({ malformed: true });
+    render(<IntakeForm />);
+    await submitNarrative();
+    expect(await screen.findByRole("button", { name: "Start over" })).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Start over" }));
+    expect(screen.getByRole("textbox", { name: "Describe what happened" })).toHaveValue("");
+  });
+
   it("keeps the case-state update accessible and responsive", async () => {
     mockJsonResponse(incompleteCaseState);
 
