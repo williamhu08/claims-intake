@@ -218,9 +218,13 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
     onChange(encodeDateTimeParts(nextParts));
   }
 
-  function handleTimePartChange(part: "hour" | "minute" | "second", nextRaw: string) {
+  function handleTimePartChange(part: "hour" | "minute" | "second", nextRaw: string, input: HTMLInputElement) {
     if (disabled || !/^\d{0,2}$/.test(nextRaw)) return;
     onChange(encodeDateTimeParts({ year, month, day, hour, minute, second, [part]: nextRaw }));
+    if (nextRaw.length === 2) {
+      const nextInput = input.parentElement?.querySelectorAll<HTMLInputElement>("input")[(["hour", "minute", "second"].indexOf(part) + 1)];
+      nextInput?.focus();
+    }
   }
 
   function dateSelectProps(part: "year" | "month" | "day", currentValue: string, prerequisiteMet: boolean) {
@@ -234,21 +238,26 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
     };
   }
 
-  function timeInputProps(part: "hour" | "minute" | "second", currentValue: string) {
+  function timeInputProps(part: "hour" | "minute" | "second", currentValue: string, index: number) {
     const hasValue = currentValue.length > 0;
     const numericValue = Number(currentValue);
     const isInvalid = hasValue && (currentValue.length !== 2 || (part === "hour" ? numericValue > 23 : numericValue > 59));
     return {
       "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}`,
       value: currentValue,
-      onChange: (event: ChangeEvent<HTMLInputElement>) => handleTimePartChange(part, event.target.value),
+      onChange: (event: ChangeEvent<HTMLInputElement>) => handleTimePartChange(part, event.target.value, event.currentTarget),
+      onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Backspace" && currentValue === "") {
+          event.currentTarget.parentElement?.querySelectorAll<HTMLInputElement>("input")[index - 1]?.focus();
+        }
+      },
       disabled,
       inputMode: "numeric" as const,
       maxLength: 2,
       "aria-invalid": isInvalid,
       "aria-describedby": describedBy,
-      className: `${selectClassName} ${isInvalid ? "border-destructive text-destructive focus:border-destructive" : ""}`,
-      placeholder: "00",
+      className: `w-12 rounded-lg border border-input bg-background px-2 py-3 text-center text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${isInvalid ? "border-destructive text-destructive focus:border-destructive" : ""}`,
+      placeholder: "__",
     };
   }
 
@@ -280,19 +289,13 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
           ))}
         </select>
       </div>
-      <div className="grid grid-cols-3 gap-3">
-        <label className="space-y-1 text-sm text-muted-foreground">
-          <span>Hour</span>
-          <input {...timeInputProps("hour", hour)} />
-        </label>
-        <label className="space-y-1 text-sm text-muted-foreground">
-          <span>Minute</span>
-          <input {...timeInputProps("minute", minute)} />
-        </label>
-        <label className="space-y-1 text-sm text-muted-foreground">
-          <span>Second</span>
-          <input {...timeInputProps("second", second)} />
-        </label>
+      <div aria-label="Time" className="flex items-center gap-2">
+        <span className="sr-only">Time in hours, minutes, and seconds</span>
+        <input {...timeInputProps("hour", hour, 0)} />
+        <span aria-hidden="true" className="text-lg text-muted-foreground">:</span>
+        <input {...timeInputProps("minute", minute, 1)} />
+        <span aria-hidden="true" className="text-lg text-muted-foreground">:</span>
+        <input {...timeInputProps("second", second, 2)} />
       </div>
     </div>
   );
