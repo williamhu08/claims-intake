@@ -52,8 +52,8 @@ export function isClarificationAnswerValid(type: ClarificationAnswerType, value:
 
 const MIN_LOSS_DATE_YEAR = 2000;
 const MONTH_LABELS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
 /**
