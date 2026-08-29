@@ -96,7 +96,7 @@ export function applyCaseSessionAction(
     const safetyFact = factFor(session.caseState, "active_loss_or_safety");
     const isActualSafetyStop =
       parsedAction.stopReason === "safety_review" &&
-      (safetyFact.status === "unclear" || /active|unsafe|danger|hazard/i.test(safetyFact.value ?? ""));
+      (safetyFact.status === "unclear" || /^active:/i.test(safetyFact.value ?? ""));
     const isBudgetStop = parsedAction.stopReason === "safety_budget_exhausted";
     const isClaimantUnableToAnswer = parsedAction.stopReason === "claimant_cannot_answer";
 

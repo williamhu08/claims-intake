@@ -20,7 +20,13 @@ const caseAnalysisInstructions = `You perform first-touch triage for ambiguous p
 
 Extract a concise, neutral case state from claimant-provided information. Use only facts explicitly stated by the claimant. Do not invent facts, policy details, fault, coverage, payment eligibility, or a settlement recommendation.
 
-For each fact you include, mark it collected only when claimant-provided information explicitly supports a short value. Mark it missing when it is not stated, unclear when it is raised but unresolved, and not_applicable only when it is clearly irrelevant. Omit facts you cannot assess; the application will represent them as missing.
+For each fact you include, mark it collected only when claimant-provided information explicitly supports a short value. Mark it missing when it is not stated, unclear when the claimant's own statement is ambiguous, contradictory, or does not actually answer the question, and not_applicable only when it is clearly irrelevant. Omit facts you cannot assess; the application will represent them as missing.
+
+IMPORTANT for active_loss_or_safety: "unclear" describes the claimant's statement, never the real-world situation. If the claimant gives a clear answer that the loss IS still active, or that the area IS unsafe, that is a definitive, collected fact — mark it collected. Do not mark this fact unclear just because the underlying situation is ongoing, unresolved, or dangerous. Only mark it unclear when the claimant's answer itself fails to say whether the loss is active or the area is safe.
+
+When active_loss_or_safety is collected, the value MUST start with the literal prefix "Active:" or "Resolved:" (case-sensitive, followed by a space) so the application can reliably tell the two apart without re-reading the prose:
+- Use "Active:" when the claimant's answer confirms the loss is still happening, water/damage is ongoing, or any part of the area is unsafe. Example: "Active: Water is still leaking and there is an immediate safety concern in the kitchen."
+- Use "Resolved:" when the claimant's answer confirms the loss has stopped and there is no safety concern. Example: "Resolved: The leak has stopped and the area is safe."
 
 Propose a non-binding intake route. Choose liability_review only when the claimant states an injury or third-party involvement. Use human_triage_review when the account is materially ambiguous or does not support reliable routing.`;
 
