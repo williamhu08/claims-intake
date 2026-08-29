@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTestingMode } from "@/components/app-shell";
 
 /**
- * Collapsible "Sandbox" panel of developer-only links, rendered at the bottom
+ * Collapsible "Sandbox" panel of developer-only links, rendered at the top
  * of the claim intake page. Only visible while Testing mode is on (and never
  * in production) — it links out to pages like the answer-type showcase that
  * are not part of the real claim flow.
@@ -15,9 +15,9 @@ export function SandboxSection({ isProduction }: { isProduction: boolean }) {
   if (isProduction || !testingMode) return null;
 
   return (
-    <details className="group mt-10 rounded-lg border border-border bg-muted/40 open:bg-muted/60">
+    <details className="group mb-10 rounded-lg border border-border bg-muted/40 open:bg-muted/60">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-foreground select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
-        <span>Sandbox</span>
+        <span>Sandbox <span className="font-normal text-muted-foreground">(Testing mode only)</span></span>
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
