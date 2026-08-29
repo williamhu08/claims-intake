@@ -319,9 +319,11 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             disabled={loading}
             describedBy="clarification-hint"
           />
-          <p id="clarification-hint" className="mt-2 text-sm text-muted-foreground">
-            {clarificationAnswerTypeHints[pendingAction.answerType]}
-          </p>
+          {clarificationAnswerTypeHints[pendingAction.answerType] ? (
+            <p id="clarification-hint" className="mt-2 text-sm text-muted-foreground">
+              {clarificationAnswerTypeHints[pendingAction.answerType]}
+            </p>
+          ) : null}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button type="submit" disabled={!answerIsValid || loading} className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
               {isRespondingToClarification ? "Saving…" : "Continue"}

@@ -258,7 +258,7 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
       "aria-invalid": isInvalid,
       "aria-describedby": describedBy,
       className: `w-12 rounded-lg border border-input bg-background px-2 py-3 text-center text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${isInvalid ? "border-destructive text-destructive focus:border-destructive" : ""}`,
-      placeholder: "__",
+      placeholder: part === "hour" ? "HH" : part === "minute" ? "MM" : "SS",
     };
   }
 
@@ -311,7 +311,7 @@ function PhoneAnswerInput({ value, onChange, disabled, describedBy }: Pick<Props
   const isInvalid = value.length > 0 && !isValidPhone(value);
   const refs: Array<HTMLInputElement | null> = [];
 
-  function updatePart(part: "area" | "prefix" | "line", next: string, input: HTMLInputElement) {
+  function updatePart(part: "area" | "prefix" | "line", next: string) {
     if (disabled || !/^\d{0,4}$/.test(next)) return;
     const nextArea = part === "area" ? next : areaCode;
     const nextPrefix = part === "prefix" ? next : prefix;
@@ -329,13 +329,13 @@ function PhoneAnswerInput({ value, onChange, disabled, describedBy }: Pick<Props
     value: current,
     maxLength,
     inputMode: "numeric" as const,
-    placeholder: "_".repeat(maxLength),
+    placeholder: part === "area" ? "123" : part === "prefix" ? "456" : "7890",
     disabled,
     "aria-invalid": isInvalid,
     "aria-describedby": describedBy,
     "aria-label": part === "area" ? "Area code" : part === "prefix" ? "Phone prefix" : "Line number",
     className: inputClass(part),
-    onChange: (event: ChangeEvent<HTMLInputElement>) => updatePart(part, event.target.value, event.currentTarget),
+    onChange: (event: ChangeEvent<HTMLInputElement>) => updatePart(part, event.target.value),
   });
 
   return (

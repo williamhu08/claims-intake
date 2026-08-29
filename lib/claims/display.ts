@@ -22,7 +22,7 @@ export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, strin
   multi_choice: "Select one or more options that apply.",
   integer: "Enter a whole number.",
   percentage: "Enter a percentage between 0 and 100 with an optional decimal point, without a leading zero (e.g. 7 or 7.5, not 07).",
-  phone: "Enter 123-456-7890 or (123)-456-7890.",
+  phone: "",
   email: "Enter a valid email address.",
   postal_code: "Enter a 5-digit postal code.",
   url: "Enter a link starting with http:// or https://.",

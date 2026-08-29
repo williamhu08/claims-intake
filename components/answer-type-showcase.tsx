@@ -44,9 +44,11 @@ export function AnswerTypeShowcase() {
               options={clarificationAnswerTypeSampleOptions[answerType]}
               describedBy={`answer-type-hint-${answerType}`}
             />
-            <p id={`answer-type-hint-${answerType}`} className="mt-2 text-sm text-muted-foreground">
-              {clarificationAnswerTypeHints[answerType]}
-            </p>
+            {clarificationAnswerTypeHints[answerType] ? (
+              <p id={`answer-type-hint-${answerType}`} className="mt-2 text-sm text-muted-foreground">
+                {clarificationAnswerTypeHints[answerType]}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm font-medium" aria-live="polite">
               {value.trim().length === 0 ? (
                 <span className="text-muted-foreground">No answer yet</span>
