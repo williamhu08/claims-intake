@@ -35,6 +35,16 @@ export function ResultPanel({ session }: ResultPanelProps) {
   const { terminal, caseState } = session;
   if (!terminal) return null;
 
+  // Poison pill: a terminal case must never carry unresolved facts. If it does,
+  // the session engine's contract was violated upstream — fail loudly instead of
+  // silently rendering an incomplete "final" result. The CaseSessionErrorBoundary
+  // that wraps this component catches this and offers a safe recovery path.
+  if (caseState.missingFactKeys.length > 0) {
+    throw new Error(
+      `ResultPanel invariant violated: terminal case state still has unresolved facts (${caseState.missingFactKeys.join(", ")}).`,
+    );
+  }
+
   const copy = stopReasonCopy[terminal.stopReason];
 
   return (

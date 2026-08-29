@@ -8,6 +8,7 @@ import {
 } from "@/lib/claims/session-schema";
 import { exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
+import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
 import {
   ClarificationInput,
   isClarificationAnswerValid,
@@ -331,7 +332,11 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         </form>
       )}
 
-      {session?.terminal && <ResultPanel session={session} />}
+      {session?.terminal && (
+        <CaseSessionErrorBoundary key={sessionToken ?? "no-session"} onReset={resetSession}>
+          <ResultPanel session={session} />
+        </CaseSessionErrorBoundary>
+      )}
 
       {session?.terminal && (
         <div

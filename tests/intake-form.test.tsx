@@ -44,15 +44,34 @@ function mockJsonResponse(body: unknown, status = 200) {
 function toSessionResponse(body: unknown) {
   const caseState = toCaseStateFixture(body);
   if (!caseState || typeof caseState !== "object" || !("claimType" in caseState)) return body;
+
+  // A terminal `propose_route` state may never carry unresolved facts — that is
+  // exactly the invariant ResultPanel enforces. When the fixture still has missing
+  // facts, mock a human-review escalation instead (with those facts already asked
+  // about), which is the only valid terminal state for an incomplete case.
+  const missingFactKeys = (caseState as { missingFactKeys?: unknown }).missingFactKeys;
+  const hasUnresolvedFacts = Array.isArray(missingFactKeys) && missingFactKeys.length > 0;
+
   return {
     session: {
       version: 1,
       issuedAt: "2026-08-28T12:00:00.000Z",
       expiresAt: "2026-08-28T12:30:00.000Z",
       caseState,
-      clarificationHistory: [],
-      actionTrace: [{ kind: "propose_route", at: "2026-08-28T12:00:00.000Z" }],
-      terminal: { kind: "propose_route", stopReason: "route_supported", rationale: "A mocked, non-binding intake recommendation." },
+      clarificationHistory: hasUnresolvedFacts
+        ? (missingFactKeys as string[]).map((factKey) => ({
+            kind: "ask_clarifying_question" as const,
+            question: "Mocked clarifying question.",
+            whyItMatters: "Mocked rationale.",
+            answerType: "free_text" as const,
+            factKeys: [factKey],
+            answer: "no_response",
+          }))
+        : [],
+      actionTrace: [{ kind: hasUnresolvedFacts ? "escalate_to_human" : "propose_route", at: "2026-08-28T12:00:00.000Z" }],
+      terminal: hasUnresolvedFacts
+        ? { kind: "escalate_to_human", stopReason: "claimant_cannot_answer", rationale: "A mocked human-review escalation for an incomplete case." }
+        : { kind: "propose_route", stopReason: "route_supported", rationale: "A mocked, non-binding intake recommendation." },
     },
     sessionToken: "test-session-token",
   };
@@ -238,7 +257,10 @@ describe("IntakeForm", () => {
     expect(
       screen.getByText(/We don't know yet—for example, whether water is still leaking/),
     ).toBeInTheDocument();
-    expect(screen.getByText("Property adjuster review")).toBeInTheDocument();
+    // The mocked case still has unresolved facts, so a valid terminal state must
+    // escalate to human review rather than propose a route (ResultPanel's
+    // terminal-state invariant forbids a route proposal with facts unresolved).
+    expect(screen.getByRole("heading", { name: "Needs human review" })).toBeInTheDocument();
   });
 
   it("prevents duplicate initial submissions while the request is pending", async () => {
