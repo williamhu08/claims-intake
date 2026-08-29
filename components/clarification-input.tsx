@@ -46,11 +46,45 @@ export function isClarificationAnswerValid(type: ClarificationAnswerType, value:
 }
 
 export function ClarificationInput({ answerType, value, onChange, options = [], disabled, describedBy }: Props) {
+  const readOnlySelectProps = {
+    "aria-disabled": disabled,
+    "aria-describedby": describedBy,
+    className: "mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground disabled:opacity-60",
+  };
+  const handleSelectChange = (nextValue: string) => {
+    if (!disabled) onChange(nextValue);
+  };
+
   if (answerType === "yes_no") {
-    return <select aria-label="Your answer" value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} aria-describedby={describedBy} className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground"><option value="">Select an answer</option><option value="yes">Yes</option><option value="no">No</option></select>;
+    return (
+      <select
+        aria-label="Your answer"
+        value={value}
+        onChange={(event) => handleSelectChange(event.target.value)}
+        {...readOnlySelectProps}
+      >
+        <option value="" disabled={disabled && value !== ""}>Select an answer</option>
+        <option value="yes" disabled={disabled && value !== "yes"}>Yes</option>
+        <option value="no" disabled={disabled && value !== "no"}>No</option>
+      </select>
+    );
   }
   if (answerType === "single_choice") {
-    return <select aria-label="Your answer" value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} aria-describedby={describedBy} className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground"><option value="">Select an option</option>{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>;
+    return (
+      <select
+        aria-label="Your answer"
+        value={value}
+        onChange={(event) => handleSelectChange(event.target.value)}
+        {...readOnlySelectProps}
+      >
+        <option value="" disabled={disabled && value !== ""}>Select an option</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value} disabled={disabled && value !== option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
   }
   if (answerType === "multi_choice") {
     const selected = new Set(value ? value.split(",") : []);
