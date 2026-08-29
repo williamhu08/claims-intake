@@ -13,7 +13,7 @@ type ClaimType = ClaimIntakeResult["claimType"];
 export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, string> = {
   free_text: "Answer in your own words.",
   address: "Enter the full address.",
-  money: "Enter a non-negative amount with up to two decimal places.",
+  money: "Enter a non-negative amount with exactly two decimal places.",
   date: "Select the year, then the month, then the day.",
   date_time: "Select the date, then the hour, minute, and second.",
   yes_no: "Choose yes or no.",

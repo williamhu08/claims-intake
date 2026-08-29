@@ -1,5 +1,6 @@
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const MONEY_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;
+const MONEY_PATTERN = /^(?:0|[1-9]\d*)\.\d{2}$/;
+const MONEY_CANDIDATE_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;
 // Integer part of a percentage: "0", "100", or 1-99 with no leading zero
 // ("07" is rejected, "7" is accepted).
 const PERCENTAGE_INTEGER_PART = /^(?:0|100|[1-9]\d?)$/;
@@ -105,7 +106,7 @@ export function isValidPhone(value: string): boolean {
 }
 
 export function isMoneyCandidate(value: string): boolean {
-  return value === "" || MONEY_PATTERN.test(value);
+  return value === "" || MONEY_CANDIDATE_PATTERN.test(value);
 }
 
 export function isValidClarificationAnswer(type: string, value: string, options?: Array<{ value: string }>): boolean {
