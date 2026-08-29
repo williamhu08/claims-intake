@@ -7,7 +7,6 @@ import {
   isMoneyCandidate,
   isPostalCodeCandidate,
   isValidCalendarDate,
-  isValidCurrency,
   isValidDateTime,
   isValidMoney,
   isValidPercentage,
@@ -21,7 +20,7 @@ import {
 export const clarificationAnswerTypeValues = [
   "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
   "integer", "percentage", "phone", "email", "date_time", "postal_code",
-  "address", "currency", "url",
+  "address", "url",
 ] as const;
 export type ClarificationAnswerType = (typeof clarificationAnswerTypeValues)[number];
 
@@ -45,7 +44,6 @@ export function isClarificationAnswerValid(type: ClarificationAnswerType, value:
   const trimmed = value.trim();
   if (type === "free_text" || type === "address") return trimmed.length > 0;
   if (type === "money") return isValidMoney(trimmed);
-  if (type === "currency") return isValidCurrency(trimmed);
   if (type === "date") return isValidCalendarDate(trimmed);
   if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
   if (type === "single_choice") return trimmed.length > 0;
@@ -403,12 +401,12 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     // Filtered at the keystroke level (rather than only flagged invalid
     // afterward) so a non-numeric character, or a 6th postal-code digit,
     // never lands in the field in the first place.
-    if (answerType === "money" || answerType === "currency" || answerType === "percentage") { if (!isMoneyCandidate(next)) return; }
+    if (answerType === "money" || answerType === "percentage") { if (!isMoneyCandidate(next)) return; }
     if (answerType === "integer") { if (!isIntegerCandidate(next)) return; }
     if (answerType === "postal_code") { if (!isPostalCodeCandidate(next)) return; }
     onChange(next);
   }
   const common = { value, onChange: handleChange, disabled, inputMode, "aria-describedby": describedBy, "aria-invalid": value.length > 0 && !isClarificationAnswerValid(answerType, value), className: "mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" };
   if (answerType === "free_text" || answerType === "address") return <textarea {...common} rows={answerType === "address" ? 3 : 2} placeholder={answerType === "address" ? "Enter the address" : "Type your answer"} />;
-  return <input {...common} type={inputType} placeholder={answerType === "money" || answerType === "currency" ? "0.00" : undefined} />;
+  return <input {...common} type={inputType} placeholder={answerType === "money" ? "0.00" : undefined} />;
 }
