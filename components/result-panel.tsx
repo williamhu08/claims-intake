@@ -35,13 +35,18 @@ export function ResultPanel({ session }: ResultPanelProps) {
   const { terminal, caseState } = session;
   if (!terminal) return null;
 
-  // Poison pill: a terminal case must never carry unresolved facts. If it does,
-  // the session engine's contract was violated upstream — fail loudly instead of
+  // Poison pill: a route proposal ("this case is fully assessed and ready to
+  // route") must never carry unresolved facts — that combination means the
+  // session engine's contract was violated upstream. Fail loudly instead of
   // silently rendering an incomplete "final" result. The CaseSessionErrorBoundary
   // that wraps this component catches this and offers a safe recovery path.
-  if (caseState.missingFactKeys.length > 0) {
+  //
+  // escalate_to_human is exempt: unresolved facts are the expected, documented
+  // reason a case escalates, and "Details still to confirm" is exactly what the
+  // human reviewer needs to see in that case.
+  if (terminal.kind === "propose_route" && caseState.missingFactKeys.length > 0) {
     throw new Error(
-      `ResultPanel invariant violated: terminal case state still has unresolved facts (${caseState.missingFactKeys.join(", ")}).`,
+      `ResultPanel invariant violated: a route proposal was terminal while facts remained unresolved (${caseState.missingFactKeys.join(", ")}).`,
     );
   }
 
