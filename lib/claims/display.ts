@@ -15,7 +15,7 @@ export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, strin
   address: "Enter the full address.",
   money: "Enter a non-negative amount with exactly two decimal places.",
   date: "Select the year, then the month, then the day.",
-  date_time: "Select the date, then the hour, minute, and second.",
+  date_time: "Select the date, then enter the time in 24-hour format (e.g. 2:34:26 PM as 14:34:26).",
   yes_no: "Choose yes or no.",
   single_choice: "Choose one option.",
   multi_choice: "Select one or more options that apply.",
