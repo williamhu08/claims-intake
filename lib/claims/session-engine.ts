@@ -99,15 +99,22 @@ export function applyCaseSessionAction(
     }
   }
 
-  if (
-    parsedAction.kind === "escalate_to_human" &&
-    parsedAction.stopReason !== "safety_review" &&
-    parsedAction.stopReason !== "safety_budget_exhausted" &&
-    parsedAction.stopReason !== "claimant_cannot_answer" &&
-    unresolvedUnaskedFacts.length > 0 &&
-    session.clarificationHistory.length < maxClarifications
-  ) {
-    throw new Error("This escalation is premature while relevant case details remain unasked.");
+  if (parsedAction.kind === "escalate_to_human") {
+    const safetyFact = factFor(session.caseState, "active_loss_or_safety");
+    const isActualSafetyStop =
+      parsedAction.stopReason === "safety_review" &&
+      (safetyFact.status === "unclear" || /active|unsafe|danger|hazard/i.test(safetyFact.value ?? ""));
+    const isBudgetStop = parsedAction.stopReason === "safety_budget_exhausted";
+    const isClaimantUnableToAnswer = parsedAction.stopReason === "claimant_cannot_answer";
+
+    if (
+      unresolvedUnaskedFacts.length > 0 &&
+      !isActualSafetyStop &&
+      !isBudgetStop &&
+      !isClaimantUnableToAnswer
+    ) {
+      throw new Error("This escalation is premature while relevant case details remain unasked.");
+    }
   }
 
   const traceEntry = { kind: parsedAction.kind, at: clock().toISOString() };
