@@ -1,4 +1,5 @@
 import type { CaseSessionState } from "@/lib/claims/session-schema";
+import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";
 type ResultPanelProps = { session: CaseSessionState };
 
@@ -37,8 +38,10 @@ export function ResultPanel({ session }: ResultPanelProps) {
   const copy = stopReasonCopy[terminal.stopReason];
 
   return (
-    <div className="space-y-6">
-      <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <CaseStateSummary result={caseState} heading="Final case state" />
+
+      <section aria-live="polite" className="mt-8 border-t border-border pt-6">
         <div className="flex items-center gap-2">
           <span
             className={`h-1.5 w-1.5 rounded-full ${terminal.kind === "propose_route" ? "bg-success" : "bg-accent"}`}
