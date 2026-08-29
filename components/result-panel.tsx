@@ -57,25 +57,32 @@ export function ResultPanel({ session }: ResultPanelProps) {
   // though the static type only ever admits the two known literals.
   const terminalKind: string = terminal.kind;
 
-  if (terminal.kind === "propose_route" && caseState.missingFactKeys.length > 0) {
-    throw new Error(
-      `ResultPanel invariant violated: a route proposal was terminal while facts remained unresolved (${caseState.missingFactKeys.join(", ")}).`,
-    );
-  }
-
-  if (terminal.kind === "escalate_to_human" && unaskedMissingFacts.length > 0) {
-    throw new Error(
-      `ResultPanel invariant violated: escalation was terminal while facts were never asked (${unaskedMissingFacts.join(", ")}).`,
-    );
-  }
-
-  // Exhaustiveness guard: terminalSessionStateSchema only ever validates
-  // "propose_route" or "escalate_to_human" as terminal.kind. If a third kind
-  // ever reaches this component — e.g. from a future schema change that forgot
-  // to add a matching check above — fail loudly rather than silently falling
-  // through the two checks above with no coverage at all.
-  if (terminalKind !== "propose_route" && terminalKind !== "escalate_to_human") {
-    throw new Error(`ResultPanel invariant violated: invalid terminal.kind ("${terminalKind}").`);
+  if (unaskedMissingFacts.length > 0) {
+    if (terminalKind === "propose_route") {
+      throw new Error(
+        `ResultPanel invariant violated: a route proposal was terminal while facts remained unresolved (${unaskedMissingFacts.join(", ")}).`,
+      );
+    } else if (terminalKind === "escalate_to_human") {
+      throw new Error(
+        `ResultPanel invariant violated: escalation was terminal while facts were never asked (${unaskedMissingFacts.join(", ")}).`,
+      );
+    } else if (terminalKind === "ask_clarifying_question") {
+      // ask_clarifying_question is a valid `pendingAction.kind`, but it is never
+      // a valid `terminal.kind` — a session cannot be both pending a question
+      // and terminal at once. Reaching this branch means the two states were
+      // conflated upstream.
+      throw new Error(
+        `ResultPanel invariant violated: terminal.kind was "ask_clarifying_question" while facts remained unasked (${unaskedMissingFacts.join(", ")}) — a session cannot be both pending a question and terminal.`,
+      );
+    } else {
+      // Exhaustiveness guard: terminalSessionStateSchema only ever validates
+      // "propose_route" or "escalate_to_human" as terminal.kind, and
+      // "ask_clarifying_question" is covered above. If any other value ever
+      // reaches this component — e.g. from a future schema change that forgot
+      // to add a matching branch above — fail loudly instead of silently
+      // falling through with no coverage at all.
+      throw new Error(`ResultPanel invariant violated: invalid terminal.kind ("${terminalKind}").`);
+    }
   }
 
   const copy = stopReasonCopy[terminal.stopReason];
