@@ -31,11 +31,8 @@ export function isClarificationEligible(
     return false;
   }
 
-  const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
   return session.caseState.facts.some(
-    (fact) =>
-      (fact.status === "missing" || fact.status === "unclear") &&
-      !alreadyAsked.has(fact.key),
+    (fact) => fact.status === "missing" || fact.status === "unclear",
   );
 }
 
@@ -73,29 +70,25 @@ export function applyCaseSessionAction(
   }
 
   if (parsedAction.kind === "ask_clarifying_question") {
-    const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
     const allFactsEligible = parsedAction.factKeys.every((key) => {
       const fact = factFor(session.caseState, key);
-      return (fact.status === "missing" || fact.status === "unclear") && !alreadyAsked.has(key);
+      return fact.status === "missing" || fact.status === "unclear";
     });
     if (!allFactsEligible || !isClarificationEligible(session, maxClarifications)) {
       throw new Error("This clarification is not eligible for the current case state.");
     }
   }
 
-  const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
-  const unresolvedUnaskedFacts = session.caseState.facts.filter(
-    (fact) =>
-      (fact.status === "missing" || fact.status === "unclear") &&
-      !alreadyAsked.has(fact.key),
+  const unresolvedFacts = session.caseState.facts.filter(
+    (fact) => fact.status === "missing" || fact.status === "unclear",
   );
 
   if (parsedAction.kind === "propose_route") {
     if (
       parsedAction.route !== session.caseState.proposedRoute.kind ||
-      unresolvedUnaskedFacts.length > 0
+      unresolvedFacts.length > 0
     ) {
-      throw new Error("This route is not supported while relevant case details remain unasked.");
+      throw new Error("This route is not supported while relevant case details remain unresolved.");
     }
   }
 
@@ -108,12 +101,12 @@ export function applyCaseSessionAction(
     const isClaimantUnableToAnswer = parsedAction.stopReason === "claimant_cannot_answer";
 
     if (
-      unresolvedUnaskedFacts.length > 0 &&
+      unresolvedFacts.length > 0 &&
       !isActualSafetyStop &&
       !isBudgetStop &&
       !isClaimantUnableToAnswer
     ) {
-      throw new Error("This escalation is premature while relevant case details remain unasked.");
+      throw new Error("This escalation is premature while relevant case details remain unresolved.");
     }
   }
 

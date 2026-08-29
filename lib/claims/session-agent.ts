@@ -151,7 +151,7 @@ export async function selectNextCaseSessionAction(
       ? {
           ask_clarifying_question: {
             description:
-              "Ask one specific, claimant-friendly question for one or more facts that are currently missing or unclear in Case State. Choose factKeys only from those facts, do not repeat any fact already asked in clarificationHistory, and write the question and whyItMatters dynamically from the current case details. Never infer or hardcode an answer, and do not ask for facts that are already collected or not applicable.",
+              "Ask one specific, claimant-friendly question for one or more facts that are currently missing or unclear in Case State. Choose factKeys only from those facts. If a prior answer did not resolve a fact, ask a focused follow-up for that fact rather than terminating. Write the question and whyItMatters dynamically from the current case details. Never infer or hardcode an answer, and do not ask for facts that are already collected or not applicable.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }

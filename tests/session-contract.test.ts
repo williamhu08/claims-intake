@@ -165,7 +165,7 @@ describe("V2 session contract", () => {
     expect(() => applyCaseSessionAction(createCaseSession(caseState, 1800, () => new Date("2026-08-26T19:00:00.000Z")), collected, 2, () => new Date("2026-08-26T19:00:00.000Z"))).toThrow();
     const pending = applyCaseSessionAction(createCaseSession(caseState, 1800, () => new Date("2026-08-26T19:00:00.000Z")), question, 2, () => new Date("2026-08-26T19:00:00.000Z"));
     const answered = recordClaimantAnswer(pending, "A dishwasher leak");
-    expect(() => applyCaseSessionAction(answered, question, 2, () => new Date("2026-08-26T19:00:00.000Z"))).toThrow();
+    expect(() => applyCaseSessionAction(answered, collected, 2, () => new Date("2026-08-26T19:00:00.000Z"))).toThrow();
   });
 
   it("rejects an invalid action, repeated fact key, and unsupported route", () => {
@@ -364,7 +364,18 @@ describe("V2 session contract", () => {
       createCaseSession(caseState, 1_800),
       { kind: "escalate_to_human", stopReason: "unresolved_ambiguity", rationale: "Needs review." },
       2,
-    )).toThrow("remain unasked");
+    )).toThrow("remain unresolved");
+
+    const askedButStillUnclear = recordClaimantAnswer(
+      applyCaseSessionAction(createCaseSession(caseState, 1_800), question, 2),
+      "I do not know",
+    );
+    expect(() => applyCaseSessionAction(
+      askedButStillUnclear,
+      { kind: "escalate_to_human", stopReason: "unresolved_ambiguity", rationale: "Needs review." },
+      2,
+    )).toThrow("remain unresolved");
+    expect(isWaterSourceClarificationEligible(askedButStillUnclear, 2)).toBe(true);
   });
 
   it("routes clear first-party water damage and ends with an auditable terminal trace", () => {
@@ -446,7 +457,7 @@ describe("V2 session contract", () => {
         },
         2,
       ),
-    ).toThrow("remain unasked");
+    ).toThrow("remain unresolved");
   });
 
   it("rejects a proposed route while active loss or safety status remains unclear, even if the route kind matches", () => {
