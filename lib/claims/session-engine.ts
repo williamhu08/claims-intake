@@ -83,18 +83,31 @@ export function applyCaseSessionAction(
     }
   }
 
-  if (parsedAction.kind === "propose_route") {
-    const cause = factFor(session.caseState, "incident_cause");
-    const safety = factFor(session.caseState, "active_loss_or_safety");
+  const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
+  const unresolvedUnaskedFacts = session.caseState.facts.filter(
+    (fact) =>
+      (fact.status === "missing" || fact.status === "unclear") &&
+      !alreadyAsked.has(fact.key),
+  );
 
+  if (parsedAction.kind === "propose_route") {
     if (
       parsedAction.route !== session.caseState.proposedRoute.kind ||
-      cause.status === "missing" ||
-      cause.status === "unclear" ||
-      safety.status === "unclear"
+      unresolvedUnaskedFacts.length > 0
     ) {
-      throw new Error("This route is not supported by the current case state.");
+      throw new Error("This route is not supported while relevant case details remain unasked.");
     }
+  }
+
+  if (
+    parsedAction.kind === "escalate_to_human" &&
+    parsedAction.stopReason !== "safety_review" &&
+    parsedAction.stopReason !== "safety_budget_exhausted" &&
+    parsedAction.stopReason !== "claimant_cannot_answer" &&
+    unresolvedUnaskedFacts.length > 0 &&
+    session.clarificationHistory.length < maxClarifications
+  ) {
+    throw new Error("This escalation is premature while relevant case details remain unasked.");
   }
 
   const traceEntry = { kind: parsedAction.kind, at: clock().toISOString() };

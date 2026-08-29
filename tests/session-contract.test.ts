@@ -81,6 +81,18 @@ const question: CaseSessionAction = {
   whyItMatters: "This helps us send your intake to the right review team.",
 };
 
+function withAllFactsCollected(state: CaseState): CaseState {
+  return {
+    ...state,
+    facts: state.facts.map((fact) =>
+      fact.status === "collected"
+        ? fact
+        : { ...fact, status: "collected" as const, value: "Not reported by claimant" },
+    ),
+    missingFactKeys: [],
+  };
+}
+
 function withFact(
   state: CaseState,
   key: CaseState["facts"][number]["key"],
@@ -243,7 +255,7 @@ describe("V2 session contract", () => {
     const answered = recordClaimantAnswer(pending, "A pipe under my kitchen sink burst.");
     const resolvedState = withFact(
       {
-        ...answered.caseState,
+        ...withAllFactsCollected(answered.caseState),
         proposedRoute: {
           kind: "property_adjuster_review",
           rationale: "The claimant identified a first-party burst pipe.",
@@ -281,7 +293,7 @@ describe("V2 session contract", () => {
   });
 
   it("keeps claimant-stated possible third-party involvement as an intake route, not a fault finding", () => {
-    const thirdPartyState = withFact(
+    const thirdPartyState = withAllFactsCollected(withFact(
       withFact(
         {
           ...caseState,
@@ -298,7 +310,7 @@ describe("V2 session contract", () => {
       "injury_or_third_party",
       "collected",
       "The upstairs neighbor may be involved.",
-    );
+    ));
     const terminal = applyCaseSessionAction(
       createCaseSession(thirdPartyState, 1_800),
       {
@@ -347,8 +359,16 @@ describe("V2 session contract", () => {
     ).toThrow("expired");
   });
 
+  it("does not allow unresolved unasked facts to end in ambiguous human review", () => {
+    expect(() => applyCaseSessionAction(
+      createCaseSession(caseState, 1_800),
+      { kind: "escalate_to_human", stopReason: "unresolved_ambiguity", rationale: "Needs review." },
+      2,
+    )).toThrow("remain unasked");
+  });
+
   it("routes clear first-party water damage and ends with an auditable terminal trace", () => {
-    const clearWaterState = withFact(
+    const clearWaterState = withAllFactsCollected(withFact(
       {
         ...caseState,
         proposedRoute: {
@@ -360,7 +380,7 @@ describe("V2 session contract", () => {
       "incident_cause",
       "collected",
       "A burst pipe under the kitchen sink.",
-    );
+    ));
     const session = createCaseSession(clearWaterState, 1_800);
     const terminal = applyCaseSessionAction(
       session,
@@ -416,7 +436,7 @@ describe("V2 session contract", () => {
       ).terminal?.stopReason,
     ).toBe("safety_review");
     expect(isWaterSourceClarificationEligible(createCaseSession(gibberishState, 1_800), 2)).toBe(true);
-    expect(
+    expect(() =>
       applyCaseSessionAction(
         createCaseSession(gibberishState, 1_800),
         {
@@ -425,8 +445,8 @@ describe("V2 session contract", () => {
           rationale: "A person should review the unsupported account.",
         },
         2,
-      ).terminal?.stopReason,
-    ).toBe("unresolved_ambiguity");
+      ),
+    ).toThrow("remain unasked");
   });
 
   it("rejects a proposed route while active loss or safety status remains unclear, even if the route kind matches", () => {
