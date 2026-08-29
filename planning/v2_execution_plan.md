@@ -190,9 +190,6 @@ Update a step to `[x]` only when every bullet beneath it is complete.
       remains server-only; the frontend never receives or manages
       `CASE_SESSION_SIGNING_SECRET`.
 
-=======
-      every requirement below are implemented and verified:
->>>>>>> a3ddbd58c379b543dfa506064eb8df429da5934f
       - [x] Replace the one-turn V1 submission flow with the V2 lifecycle:
         narrative → session start → optional question → claimant response →
         refreshed state → terminal route or human review.
