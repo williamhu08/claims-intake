@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTestingMode } from "@/components/app-shell";
 import {
   caseSessionStateSchema,
@@ -33,6 +33,14 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const abortController = useRef<AbortController | null>(null);
   const retryAction = useRef<(() => void) | null>(null);
   const [errorRecovery, setErrorRecovery] = useState<"retry" | "reset" | null>(null);
+  const [showTryAnother, setShowTryAnother] = useState(false);
+
+  useEffect(() => {
+    if (!session?.terminal) return;
+
+    const timer = window.setTimeout(() => setShowTryAnother(true), 1000);
+    return () => window.clearTimeout(timer);
+  }, [session?.terminal]);
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
@@ -61,6 +69,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     abortController.current?.abort();
     abortController.current = new AbortController();
     setRequestState("submitting");
+    setShowTryAnother(false);
     setError(null);
     setErrorRecovery(null);
     retryAction.current = () => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent);
@@ -117,6 +126,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   async function submitAnswer(value: string) {
     if (!sessionToken || !pendingAction || loading) return;
     setRequestState("responding");
+    setShowTryAnother(false);
     setError(null);
     setErrorRecovery(null);
     retryAction.current = () => void submitAnswer(value);
@@ -322,6 +332,22 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       )}
 
       {session?.terminal && <ResultPanel session={session} />}
+
+      {session?.terminal && (
+        <div
+          aria-hidden={!showTryAnother}
+          className={`flex justify-center transition-opacity duration-700 ease-out ${showTryAnother ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        >
+          <button
+            type="button"
+            tabIndex={showTryAnother ? 0 : -1}
+            onClick={resetSession}
+            className="rounded-lg border border-border bg-background px-5 py-3 font-medium text-foreground transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Want to try another claim?
+          </button>
+        </div>
+      )}
     </div>
   );
 
