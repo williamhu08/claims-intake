@@ -21,7 +21,7 @@ export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, strin
   single_choice: "Choose one option.",
   multi_choice: "Select one or more options that apply.",
   integer: "Enter a whole number.",
-  percentage: "Enter a percentage between 0 and 100, without a leading zero (e.g. 7, not 07).",
+  percentage: "Enter a percentage between 0 and 100 with an optional decimal point, without a leading zero (e.g. 7 or 7.5, not 07).",
   phone: "Enter a phone number, digits only or with spaces, parentheses, or dashes.",
   email: "Enter a valid email address.",
   postal_code: "Enter a 5-digit postal code.",

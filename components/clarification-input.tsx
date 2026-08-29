@@ -175,8 +175,8 @@ function encodeDateTimeParts(parts: { year: string; month: string; day: string; 
 /**
  * Two independent controls sharing one encoded value: a calendar date
  * (year → month → day, cascading exactly like DateAnswerSelect) and a time
- * of day (hour → minute → second, each 00-23/00-59/00-59 and independently
- * selectable — none of them constrain the others the way month/day do).
+ * of day (hour, minute, and second text inputs constrained to two digits).
+ * Values outside 00-23/00-59/00-59 remain visible in red and cannot validate.
  */
 function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
   const currentYear = new Date().getFullYear();
@@ -198,10 +198,6 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
   const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0"));
   const dayCount = year && month ? getDaysInMonth(Number(year), Number(month)) : 31;
   const dayOptions = Array.from({ length: dayCount }, (_, index) => String(index + 1).padStart(2, "0"));
-  const hourOptions = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, "0"));
-  const minuteOptions = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, "0"));
-  const secondOptions = minuteOptions;
-
   function handleDatePartChange(part: "year" | "month" | "day", nextRaw: string) {
     if (disabled) return;
     // Choosing a date part resets every date part after it, same as
@@ -222,7 +218,7 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
   }
 
   function handleTimePartChange(part: "hour" | "minute" | "second", nextRaw: string) {
-    if (disabled) return;
+    if (disabled || !/^\d{0,2}$/.test(nextRaw)) return;
     onChange(encodeDateTimeParts({ year, month, day, hour, minute, second, [part]: nextRaw }));
   }
 
@@ -237,14 +233,21 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
     };
   }
 
-  function timeSelectProps(part: "hour" | "minute" | "second", currentValue: string) {
+  function timeInputProps(part: "hour" | "minute" | "second", currentValue: string) {
+    const hasValue = currentValue.length > 0;
+    const numericValue = Number(currentValue);
+    const isInvalid = hasValue && (currentValue.length !== 2 || (part === "hour" ? numericValue > 23 : numericValue > 59));
     return {
       "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}`,
       value: currentValue,
-      onChange: (event: ChangeEvent<HTMLSelectElement>) => handleTimePartChange(part, event.target.value),
+      onChange: (event: ChangeEvent<HTMLInputElement>) => handleTimePartChange(part, event.target.value),
       disabled,
-      "aria-disabled": disabled,
-      className: selectClassName,
+      inputMode: "numeric" as const,
+      maxLength: 2,
+      "aria-invalid": isInvalid,
+      "aria-describedby": describedBy,
+      className: `${selectClassName} ${isInvalid ? "border-destructive text-destructive focus:border-destructive" : ""}`,
+      placeholder: "00",
     };
   }
 
@@ -277,30 +280,18 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
         </select>
       </div>
       <div className="grid grid-cols-3 gap-3">
-        <select {...timeSelectProps("hour", hour)}>
-          <option value="" disabled={disabled && hour !== ""}>Hour</option>
-          {hourOptions.map((option) => (
-            <option key={option} value={option} disabled={disabled && hour !== option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <select {...timeSelectProps("minute", minute)}>
-          <option value="" disabled={disabled && minute !== ""}>Minute</option>
-          {minuteOptions.map((option) => (
-            <option key={option} value={option} disabled={disabled && minute !== option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <select {...timeSelectProps("second", second)}>
-          <option value="" disabled={disabled && second !== ""}>Second</option>
-          {secondOptions.map((option) => (
-            <option key={option} value={option} disabled={disabled && second !== option}>
-              {option}
-            </option>
-          ))}
-        </select>
+        <label className="space-y-1 text-sm text-muted-foreground">
+          <span>Hour</span>
+          <input {...timeInputProps("hour", hour)} />
+        </label>
+        <label className="space-y-1 text-sm text-muted-foreground">
+          <span>Minute</span>
+          <input {...timeInputProps("minute", minute)} />
+        </label>
+        <label className="space-y-1 text-sm text-muted-foreground">
+          <span>Second</span>
+          <input {...timeInputProps("second", second)} />
+        </label>
       </div>
     </div>
   );
