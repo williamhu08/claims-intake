@@ -278,21 +278,21 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    
    The detailed 4D design, recovery taxonomy, reset semantics, accessibility contract, test matrix, and browser verification checklist live in the [4D Recovery and Verification Design](./v2_4d_recovery_verification.md).
 
-   - [ ] Treat retryable Gateway/network failures as retry-in-place by
+   - [x] Treat retryable Gateway/network failures as retry-in-place by
      resubmitting the same pending question or answer; treat invalid or
      expired sessions as non-retryable and route directly to reset.
-   - [ ] Reset safely by clearing local view state and requiring a fresh
+   - [x] Reset safely by clearing local view state and requiring a fresh
      narrative submission; never reuse a terminal, invalid, or expired token.
-   - [ ] Keep supported-category guidance contextual and ensure the form,
+   - [x] Keep supported-category guidance contextual and ensure the form,
      question panel, history, and terminal result remain responsive at narrow
      and wide viewports.
-   - [ ] Use semantic headings, labelled controls, `aria-live` for status
+   - [x] Use semantic headings, labelled controls, `aria-live` for status
      updates, and `role="alert"` for actionable errors.
    - [ ] Add focused claimant-flow component/interaction tests with mocked V2
      routes covering immediate route, one clarification, “I don&apos;t know”,
      retry after failure, malformed response, human review, reset, and
      duplicate-submit prevention.
-   - [ ] Add answer-type fixtures and tests for free text, valid/invalid
+   - [x] Add answer-type fixtures and tests for free text, valid/invalid
      monetary input, and valid/invalid `YYYY-MM-DD` input, including paste and
      malformed-character rejection. Before frontend implementation, align the
      V2 action schema and route tests with the answer-type field so the dynamic
