@@ -275,6 +275,9 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      - [x] Ensure the next clarification submission uses the newest token, not the token from the initial `/start` response.
 
    **4D.** [ ] **Recover, reset, and verify the claimant flow**
+   
+   The detailed 4D design, recovery taxonomy, reset semantics, accessibility contract, test matrix, and browser verification checklist live in the [4D Recovery and Verification Design](./v2_4d_recovery_verification.md).
+
    - [ ] Treat retryable Gateway/network failures as retry-in-place by
      resubmitting the same pending question or answer; treat invalid or
      expired sessions as non-retryable and route directly to reset.
