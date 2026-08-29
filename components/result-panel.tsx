@@ -3,6 +3,15 @@ import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";
 type ResultPanelProps = { session: CaseSessionState };
 
+const missingFactLabels: Record<CaseSessionState["caseState"]["facts"][number]["key"], string> = {
+  incident_cause: "The likely source or cause of the damage",
+  damage_description: "A clear description of what was damaged",
+  affected_property: "Which property or areas were affected",
+  loss_timing: "When the incident happened or was discovered",
+  active_loss_or_safety: "Whether the damage is still happening or the area is unsafe",
+  injury_or_third_party: "Whether anyone was injured or another party is involved",
+};
+
 const routeLabels = {
   property_adjuster_review: "Property adjuster review",
   liability_review: "Liability review",
@@ -60,6 +69,16 @@ export function ResultPanel({ session }: ResultPanelProps) {
               <p className="text-sm font-medium text-foreground">Why this needs review</p>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">{reviewReason(terminal.stopReason)}</p>
             </div>
+            {caseState.missingFactKeys.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-foreground">Details still to confirm</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted-foreground">
+                  {caseState.missingFactKeys.map((key) => (
+                    <li key={key}>{missingFactLabels[key]}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div>
               <p className="text-sm leading-relaxed text-muted-foreground text-pretty">{copy.nextStep}</p>
               <p className="mt-3 inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
