@@ -1,7 +1,76 @@
 import type { ClaimIntakeResult, CaseFactSource } from "@/lib/claims/schema";
 import type { StopReason } from "@/lib/claims/session-schema";
+import type { ClarificationAnswerType } from "@/components/clarification-input";
 
 type ClaimType = ClaimIntakeResult["claimType"];
+
+/**
+ * Claimant-facing hint shown under the answer control for each clarification
+ * answer type. Centralized here (rather than duplicated per caller) so
+ * IntakeForm's live clarification flow and the testing-mode answer-type
+ * showcase page render identical copy for the same type.
+ */
+export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, string> = {
+  free_text: "Answer in your own words.",
+  address: "Enter the full address.",
+  money: "Enter a non-negative amount with up to two decimal places.",
+  currency: "Enter a non-negative amount with up to two decimal places.",
+  date: "Select the year, then the month, then the day.",
+  date_time: "Enter a date and time.",
+  yes_no: "Choose yes or no.",
+  single_choice: "Choose one option.",
+  multi_choice: "Select one or more options that apply.",
+  integer: "Enter a whole number.",
+  percentage: "Enter a percentage between 0 and 100.",
+  phone: "Enter a phone number, digits only or with spaces, parentheses, or dashes.",
+  email: "Enter a valid email address.",
+  postal_code: "Enter a valid postal or ZIP code.",
+  url: "Enter a link starting with http:// or https://.",
+  duration: "Enter a duration, for example \"3 days\" or \"2 hours\".",
+};
+
+/**
+ * Human-readable label for each clarification answer type, used only by the
+ * testing-mode answer-type showcase page (never shown to a real claimant,
+ * who only ever sees a real question's own wording).
+ */
+export const clarificationAnswerTypeLabels: Record<ClarificationAnswerType, string> = {
+  free_text: "Free text",
+  address: "Address",
+  money: "Money",
+  currency: "Currency",
+  date: "Date",
+  date_time: "Date & time",
+  yes_no: "Yes / No",
+  single_choice: "Single choice",
+  multi_choice: "Multi choice",
+  integer: "Integer",
+  percentage: "Percentage",
+  phone: "Phone",
+  email: "Email",
+  postal_code: "Postal code",
+  url: "URL",
+  duration: "Duration",
+};
+
+/**
+ * Sample options for the two choice-based answer types, used only by the
+ * testing-mode answer-type showcase page. Real single_choice/multi_choice
+ * questions always supply their own options from the model.
+ */
+export const clarificationAnswerTypeSampleOptions: Partial<Record<ClarificationAnswerType, Array<{ value: string; label: string }>>> = {
+  single_choice: [
+    { value: "burst_pipe", label: "Burst pipe" },
+    { value: "roof_leak", label: "Roof leak" },
+    { value: "appliance_leak", label: "Appliance leak" },
+  ],
+  multi_choice: [
+    { value: "kitchen", label: "Kitchen" },
+    { value: "bathroom", label: "Bathroom" },
+    { value: "basement", label: "Basement" },
+    { value: "hallway", label: "Hallway" },
+  ],
+};
 
 /** Claimant-facing label for where a fact's value came from. Never expose the raw enum. */
 export const caseFactSourceLabels: Record<CaseFactSource, string> = {

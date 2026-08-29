@@ -8,10 +8,15 @@ import {
   isValidMoney,
 } from "@/lib/claims/answer-validation";
 
-export type ClarificationAnswerType =
-  | "free_text" | "money" | "date" | "yes_no" | "single_choice" | "multi_choice"
-  | "integer" | "percentage" | "phone" | "email" | "date_time" | "postal_code"
-  | "address" | "currency" | "duration" | "url";
+// The array is the source of truth; ClarificationAnswerType is derived from it
+// so runtime code (e.g. the testing-mode answer-type showcase, which iterates
+// every type) and the static type can never drift apart.
+export const clarificationAnswerTypeValues = [
+  "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
+  "integer", "percentage", "phone", "email", "date_time", "postal_code",
+  "address", "currency", "duration", "url",
+] as const;
+export type ClarificationAnswerType = (typeof clarificationAnswerTypeValues)[number];
 
 type Option = { value: string; label: string };
 interface Props {
