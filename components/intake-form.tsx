@@ -31,6 +31,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const [error, setError] = useState<string | null>(null);
   const requestVersion = useRef(0);
   const abortController = useRef<AbortController | null>(null);
+  const retryAction = useRef<(() => void) | null>(null);
+  const [errorRecovery, setErrorRecovery] = useState<"retry" | "reset" | null>(null);
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
@@ -60,6 +62,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     abortController.current = new AbortController();
     setRequestState("submitting");
     setError(null);
+    setErrorRecovery(null);
+    retryAction.current = () => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent);
     updateSession(null);
     setSessionToken(null);
 
@@ -78,12 +82,14 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         data = await response.json();
       } catch {
         setRequestState("error");
-        setError("The server sent a response that wasn't valid JSON. Check the server logs for a route crash or an unhandled error in /api/case-session/start.");
+        setErrorRecovery("reset");
+        setError("The server sent a response that wasn't valid JSON. The session could not be safely continued.");
         return;
       }
 
       if (!response.ok) {
         setRequestState("error");
+        setErrorRecovery(response.status >= 500 ? "retry" : "reset");
         setError(getErrorMessage(data));
         return;
       }
@@ -91,7 +97,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       const parsed = parseSessionStartResponse(data);
       if (!parsed) {
         setRequestState("error");
-        setError("The session response didn't match the expected shape. Check /api/case-session/start for a schema mismatch between the server payload and caseSessionStateSchema.");
+        setErrorRecovery("reset");
+        setError("The assessment returned an incomplete session. For safety, this session cannot continue; please start over.");
         return;
       }
 
@@ -102,7 +109,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       if (version !== requestVersion.current) return;
       setRequestState("error");
-      setError("The request to /api/case-session/start failed before a response arrived. Check your network connection or the dev server console for a crashed request; your narrative is still available above.");
+      setErrorRecovery("retry");
+      setError("The request could not reach the assessment service. Your narrative is still available, and you can try again.");
     }
   }
 
@@ -110,6 +118,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     if (!sessionToken || !pendingAction || loading) return;
     setRequestState("responding");
     setError(null);
+    setErrorRecovery(null);
+    retryAction.current = () => void submitAnswer(value);
 
     try {
       const response = await fetch("/api/case-session/respond", {
@@ -127,7 +137,9 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       setRequestState(parsed.session.terminal ? "terminal" : "active");
     } catch (error) {
       setRequestState("error");
-      setError(error instanceof Error ? error.message : "The request to /api/case-session/respond failed before a response arrived. Check the dev server console for the underlying error.");
+      const message = error instanceof Error ? error.message : "The clarification could not be submitted.";
+      setErrorRecovery(message.includes("expired") || message.includes("invalid") || message.includes("shape") ? "reset" : "retry");
+      setError(message);
     }
   }
 
@@ -239,11 +251,18 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       </form>
 
       {error && (
-        <div
-          role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-        >
-          {error}
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          <p>{error}</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {errorRecovery === "retry" && retryAction.current && (
+              <button type="button" onClick={() => retryAction.current?.()} disabled={loading} className="rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground disabled:opacity-50">
+                Try again
+              </button>
+            )}
+            <button type="button" onClick={resetSession} className="rounded-lg border border-border bg-background px-3 py-2 font-medium text-foreground">
+              Start over
+            </button>
+          </div>
         </div>
       )}
 
@@ -315,6 +334,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     setRequestState("idle");
     setAnswer("");
     setError(null);
+    setErrorRecovery(null);
+    retryAction.current = null;
   }
 }
 

@@ -36,9 +36,26 @@ function mockJsonResponse(body: unknown, status = 200) {
     "fetch",
     vi.fn().mockResolvedValue({
       ok: status >= 200 && status < 300,
-      json: async () => toCaseStateFixture(body),
+      json: async () => toSessionResponse(body),
     }),
   );
+}
+
+function toSessionResponse(body: unknown) {
+  const caseState = toCaseStateFixture(body);
+  if (!caseState || typeof caseState !== "object" || !("claimType" in caseState)) return body;
+  return {
+    session: {
+      version: 1,
+      issuedAt: "2026-08-28T12:00:00.000Z",
+      expiresAt: "2026-08-28T12:30:00.000Z",
+      caseState,
+      clarificationHistory: [],
+      actionTrace: [{ kind: "propose_route", at: "2026-08-28T12:00:00.000Z" }],
+      terminal: { kind: "propose_route", stopReason: "route_supported", rationale: "A mocked, non-binding intake recommendation." },
+    },
+    sessionToken: "test-session-token",
+  };
 }
 
 function toCaseStateFixture(body: unknown) {
@@ -89,7 +106,7 @@ describe("IntakeForm", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(`Mocked ${category.label.toLowerCase()} assessment.`)).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
-      "/api/case-analysis",
+      "/api/case-session/start",
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -151,7 +168,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The session response didn't match the expected shape. Check /api/case-session/start for a schema mismatch between the server payload and caseSessionStateSchema.",
+      "The assessment returned an incomplete session. For safety, this session cannot continue; please start over.",
     );
   });
 
@@ -170,7 +187,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The server sent a response that wasn't valid JSON. Check the server logs for a route crash or an unhandled error in /api/case-session/start.",
+      "The server sent a response that wasn't valid JSON. The session could not be safely continued.",
     );
   });
 
@@ -181,7 +198,7 @@ describe("IntakeForm", () => {
     await submitNarrative();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The request to /api/case-session/start failed before a response arrived. Check your network connection or the dev server console for a crashed request; your narrative is still available above.",
+      "The request could not reach the assessment service. Your narrative is still available, and you can try again.",
     );
   });
 
@@ -195,10 +212,10 @@ describe("IntakeForm", () => {
     render(<IntakeForm />);
     await submitNarrative();
 
-    expect(screen.getByRole("button", { name: "Assessing…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Starting assessment…" })).toBeDisabled();
     resolveRequest!({
       ok: true,
-      json: async () => toCaseStateFixture({
+      json: async () => toSessionResponse({
         claimType: "water_damage",
         summary: "Mocked water assessment.",
         confidence: 0.9,
@@ -230,10 +247,9 @@ describe("IntakeForm", () => {
     render(<IntakeForm />);
     await submitNarrative();
 
-    const caseStateLabel = await screen.findByText("Case state");
-    expect(caseStateLabel.closest("section")).toHaveAttribute("aria-live", "polite");
-    expect(screen.getByRole("heading", { name: "Collected facts" }).parentElement?.parentElement).toHaveClass(
-      "sm:grid-cols-2",
-    );
+  expect(await screen.findByText("Final case state")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Collected facts" }).parentElement?.parentElement).toHaveClass(
+    "sm:grid-cols-2",
+  );
   });
 });

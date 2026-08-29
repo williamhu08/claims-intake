@@ -123,6 +123,23 @@ describe("V2 session contract", () => {
     expect(session.pendingAction?.factKeys).toEqual(["incident_cause"]);
   });
 
+  it("requires options only for server-declared choice answers", () => {
+    expect(caseSessionActionSchema.safeParse({
+      ...question,
+      answerType: "free_text",
+      options: [{ value: "pipe", label: "Pipe" }, { value: "appliance", label: "Appliance" }],
+    }).success).toBe(false);
+    expect(caseSessionActionSchema.safeParse({
+      ...question,
+      answerType: "single_choice",
+      options: [{ value: "pipe", label: "Pipe" }, { value: "appliance", label: "Appliance" }],
+    }).success).toBe(true);
+    expect(caseSessionActionSchema.safeParse({
+      ...question,
+      answerType: "single_choice",
+    }).success).toBe(false);
+  });
+
   it("rejects an invalid action, repeated fact key, and unsupported route", () => {
     expect(
       caseSessionActionSchema.safeParse({
