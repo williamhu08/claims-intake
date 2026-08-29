@@ -1,5 +1,6 @@
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MONEY_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;
+const CURRENCY_PATTERN = /^(?:0|[1-9]\d*)\.\d{2}$/;
 // Integer part of a percentage: "0", "100", or 1-99 with no leading zero
 // ("07" is rejected, "7" is accepted).
 const PERCENTAGE_INTEGER_PART = /^(?:0|100|[1-9]\d?)$/;
@@ -98,6 +99,10 @@ export function isValidMoney(value: string): boolean {
   return MONEY_PATTERN.test(value) && Number.isFinite(Number(value));
 }
 
+export function isValidCurrency(value: string): boolean {
+  return CURRENCY_PATTERN.test(value) && Number.isFinite(Number(value));
+}
+
 export function isMoneyCandidate(value: string): boolean {
   return value === "" || MONEY_PATTERN.test(value);
 }
@@ -105,7 +110,8 @@ export function isMoneyCandidate(value: string): boolean {
 export function isValidClarificationAnswer(type: string, value: string, options?: Array<{ value: string }>): boolean {
   const trimmed = value.trim();
   if (type === "free_text" || type === "address") return trimmed.length > 0;
-  if (type === "money" || type === "currency") return isValidMoney(trimmed);
+  if (type === "money") return isValidMoney(trimmed);
+  if (type === "currency") return CURRENCY_PATTERN.test(trimmed) && Number.isFinite(Number(trimmed));
   if (type === "date") return isValidCalendarDate(trimmed);
   if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
   if (type === "single_choice") return options?.some((option) => option.value === trimmed) ?? false;

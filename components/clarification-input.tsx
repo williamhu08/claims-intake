@@ -7,6 +7,7 @@ import {
   isMoneyCandidate,
   isPostalCodeCandidate,
   isValidCalendarDate,
+  isValidCurrency,
   isValidDateTime,
   isValidMoney,
   isValidPercentage,
@@ -44,7 +45,8 @@ const patterns: Partial<Record<ClarificationAnswerType, RegExp>> = {
 export function isClarificationAnswerValid(type: ClarificationAnswerType, value: string) {
   const trimmed = value.trim();
   if (type === "free_text" || type === "address") return trimmed.length > 0;
-  if (type === "money" || type === "currency") return isValidMoney(trimmed);
+  if (type === "money") return isValidMoney(trimmed);
+  if (type === "currency") return isValidCurrency(trimmed);
   if (type === "date") return isValidCalendarDate(trimmed);
   if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
   if (type === "single_choice") return trimmed.length > 0;
