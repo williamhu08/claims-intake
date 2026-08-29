@@ -7,7 +7,7 @@ import { IntakeForm } from "@/components/intake-form";
 
 export function ClaimIntakeSection() {
   const [session, setSession] = useState<CaseSessionState | null>(null);
-  const [isCaseStateOpen, setIsCaseStateOpen] = useState(true);
+  const [isCaseStateOpen, setIsCaseStateOpen] = useState(false);
 
   return (
     <>
