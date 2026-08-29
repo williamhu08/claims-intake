@@ -16,6 +16,7 @@ import {
 import {
   applyCaseSessionAction,
   createCaseSession,
+  recordClaimantAnswer,
   signCaseSession,
 } from "@/lib/claims/session-engine";
 import type { CaseState } from "@/lib/claims/schema";
@@ -94,10 +95,83 @@ describe("V2 case-session routes", () => {
     expect(mockedSelect).not.toHaveBeenCalled();
   });
 
-  it("escalates an explicit no-response without a second model call", async () => {
+  it("asks about the next unresolved fact after a no-response, instead of escalating past it", async () => {
+    // Regression test: an explicit no-response only resolves the fact the claimant
+    // was actually asked about (incident_cause). Three other facts (loss_timing,
+    // active_loss_or_safety, injury_or_third_party) were never asked, so the route
+    // must consult the model for the next action rather than instantly escalating.
     const session = applyCaseSessionAction(createCaseSession(waterCaseState, 1_800), sourceQuestion, 2);
     const token = signCaseSession(session, sessionSecret);
-    vi.stubEnv("AI_GATEWAY_API_KEY", "");
+
+    const refreshedCaseState: CaseState = {
+      ...waterCaseState,
+      facts: waterCaseState.facts.map((fact) =>
+        fact.key === "incident_cause" ? { ...fact, status: "unclear" as const } : fact,
+      ),
+    };
+    const timingQuestion: CaseSessionAction = {
+      kind: "ask_clarifying_question",
+      answerType: "free_text",
+      question: "Is the damage still happening or is anyone unsafe?",
+      factKeys: ["active_loss_or_safety"],
+      whyItMatters: "This determines whether the case needs urgent routing.",
+    };
+    mockedRefresh.mockResolvedValue(refreshedCaseState);
+    mockedSelect.mockResolvedValue(timingQuestion);
+
+    const response = await respond(
+      request("http://localhost/api/case-session/respond", { sessionToken: token, answer: "no_response" }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      session: { pendingAction: timingQuestion },
+    });
+    expect(mockedRefresh).toHaveBeenCalledOnce();
+    expect(mockedSelect).toHaveBeenCalledOnce();
+  });
+
+  it("escalates a no-response only once every unresolved fact has actually been asked", async () => {
+    // Build a session where the other three unresolved facts (loss_timing,
+    // active_loss_or_safety, injury_or_third_party) were already asked and
+    // answered in prior turns, so only incident_cause remains — asking it and
+    // getting a no-response makes every fact "asked", so escalation is now valid.
+    const timingQuestion: CaseSessionAction = {
+      kind: "ask_clarifying_question",
+      answerType: "free_text",
+      question: "When did this happen?",
+      factKeys: ["loss_timing"],
+      whyItMatters: "This helps determine urgency.",
+    };
+    const safetyQuestion: CaseSessionAction = {
+      kind: "ask_clarifying_question",
+      answerType: "free_text",
+      question: "Is the damage still happening or is anyone unsafe?",
+      factKeys: ["active_loss_or_safety"],
+      whyItMatters: "This determines whether the case needs urgent routing.",
+    };
+    const injuryQuestion: CaseSessionAction = {
+      kind: "ask_clarifying_question",
+      answerType: "free_text",
+      question: "Was anyone injured or is another party involved?",
+      factKeys: ["injury_or_third_party"],
+      whyItMatters: "This affects liability review.",
+    };
+
+    let priorTurns = createCaseSession(waterCaseState, 1_800);
+    for (const question of [timingQuestion, safetyQuestion, injuryQuestion]) {
+      priorTurns = applyCaseSessionAction(priorTurns, question, 10);
+      priorTurns = recordClaimantAnswer(priorTurns, "I'm not sure.");
+    }
+    const session = applyCaseSessionAction(priorTurns, sourceQuestion, 10);
+    const token = signCaseSession(session, sessionSecret);
+
+    mockedRefresh.mockResolvedValue(waterCaseState);
+    mockedSelect.mockResolvedValue({
+      kind: "escalate_to_human",
+      stopReason: "claimant_cannot_answer",
+      rationale: "The claimant could not identify the source.",
+    });
 
     const response = await respond(
       request("http://localhost/api/case-session/respond", { sessionToken: token, answer: "no_response" }),
@@ -109,8 +183,8 @@ describe("V2 case-session routes", () => {
         terminal: { kind: "escalate_to_human", stopReason: "claimant_cannot_answer" },
       },
     });
-    expect(mockedRefresh).not.toHaveBeenCalled();
-    expect(mockedSelect).not.toHaveBeenCalled();
+    expect(mockedRefresh).toHaveBeenCalledOnce();
+    expect(mockedSelect).toHaveBeenCalledOnce();
   });
 
   it("rejects an invalid session token before continuing", async () => {

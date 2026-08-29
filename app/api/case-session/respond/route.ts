@@ -104,18 +104,13 @@ export async function POST(request: Request) {
 
   try {
     const answeredSession = recordClaimantAnswer(session, parsedRequest.data.answer);
-    const nextSession =
-      parsedRequest.data.answer === "no_response"
-        ? applyCaseSessionAction(
-            answeredSession,
-            {
-              kind: "escalate_to_human",
-              stopReason: "claimant_cannot_answer",
-              rationale: "The claimant could not identify the material detail.",
-            },
-            config.maxClarifications,
-          )
-        : await continueAfterAnswer(answeredSession, parsedRequest.data.answer, config);
+    // A "no_response" answer only resolves THIS question's fact as unanswerable —
+    // it must not short-circuit past other unresolved facts that were never asked.
+    // Always continue through the model so it can either ask the next unresolved
+    // fact or, once every fact has genuinely been asked, escalate to human review.
+    // The session engine (applyCaseSessionAction) still enforces that an escalation
+    // cannot skip a fact that was never put to the claimant.
+    const nextSession = await continueAfterAnswer(answeredSession, parsedRequest.data.answer, config);
 
     return Response.json({
       session: nextSession,
