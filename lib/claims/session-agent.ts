@@ -166,10 +166,14 @@ export async function selectNextCaseSessionAction(
     },
   };
 
-  const result = await generateText({
+  let result = await generateText({
     model: model(),
     system: nextActionInstructions,
-    prompt: `Validated case-session state:\n${JSON.stringify(session)}`,
+    prompt: `Validated case-session state:\n${JSON.stringify(session)}${
+      canAskClarification
+        ? "\nUNRESOLVED-FACT RULE: Because one or more facts are missing or unclear, you MUST select ask_clarifying_question now. Do not route or escalate."
+        : ""
+    }`,
     tools,
     toolChoice: "required",
     maxRetries: 0,
@@ -177,6 +181,19 @@ export async function selectNextCaseSessionAction(
   });
 
   enforceInputTokenBudget(result.usage.inputTokens, maxInputTokens);
+
+  if (canAskClarification && result.toolCalls[0]?.toolName !== "ask_clarifying_question") {
+    result = await generateText({
+      model: model(),
+      system: nextActionInstructions,
+      prompt: `The previous action was invalid. Select ask_clarifying_question now. Ask about a missing or unclear fact from Case State and write the question dynamically. Do not route or escalate.\nValidated case-session state:\n${JSON.stringify(session)}`,
+      tools,
+      toolChoice: "required",
+      maxRetries: 0,
+      timeout,
+    });
+    enforceInputTokenBudget(result.usage.inputTokens, maxInputTokens);
+  }
 
   if (result.toolCalls.length !== 1) {
     throw new Error("The model must select exactly one case-session action.");
