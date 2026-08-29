@@ -49,7 +49,7 @@ const claimantExplanationSchema = z
 export const clarificationAnswerTypeValues = [
   "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
   "integer", "percentage", "phone", "email", "date_time", "postal_code",
-  "address", "currency", "duration", "url",
+  "address", "currency", "url",
 ] as const;
 export const clarificationAnswerTypeSchema = z.enum(clarificationAnswerTypeValues);
 

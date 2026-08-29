@@ -26,7 +26,6 @@ export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, strin
   email: "Enter a valid email address.",
   postal_code: "Enter a 5-digit postal code.",
   url: "Enter a link starting with http:// or https://.",
-  duration: "Enter a duration, for example \"3 days\" or \"2 hours\".",
 };
 
 /**
@@ -50,7 +49,6 @@ export const clarificationAnswerTypeLabels: Record<ClarificationAnswerType, stri
   email: "Email",
   postal_code: "Postal code",
   url: "URL",
-  duration: "Duration",
 };
 
 /**

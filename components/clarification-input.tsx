@@ -20,7 +20,7 @@ import {
 export const clarificationAnswerTypeValues = [
   "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
   "integer", "percentage", "phone", "email", "date_time", "postal_code",
-  "address", "currency", "duration", "url",
+  "address", "currency", "url",
 ] as const;
 export type ClarificationAnswerType = (typeof clarificationAnswerTypeValues)[number];
 
@@ -39,7 +39,6 @@ const patterns: Partial<Record<ClarificationAnswerType, RegExp>> = {
   phone: /^[+\d][\d ()-]{6,24}$/,
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   url: /^https?:\/\/[^\s]+$/i,
-  duration: /^\d+\s*(?:minutes?|hours?|days?|weeks?|months?)$/i,
 };
 
 export function isClarificationAnswerValid(type: ClarificationAnswerType, value: string) {
