@@ -52,6 +52,10 @@ export function ResultPanel({ session }: ResultPanelProps) {
   //   must never excuse skipping a different, never-asked fact.
   const askedFactKeys = new Set(clarificationHistory.flatMap((entry) => entry.factKeys));
   const unaskedMissingFacts = caseState.missingFactKeys.filter((key) => !askedFactKeys.has(key));
+  // Read the raw kind as a string before any narrowing checks below, so the
+  // exhaustiveness guard can still report an unexpected value at runtime even
+  // though the static type only ever admits the two known literals.
+  const terminalKind: string = terminal.kind;
 
   if (terminal.kind === "propose_route" && caseState.missingFactKeys.length > 0) {
     throw new Error(
@@ -63,6 +67,15 @@ export function ResultPanel({ session }: ResultPanelProps) {
     throw new Error(
       `ResultPanel invariant violated: escalation was terminal while facts were never asked (${unaskedMissingFacts.join(", ")}).`,
     );
+  }
+
+  // Exhaustiveness guard: terminalSessionStateSchema only ever validates
+  // "propose_route" or "escalate_to_human" as terminal.kind. If a third kind
+  // ever reaches this component — e.g. from a future schema change that forgot
+  // to add a matching check above — fail loudly rather than silently falling
+  // through the two checks above with no coverage at all.
+  if (terminalKind !== "propose_route" && terminalKind !== "escalate_to_human") {
+    throw new Error(`ResultPanel invariant violated: invalid terminal.kind ("${terminalKind}").`);
   }
 
   const copy = stopReasonCopy[terminal.stopReason];
