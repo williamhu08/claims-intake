@@ -342,7 +342,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             type="button"
             tabIndex={showTryAnother ? 0 : -1}
             onClick={resetSession}
-            className="rounded-lg border border-border bg-background px-5 py-3 font-medium text-foreground transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-lg border border-success bg-success px-5 py-3 font-medium text-success-foreground transition-colors hover:bg-success/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Want to try another claim?
           </button>
