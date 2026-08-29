@@ -24,7 +24,7 @@ export const clarificationAnswerTypeHints: Record<ClarificationAnswerType, strin
   phone: "",
   email: "Enter a valid email address.",
   postal_code: "Enter a 5-digit postal code.",
-  url: "Enter a link starting with http:// or https://.",
+  url: "Enter a valid web address; http:// or https:// is optional.",
 };
 
 /**

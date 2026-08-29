@@ -125,7 +125,7 @@ export function isValidClarificationAnswer(type: string, value: string, options?
   if (type === "phone") return isValidPhone(trimmed);
   if (type === "email") return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   if (type === "postal_code") return isValidPostalCode(trimmed);
-  if (type === "url") return /^https?:\/\/[^\s]+$/i.test(trimmed);
+  if (type === "url") return /^(?:https?:\/\/)?[^\s.]+(?:\.[^\s.]+)+$/i.test(trimmed);
   return false;
 }
 
