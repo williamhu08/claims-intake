@@ -219,16 +219,7 @@ describe("V2 session contract", () => {
 
     expect(answered.pendingAction).toBeUndefined();
     expect(answered.clarificationHistory).toHaveLength(1);
-    expect(isWaterSourceClarificationEligible(answered, 2)).toBe(true);
-
-    const timingQuestion = {
-      ...question,
-      question: "When did you first notice the water damage, and do you know when it may have started?",
-      factKeys: ["loss_timing" as const],
-    };
-    const timingPending = applyCaseSessionAction(answered, timingQuestion, 2, () => now);
-    expect(timingPending.pendingAction?.factKeys).toEqual(["loss_timing"]);
-    expect(isWaterSourceClarificationEligible(recordClaimantAnswer(timingPending, "Yesterday"), 2)).toBe(false);
+    expect(isWaterSourceClarificationEligible(answered, 2)).toBe(false);
   });
 
   it("turns one claimant-supplied first-party source into a provenance-marked property route", () => {

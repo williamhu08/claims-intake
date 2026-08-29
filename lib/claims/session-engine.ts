@@ -39,15 +39,17 @@ export function isWaterSourceClarificationEligible(
   }
 
   const cause = factFor(session.caseState, "incident_cause");
-  const timing = factFor(session.caseState, "loss_timing");
   const safety = factFor(session.caseState, "active_loss_or_safety");
-  const alreadyAskedCause = session.clarificationHistory.some((item) => item.factKeys.includes("incident_cause"));
-  const alreadyAskedTiming = session.clarificationHistory.some((item) => item.factKeys.includes("loss_timing"));
+  const alreadyAskedCause = session.clarificationHistory.some((item) =>
+    item.factKeys.includes("incident_cause"),
+  );
 
   return (
-    ((cause.status === "missing" || cause.status === "unclear") && !alreadyAskedCause) ||
-    ((timing.status === "missing" || timing.status === "unclear") && !alreadyAskedTiming)
-  ) && safety.status !== "unclear" && session.clarificationHistory.length < maxClarifications;
+    (cause.status === "missing" || cause.status === "unclear") &&
+    safety.status !== "unclear" &&
+    !alreadyAskedCause &&
+    session.clarificationHistory.length < maxClarifications
+  );
 }
 
 export function createCaseSession(
@@ -80,16 +82,12 @@ export function applyCaseSessionAction(
     throw new Error("A terminal or pending session cannot select another action.");
   }
 
-  if (parsedAction.kind === "ask_clarifying_question") {
-    const asksEligibleFact = parsedAction.factKeys.some((key) => {
-      if (key !== "incident_cause" && key !== "loss_timing") return false;
-      const fact = factFor(session.caseState, key);
-      const alreadyAsked = session.clarificationHistory.some((item) => item.factKeys.includes(key));
-      return (fact.status === "missing" || fact.status === "unclear") && !alreadyAsked;
-    });
-    if (!asksEligibleFact || !isWaterSourceClarificationEligible(session, maxClarifications)) {
-      throw new Error("This clarification is not eligible for the current case state.");
-    }
+  if (
+    parsedAction.kind === "ask_clarifying_question" &&
+    (!parsedAction.factKeys.includes("incident_cause") ||
+      !isWaterSourceClarificationEligible(session, maxClarifications))
+  ) {
+    throw new Error("This clarification is not eligible for the current case state.");
   }
 
   if (parsedAction.kind === "propose_route") {
