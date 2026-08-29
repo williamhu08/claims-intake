@@ -12,7 +12,7 @@ import {
   type CaseSessionAction,
   type CaseSessionState,
 } from "@/lib/claims/session-schema";
-import { isWaterSourceClarificationEligible } from "@/lib/claims/session-engine";
+import { isClarificationEligible } from "@/lib/claims/session-engine";
 
 const defaultModel = "openai/gpt-5.6-luna";
 
@@ -145,13 +145,13 @@ export async function selectNextCaseSessionAction(
   maxInputTokens: number,
   timeout: number,
 ): Promise<CaseSessionAction> {
-  const canAskWaterSource = isWaterSourceClarificationEligible(session, maxClarifications);
+  const canAskClarification = isClarificationEligible(session, maxClarifications);
   const tools = {
-    ...(canAskWaterSource
+    ...(canAskClarification
       ? {
           ask_clarifying_question: {
             description:
-              "Ask the one eligible material clarification question about the water source (incident_cause). Always use answerType free_text. Use the exact question: What do you believe caused the water damage? If you are not sure, tell us what you noticed—for example, a burst pipe, appliance leak, drain backup, roof or window leak, condensation, or something else. Use whyItMatters to explain that identifying the likely source helps determine the appropriate intake path and immediate mitigation guidance. The claimant may describe any source in their own words; do not force a dropdown or treat the examples as an exhaustive list.",
+              "Ask one specific, claimant-friendly question for one or more facts that are currently missing or unclear in Case State. Choose factKeys only from those facts, do not repeat any fact already asked in clarificationHistory, and write the question and whyItMatters dynamically from the current case details. Never infer or hardcode an answer, and do not ask for facts that are already collected or not applicable.",
             inputSchema: askClarifyingQuestionInputSchema,
           },
         }

@@ -23,34 +23,24 @@ function factFor(state: CaseState, key: CaseFact["key"]): CaseFact {
   return fact;
 }
 
-function isWaterLoss(state: CaseState): boolean {
-  return (
-    state.claimType === "water_damage" ||
-    (state.claimType === "other_or_unclear" && /\bwater|leak|flood/i.test(state.summary))
-  );
-}
-
-export function isWaterSourceClarificationEligible(
+export function isClarificationEligible(
   session: CaseSessionState,
   maxClarifications: number,
 ): boolean {
-  if (session.terminal || session.pendingAction || !isWaterLoss(session.caseState)) {
+  if (session.terminal || session.pendingAction || session.clarificationHistory.length >= maxClarifications) {
     return false;
   }
 
-  const cause = factFor(session.caseState, "incident_cause");
-  const safety = factFor(session.caseState, "active_loss_or_safety");
-  const alreadyAskedCause = session.clarificationHistory.some((item) =>
-    item.factKeys.includes("incident_cause"),
-  );
-
-  return (
-    (cause.status === "missing" || cause.status === "unclear") &&
-    safety.status !== "unclear" &&
-    !alreadyAskedCause &&
-    session.clarificationHistory.length < maxClarifications
+  const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
+  return session.caseState.facts.some(
+    (fact) =>
+      (fact.status === "missing" || fact.status === "unclear") &&
+      !alreadyAsked.has(fact.key),
   );
 }
+
+/** @deprecated Use isClarificationEligible for all claim categories. */
+export const isWaterSourceClarificationEligible = isClarificationEligible;
 
 export function createCaseSession(
   caseState: CaseState,
@@ -82,12 +72,15 @@ export function applyCaseSessionAction(
     throw new Error("A terminal or pending session cannot select another action.");
   }
 
-  if (
-    parsedAction.kind === "ask_clarifying_question" &&
-    (!parsedAction.factKeys.includes("incident_cause") ||
-      !isWaterSourceClarificationEligible(session, maxClarifications))
-  ) {
-    throw new Error("This clarification is not eligible for the current case state.");
+  if (parsedAction.kind === "ask_clarifying_question") {
+    const alreadyAsked = new Set(session.clarificationHistory.flatMap((item) => item.factKeys));
+    const allFactsEligible = parsedAction.factKeys.every((key) => {
+      const fact = factFor(session.caseState, key);
+      return (fact.status === "missing" || fact.status === "unclear") && !alreadyAsked.has(key);
+    });
+    if (!allFactsEligible || !isClarificationEligible(session, maxClarifications)) {
+      throw new Error("This clarification is not eligible for the current case state.");
+    }
   }
 
   if (parsedAction.kind === "propose_route") {

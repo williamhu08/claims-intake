@@ -140,6 +140,22 @@ describe("V2 session contract", () => {
     }).success).toBe(false);
   });
 
+  it("allows clarification for any missing or unclear fact, not only water source", () => {
+    const fireState = { ...caseState, claimType: "fire_or_smoke" as const };
+    const fireSession = createCaseSession(fireState, 1800, () => new Date("2026-08-26T19:00:00.000Z"));
+    const action = { ...question, factKeys: ["injury_or_third_party" as const], question: "Was anyone injured or otherwise involved?" };
+    expect(isWaterSourceClarificationEligible(fireSession, 2)).toBe(true);
+    expect(() => applyCaseSessionAction(fireSession, action, 2, () => new Date("2026-08-26T19:00:00.000Z"))).not.toThrow();
+  });
+
+  it("rejects clarification for collected, not-applicable, or previously asked facts", () => {
+    const collected = { ...question, factKeys: ["damage_description" as const] };
+    expect(() => applyCaseSessionAction(createCaseSession(caseState, 1800, () => new Date("2026-08-26T19:00:00.000Z")), collected, 2, () => new Date("2026-08-26T19:00:00.000Z"))).toThrow();
+    const pending = applyCaseSessionAction(createCaseSession(caseState, 1800, () => new Date("2026-08-26T19:00:00.000Z")), question, 2, () => new Date("2026-08-26T19:00:00.000Z"));
+    const answered = recordClaimantAnswer(pending, "A dishwasher leak");
+    expect(() => applyCaseSessionAction(answered, question, 2, () => new Date("2026-08-26T19:00:00.000Z"))).toThrow();
+  });
+
   it("rejects an invalid action, repeated fact key, and unsupported route", () => {
     expect(
       caseSessionActionSchema.safeParse({
@@ -219,7 +235,7 @@ describe("V2 session contract", () => {
 
     expect(answered.pendingAction).toBeUndefined();
     expect(answered.clarificationHistory).toHaveLength(1);
-    expect(isWaterSourceClarificationEligible(answered, 2)).toBe(false);
+    expect(isWaterSourceClarificationEligible(answered, 2)).toBe(true);
   });
 
   it("turns one claimant-supplied first-party source into a provenance-marked property route", () => {
@@ -387,7 +403,7 @@ describe("V2 session contract", () => {
     };
 
     expect(noResponseTerminal.terminal?.stopReason).toBe("claimant_cannot_answer");
-    expect(isWaterSourceClarificationEligible(createCaseSession(safetyState, 1_800), 2)).toBe(false);
+    expect(isWaterSourceClarificationEligible(createCaseSession(safetyState, 1_800), 2)).toBe(true);
     expect(
       applyCaseSessionAction(
         createCaseSession(safetyState, 1_800),
@@ -399,7 +415,7 @@ describe("V2 session contract", () => {
         2,
       ).terminal?.stopReason,
     ).toBe("safety_review");
-    expect(isWaterSourceClarificationEligible(createCaseSession(gibberishState, 1_800), 2)).toBe(false);
+    expect(isWaterSourceClarificationEligible(createCaseSession(gibberishState, 1_800), 2)).toBe(true);
     expect(
       applyCaseSessionAction(
         createCaseSession(gibberishState, 1_800),
