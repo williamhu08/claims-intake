@@ -3,9 +3,14 @@
 import type { ChangeEvent } from "react";
 import {
   getDaysInMonth,
+  isIntegerCandidate,
   isMoneyCandidate,
+  isPostalCodeCandidate,
   isValidCalendarDate,
+  isValidDateTime,
   isValidMoney,
+  isValidPercentage,
+  isValidPostalCode,
 } from "@/lib/claims/answer-validation";
 
 // The array is the source of truth; ClarificationAnswerType is derived from it
@@ -30,10 +35,8 @@ interface Props {
 
 const patterns: Partial<Record<ClarificationAnswerType, RegExp>> = {
   integer: /^\d+$/,
-  percentage: /^(?:100|\d{1,2})(?:\.\d{1,2})?$/,
   phone: /^[+\d][\d ()-]{6,24}$/,
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  postal_code: /^[A-Za-z0-9][A-Za-z0-9 -]{2,11}$/,
   url: /^https?:\/\/[^\s]+$/i,
   duration: /^\d+\s*(?:minutes?|hours?|days?|weeks?|months?)$/i,
 };
@@ -46,7 +49,9 @@ export function isClarificationAnswerValid(type: ClarificationAnswerType, value:
   if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
   if (type === "single_choice") return trimmed.length > 0;
   if (type === "multi_choice") return trimmed.split(",").filter(Boolean).length > 0;
-  if (type === "date_time") return !Number.isNaN(Date.parse(trimmed));
+  if (type === "date_time") return isValidDateTime(trimmed);
+  if (type === "percentage") return isValidPercentage(trimmed);
+  if (type === "postal_code") return isValidPostalCode(trimmed);
   return patterns[type]?.test(trimmed) ?? false;
 }
 
@@ -144,6 +149,163 @@ function DateAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props
   );
 }
 
+const selectClassName = "w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground disabled:opacity-60";
+
+/**
+ * Encodes a date_time answer as "YYYY-MM-DDTHH:MM:SS" with any not-yet-chosen
+ * part left blank (e.g. "2024-05-" with an empty time, or "-01:30-05" once
+ * time is picked before date). Mirrors parseDateParts/DateAnswerSelect's
+ * approach: the value string is the single source of truth, so the existing
+ * controlled value/onChange contract and answer reset between questions keep
+ * working unchanged.
+ */
+function parseDateTimeParts(value: string): { year: string; month: string; day: string; hour: string; minute: string; second: string } {
+  const [datePart = "", timePart = ""] = value.split("T");
+  const [year = "", month = "", day = ""] = datePart.split("-");
+  const [hour = "", minute = "", second = ""] = timePart.split(":");
+  return { year, month, day, hour, minute, second };
+}
+
+function encodeDateTimeParts(parts: { year: string; month: string; day: string; hour: string; minute: string; second: string }): string {
+  const { year, month, day, hour, minute, second } = parts;
+  if (!year && !month && !day && !hour && !minute && !second) return "";
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+}
+
+/**
+ * Two independent controls sharing one encoded value: a calendar date
+ * (year → month → day, cascading exactly like DateAnswerSelect) and a time
+ * of day (hour → minute → second, each 00-23/00-59/00-59 and independently
+ * selectable — none of them constrain the others the way month/day do).
+ */
+function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
+  const currentYear = new Date().getFullYear();
+  const { year, month, day, hour, minute, second } = parseDateTimeParts(value);
+
+  // A previously-submitted "I don't know" answer is rendered as a literal
+  // string (see intake-form.tsx) rather than an encoded date_time, so it
+  // can't be decomposed into parts. Show it as plain read-only text instead
+  // of six dropdowns with nothing meaningful to select.
+  if (disabled && value && !year.match(/^\d{4}$/)) {
+    return (
+      <p aria-describedby={describedBy} className="mt-2 rounded-lg border border-input bg-muted/40 px-3 py-3 text-foreground">
+        {value}
+      </p>
+    );
+  }
+
+  const yearOptions = Array.from({ length: currentYear - MIN_LOSS_DATE_YEAR + 1 }, (_, index) => String(currentYear - index));
+  const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0"));
+  const dayCount = year && month ? getDaysInMonth(Number(year), Number(month)) : 31;
+  const dayOptions = Array.from({ length: dayCount }, (_, index) => String(index + 1).padStart(2, "0"));
+  const hourOptions = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, "0"));
+  const minuteOptions = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, "0"));
+  const secondOptions = minuteOptions;
+
+  function handleDatePartChange(part: "year" | "month" | "day", nextRaw: string) {
+    if (disabled) return;
+    // Choosing a date part resets every date part after it, same as
+    // DateAnswerSelect, but leaves the time part untouched since date and
+    // time are independent of each other.
+    const nextParts = { year, month, day, hour, minute, second };
+    if (part === "year") {
+      nextParts.year = nextRaw;
+      nextParts.month = "";
+      nextParts.day = "";
+    } else if (part === "month") {
+      nextParts.month = nextRaw;
+      nextParts.day = "";
+    } else {
+      nextParts.day = nextRaw;
+    }
+    onChange(encodeDateTimeParts(nextParts));
+  }
+
+  function handleTimePartChange(part: "hour" | "minute" | "second", nextRaw: string) {
+    if (disabled) return;
+    onChange(encodeDateTimeParts({ year, month, day, hour, minute, second, [part]: nextRaw }));
+  }
+
+  function dateSelectProps(part: "year" | "month" | "day", currentValue: string, prerequisiteMet: boolean) {
+    return {
+      "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}`,
+      value: currentValue,
+      onChange: (event: ChangeEvent<HTMLSelectElement>) => handleDatePartChange(part, event.target.value),
+      disabled: disabled || !prerequisiteMet,
+      "aria-disabled": disabled || !prerequisiteMet,
+      className: selectClassName,
+    };
+  }
+
+  function timeSelectProps(part: "hour" | "minute" | "second", currentValue: string) {
+    return {
+      "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}`,
+      value: currentValue,
+      onChange: (event: ChangeEvent<HTMLSelectElement>) => handleTimePartChange(part, event.target.value),
+      disabled,
+      "aria-disabled": disabled,
+      className: selectClassName,
+    };
+  }
+
+  return (
+    <div aria-describedby={describedBy} className="mt-2 space-y-3">
+      <div className="grid grid-cols-3 gap-3">
+        <select {...dateSelectProps("year", year, true)}>
+          <option value="" disabled={disabled && year !== ""}>Year</option>
+          {yearOptions.map((option) => (
+            <option key={option} value={option} disabled={disabled && year !== option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <select {...dateSelectProps("month", month, year !== "")}>
+          <option value="" disabled={disabled && month !== ""}>Month</option>
+          {monthOptions.map((option, index) => (
+            <option key={option} value={option} disabled={disabled && month !== option}>
+              {option} · {MONTH_LABELS[index]}
+            </option>
+          ))}
+        </select>
+        <select {...dateSelectProps("day", day, year !== "" && month !== "")}>
+          <option value="" disabled={disabled && day !== ""}>Day</option>
+          {dayOptions.map((option) => (
+            <option key={option} value={option} disabled={disabled && day !== option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <select {...timeSelectProps("hour", hour)}>
+          <option value="" disabled={disabled && hour !== ""}>Hour</option>
+          {hourOptions.map((option) => (
+            <option key={option} value={option} disabled={disabled && hour !== option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <select {...timeSelectProps("minute", minute)}>
+          <option value="" disabled={disabled && minute !== ""}>Minute</option>
+          {minuteOptions.map((option) => (
+            <option key={option} value={option} disabled={disabled && minute !== option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <select {...timeSelectProps("second", second)}>
+          <option value="" disabled={disabled && second !== ""}>Second</option>
+          {secondOptions.map((option) => (
+            <option key={option} value={option} disabled={disabled && second !== option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export function ClarificationInput({ answerType, value, onChange, options = [], disabled, describedBy }: Props) {
   const readOnlySelectProps = {
     "aria-disabled": disabled,
@@ -156,6 +318,9 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
 
   if (answerType === "date") {
     return <DateAnswerSelect value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
+  }
+  if (answerType === "date_time") {
+    return <DateTimeAnswerSelect value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
   if (answerType === "yes_no") {
     return (
@@ -192,11 +357,16 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     const selected = new Set(value ? value.split(",") : []);
     return <fieldset className="mt-2 flex flex-col gap-3" aria-describedby={describedBy}><legend className="sr-only">Select one or more options</legend>{options.map((option) => <label key={option.value} className="flex items-center gap-2 text-foreground"><input type="checkbox" checked={selected.has(option.value)} disabled={disabled} onChange={(e) => { const next = new Set(selected); if (e.target.checked) { next.add(option.value); } else { next.delete(option.value); } onChange([...next].join(",")); }} />{option.label}</label>)}</fieldset>;
   }
-  const inputType = answerType === "email" ? "email" : answerType === "url" ? "url" : answerType === "date_time" ? "datetime-local" : answerType === "address" || answerType === "free_text" ? "text" : "text";
+  const inputType = answerType === "email" ? "email" : answerType === "url" ? "url" : answerType === "address" || answerType === "free_text" ? "text" : "text";
   const inputMode: "numeric" | "text" = ["money", "currency", "integer", "percentage", "postal_code"].includes(answerType) ? "numeric" : "text";
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const next = event.target.value;
+    // Filtered at the keystroke level (rather than only flagged invalid
+    // afterward) so a non-numeric character, or a 6th postal-code digit,
+    // never lands in the field in the first place.
     if (answerType === "money" || answerType === "currency") { if (!isMoneyCandidate(next)) return; }
+    if (answerType === "integer") { if (!isIntegerCandidate(next)) return; }
+    if (answerType === "postal_code") { if (!isPostalCodeCandidate(next)) return; }
     onChange(next);
   }
   const common = { value, onChange: handleChange, disabled, inputMode, "aria-describedby": describedBy, "aria-invalid": value.length > 0 && !isClarificationAnswerValid(answerType, value), className: "mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" };
