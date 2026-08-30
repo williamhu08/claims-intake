@@ -43,6 +43,11 @@ function isUnauthorizedError(error: unknown): boolean {
   return /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
 }
 
+function isTimeoutError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return /abort|aborted|timeout|timed out|deadline/i.test(message);
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -124,14 +129,17 @@ export async function POST(request: Request) {
 
     const isRateLimited = isRateLimitError(error);
     const isUnauthorized = isUnauthorizedError(error);
+    const isTimedOut = isTimeoutError(error);
 
     return Response.json(
       {
         error: isUnauthorized
-          ? "AI Gateway rejected the configured API key. Check that AI_GATEWAY_API_KEY is valid and enabled for the Preview/Development environment, then refresh the preview. Your answer has not been submitted."
+          ? "We couldn't submit your answer because the assessment service rejected its configuration. Your answer was not saved. Please try again later."
           : isRateLimited
-            ? "The assessment service is temporarily busy because the AI Gateway free-tier rate limit was reached. Wait a moment and try again, or add AI Gateway credits. Your answer has not been submitted."
-            : "This step could not be completed. Your answer has not been submitted. Check the server logs for the underlying error — a misconfigured AI_MODEL, a transient AI Gateway outage, or a bug in continueAfterAnswer are the likely causes.",
+            ? "We couldn't submit your answer because the assessment service is temporarily busy. Your answer was not saved. Please wait a moment and try again."
+            : isTimedOut
+              ? "We couldn't submit your answer because the assessment took too long to complete. Your answer was not saved. Please try again."
+              : "We couldn't submit your answer because the assessment service encountered an unexpected problem. Your answer was not saved. Please try again.",
       },
       { status: isUnauthorized ? 401 : isRateLimited ? 429 : 502 },
     );

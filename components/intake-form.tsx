@@ -267,7 +267,14 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
 
       {error && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <p>{error}</p>
+          <ul className="list-disc space-y-1 pl-5">
+            {error.split(/(?<=\.)\s+/).map((message, index) => (
+              <li key={`${message}-${index}`}>
+                {message}
+                {" "}
+              </li>
+            ))}
+          </ul>
           <div className="mt-3 flex flex-wrap gap-3">
             {errorRecovery === "retry" && retryAction.current && (
               <button type="button" onClick={() => retryAction.current?.()} disabled={loading} className="rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground disabled:opacity-50">
