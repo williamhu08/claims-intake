@@ -10,6 +10,7 @@ import {
 } from "@/lib/claims/session-schema";
 import { clarificationAnswerTypeHints, exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
+import { CaseHandoffPanel } from "@/components/case-handoff-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
 import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";
 import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
@@ -335,6 +336,10 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             </button>
           </div>
         </form>
+      )}
+
+      {session?.terminal && getUnaskedMissingFacts(session).length === 0 && (
+        <CaseHandoffPanel sessionToken={sessionToken} enabled />
       )}
 
       {session?.terminal && (

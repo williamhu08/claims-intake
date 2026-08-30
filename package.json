@@ -14,6 +14,7 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "swr": "^2.5.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
