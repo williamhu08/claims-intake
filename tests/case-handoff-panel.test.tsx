@@ -123,6 +123,17 @@ function mockHandoffResponse(body: unknown, status = 200) {
 }
 
 describe("CaseHandoffPanel", () => {
+  it("does not request a handoff for non-water claims", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<CaseHandoffPanel sessionToken="token-liability" claimType="liability" enabled />);
+
+    await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("renders nothing when disabled", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -140,7 +151,7 @@ describe("CaseHandoffPanel", () => {
     });
     vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingResponse));
 
-    render(<CaseHandoffPanel sessionToken="token-loading" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-loading" claimType="water_damage" enabled />);
 
     expect(await screen.findByRole("status")).toHaveTextContent("Preparing your next step…");
     resolveRequest!({ ok: true, json: async () => ({ handoff: standardHandoff }) });
@@ -150,7 +161,7 @@ describe("CaseHandoffPanel", () => {
   it("renders a standard property-adjuster handoff", async () => {
     mockHandoffResponse({ handoff: standardHandoff });
 
-    render(<CaseHandoffPanel sessionToken="token-standard" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-standard" claimType="water_damage" enabled />);
 
     expect(await screen.findByRole("heading", { name: "Ready for property adjuster review" })).toBeInTheDocument();
     expect(screen.getByText(standardHandoff.rationale)).toBeInTheDocument();
@@ -163,7 +174,7 @@ describe("CaseHandoffPanel", () => {
   it("renders an urgent human-review handoff", async () => {
     mockHandoffResponse({ handoff: urgentHandoff });
 
-    render(<CaseHandoffPanel sessionToken="token-urgent" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-urgent" claimType="water_damage" enabled />);
 
     expect(await screen.findByRole("heading", { name: "Urgent human review" })).toBeInTheDocument();
     expect(screen.getByText("Active: water is still leaking.")).toBeInTheDocument();
@@ -172,7 +183,7 @@ describe("CaseHandoffPanel", () => {
   it("renders a standard human-review handoff", async () => {
     mockHandoffResponse({ handoff: humanReviewHandoff });
 
-    render(<CaseHandoffPanel sessionToken="token-human-review" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-human-review" claimType="water_damage" enabled />);
 
     expect(await screen.findByRole("heading", { name: "Human review recommended" })).toBeInTheDocument();
     expect(screen.getByText("No safety detail was confirmed.")).toBeInTheDocument();
@@ -181,18 +192,35 @@ describe("CaseHandoffPanel", () => {
   it("does not display an ineligible handoff response", async () => {
     mockHandoffResponse({ error: "This case is not eligible for the water-damage handoff. A person can review it instead." }, 422);
 
-    render(<CaseHandoffPanel sessionToken="token-malformed" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-malformed" claimType="water_damage" enabled />);
 
     await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.queryByText("This case is not eligible for the water-damage handoff. A person can review it instead.")).not.toBeInTheDocument();
   });
 
+  it("shows a safe retryable error for malformed JSON", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => { throw new SyntaxError("Unexpected token <"); } }));
+
+    render(<CaseHandoffPanel sessionToken="token-malformed-json" claimType="water_damage" enabled />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("The next step could not be prepared. Please try again.");
+  });
+
+  it("shows a safe retryable error for a malformed successful response", async () => {
+    mockHandoffResponse({});
+
+    render(<CaseHandoffPanel sessionToken="token-malformed-success" claimType="water_damage" enabled />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("The next step could not be prepared. Please try again.");
+    expect(screen.queryByText("undefined")).not.toBeInTheDocument();
+  });
+
   it("shows a retryable error when the handoff request fails to reach the service", async () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error("Network error"));
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<CaseHandoffPanel sessionToken="token-network-failure" enabled />);
+    render(<CaseHandoffPanel sessionToken="token-network-failure" claimType="water_damage" enabled />);
 
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     const retryButton = screen.getByRole("button", { name: "Try again" });
@@ -207,11 +235,11 @@ describe("CaseHandoffPanel", () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ handoff: standardHandoff }) });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { rerender } = render(<CaseHandoffPanel sessionToken="token-dedupe" enabled />);
+    const { rerender } = render(<CaseHandoffPanel sessionToken="token-dedupe" claimType="water_damage" enabled />);
     await screen.findByRole("heading", { name: "Ready for property adjuster review" });
 
-    rerender(<CaseHandoffPanel sessionToken="token-dedupe" enabled />);
-    rerender(<CaseHandoffPanel sessionToken="token-dedupe" enabled />);
+    rerender(<CaseHandoffPanel sessionToken="token-dedupe" claimType="water_damage" enabled />);
+    rerender(<CaseHandoffPanel sessionToken="token-dedupe" claimType="water_damage" enabled />);
 
     expect(fetchMock).toHaveBeenCalledOnce();
   });

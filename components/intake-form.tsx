@@ -362,7 +362,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       )}
 
       {session?.terminal && getUnaskedMissingFacts(session).length === 0 && (
-        <CaseHandoffPanel sessionToken={sessionToken} enabled />
+        <CaseHandoffPanel sessionToken={sessionToken} claimType={session.caseState.claimType} enabled />
       )}
 
       {session?.terminal && (

@@ -289,7 +289,7 @@ describe("IntakeForm", () => {
     expect(await screen.findByRole("button", { name: "Try again" })).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByRole("heading", { name: "Water damage" })).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("offers a safe reset after a malformed session", async () => {

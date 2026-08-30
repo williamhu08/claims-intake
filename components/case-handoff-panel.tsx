@@ -3,7 +3,9 @@
 import useSWR from "swr";
 import type { AdjusterReadyHandoff } from "@/lib/claims/handoff-schema";
 
-type Props = { sessionToken: string | null; enabled: boolean };
+type Props = { sessionToken: string | null; enabled: boolean; claimType?: string };
+
+const WATER_DAMAGE = "water_damage";
 
 type ResponsePayload = { handoff?: AdjusterReadyHandoff; error?: string };
 
@@ -13,14 +15,21 @@ const fetcher = async ([url, sessionToken]: [string, string]): Promise<ResponseP
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ sessionToken }),
   });
-  const data = (await response.json()) as ResponsePayload;
+  let data: ResponsePayload;
+  try {
+    data = (await response.json()) as ResponsePayload;
+  } catch {
+    throw new Error("The next step could not be prepared. Please try again.");
+  }
   if (response.status === 422) return {};
   if (!response.ok) throw new Error(data.error ?? "The handoff could not be prepared.");
+  if (!data.handoff) throw new Error("The next step could not be prepared. Please try again.");
   return data;
 };
 
-export function CaseHandoffPanel({ sessionToken, enabled }: Props) {
-  const key = enabled && sessionToken ? (["/api/case-handoff", sessionToken] as const) : null;
+export function CaseHandoffPanel({ sessionToken, enabled, claimType }: Props) {
+  const eligible = enabled && claimType === WATER_DAMAGE;
+  const key = eligible && sessionToken ? (["/api/case-handoff", sessionToken] as const) : null;
   const { data, error, isLoading, mutate } = useSWR<ResponsePayload>(key, fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
