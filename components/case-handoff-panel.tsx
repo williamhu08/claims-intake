@@ -44,7 +44,7 @@ export function CaseHandoffPanel({ sessionToken, enabled }: Props) {
   const urgent = handoff.urgency.level === "urgent";
   return (
     <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">V3 next step</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next step</p>
       <h2 className="mt-3 font-serif text-2xl font-semibold text-foreground text-balance">
         {urgent ? "Urgent human review" : handoff.finalDisposition === "property_adjuster_review" ? "Ready for property adjuster review" : "Human review recommended"}
       </h2>
