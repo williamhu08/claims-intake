@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";

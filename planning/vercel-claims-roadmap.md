@@ -31,7 +31,7 @@ The product is deliberately narrow: **first-touch triage for property claims**. 
 | **V1 — Make it legible** | Make the system's understanding visible and correctable. | Show structured case state: collected facts, missing facts, and proposed route. Add clear loading and error states. | Next.js, AI SDK, AI Gateway. |
 | **V1.5 — Design gate** | Decide what V2 is allowed to do. | Record the bounded action set, session contract, dynamic-decomposition rules, stop/safety conditions, V3 boundary, and tests required before V2 implementation. No claimant-facing capability. | AI SDK tool-use design; evaluate eve but do not require it. |
 | **V2 — Make it act** | Let the system gather missing information. | Multi-turn clarification, in-session case state, targeted questions, and an explicit stop condition. | AI SDK tool use; evaluate eve for orchestration. |
-| **V3 — Make it trustworthy** | Produce an actionable, evidence-backed handoff. | Mock policy lookup, operational severity/urgency, routing, escalation for low confidence or unresolved facts, and an adjuster-ready handoff. | AI SDK, AI Gateway, and the selected agent/tool layer. |
+| **V3 — Make it useful** | Produce one actionable water-damage handoff. | Deterministic mock policy context, safety-first urgency, and an adjuster-ready property handoff or human-review escalation. | Existing Next.js/V2 stack; no new orchestration layer. |
 | **V4 — Make it compelling** | Deliver a polished, presentation-ready submission. | Demo scenarios, visual and interaction polish, reliable edge states, README and architecture notes, final deployment, and a concise presentation. | Full stack, used deliberately. |
 
 V1.5 implementation details live in the [execution plan](./v1_5_execution_plan.md),
@@ -43,26 +43,33 @@ keep V2 bounded and defer policy, severity, and evidence work to V3.
 
 The realistic six-hour version is:
 
-> A claimant describes water damage. The agent extracts visible case facts, asks one or two targeted questions, looks up a mock policy, then either routes the claim to a property adjuster or escalates it because key uncertainty remains.
+> A claimant describes water damage, answers one or two targeted questions,
+> then receives either a non-binding property-adjuster handoff or a
+> human-review outcome because key uncertainty remains.
 
-Prioritize V0 and V1, one convincing V2 flow, a light V3 policy lookup/escalation, then V4 polish and presentation. Cut authentication, a database, real insurer integrations, multiple policy types, and broad edge-case coverage.
+Prioritize V0 and V1, one convincing V2 flow, a light V3 policy
+lookup/escalation, then V4 polish and presentation. Cut authentication, a
+database, real insurer integrations, multiple policy types, and broad
+edge-case coverage.
 
-## V3 severity decision
+## Narrow V3 severity decision
 
-V3 should add **operational severity/urgency** only when it helps a real
-handoff decision. It is not a damage valuation, coverage determination, or
-payment estimate.
+V3 adds **operational urgency** only for the water-damage handoff and only from
+the existing `active_loss_or_safety` fact. It is not a damage valuation,
+coverage determination, or payment estimate.
 
 Initial vocabulary:
 
-- `urgent` — active water or fire loss, electrical/structural safety concern,
-  or immediate mitigation may be needed;
-- `standard` — damage is known with no active safety or mitigation signal; and
-- `human_review` — the available facts cannot establish urgency safely.
+- `urgent` — active loss or safety concern; hand off immediately for human
+  review.
+- `standard` — no active loss or safety concern; continue to the non-binding
+  property-adjuster handoff.
+- `human_review` — the safety fact is missing, unclear, or contradictory; do
+  not infer urgency.
 
-Every severity result must cite concise, claimant-grounded evidence and a
-rationale. Do not begin with dollar thresholds; introduce them only if a later
-policy/evidence design justifies them.
+Every severity result must cite its fact provenance and the deterministic rule
+that produced it. Urgency prioritizes an already-determined disposition; it
+does not choose property-adjuster review over human review.
 
 ## Final demo story
 

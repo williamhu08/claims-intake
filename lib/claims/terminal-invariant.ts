@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 
 /**

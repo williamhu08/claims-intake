@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V0. */
+
 import { createContext, useContext, useSyncExternalStore } from "react";
 
 export const TestingModeContext = createContext(false);

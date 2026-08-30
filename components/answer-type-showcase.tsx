@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V2. */
+
 import { useState } from "react";
 import {
   ClarificationInput,

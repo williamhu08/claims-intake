@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import Link from "next/link";
 import { AnswerTypeShowcase } from "@/components/answer-type-showcase";
 

@@ -1,6 +1,6 @@
 # V2 Execution Plan — Clearway Agentic Intake
 
-> **Depends on V1.5.** [V1.5 — V2 Handoff Criteria](./v2_handoff_criteria.md)
+> **Depends on V1.5.** [V1.5 — V2 Handoff Criteria](./v1_v2_handoff_criteria.md)
 > defines the product and safety contract. This document is the implementation
 > checklist for delivering it.
 
@@ -295,17 +295,39 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      retry after failure, malformed response, human review, reset, and
      duplicate-submit prevention.
 
-5. [ ] **Verify V2 end-to-end and document the seam to V3**
-   - [ ] Confirm the shipped V2 behavior still matches the V1.5 action,
-     session, safety, provenance, and V3-boundary decisions.
-   - [ ] Test claimant-facing question/history/escalation UI and responsive,
+5. [x] **Close V2 verification and prepare the V3 handoff**
+
+   **5A.** [x] **Record deterministic release verification**
+   - [x] Test claimant-facing question/history/escalation UI and responsive,
      accessible states separately from the server/session unit suite.
-   - [ ] Run lint, tests, and production build.
-   - [ ] Deploy a protected Preview only.
-   - [ ] Make no more than two synthetic live Gateway smoke calls, recording
-     each in ignored `.runs/` metadata.
-   - [ ] Update README architecture with the V2 session/action boundary and
-     the preliminary V3 dependency contract.
+   - [x] Run lint, tests, and production build.
+   - Evidence is recorded in the
+     [V2 Release Verification Record](./v2_release_verification.md).
+
+   **5B.** [x] **Complete protected Preview acceptance**
+   - [x] Verify the protected Vercel Preview manually, including the claimant
+     question/history/escalation flow and narrow viewport behavior.
+   - [x] Confirm the Preview preserves the V1.5 action, session, safety,
+     provenance, and V3-boundary contract.
+   - Record this as **user-verified**; do not claim an automated browser
+     acceptance test substitutes for the claimant-facing review.
+
+   **5C.** [ ] **Optionally add live-model smoke evidence**
+   - [ ] If Preview credentials and Gateway capacity are available, make no
+     more than two synthetic live Gateway smoke calls.
+   - [ ] Record each actual model invocation in ignored `.runs/` metadata with
+     a Pacific-time timestamp and redacted input/output.
+   - Live smoke evidence supports the deterministic suite; it is not required
+     to complete V2 or a substitute for the protected Preview review.
+
+   **5D.** [x] **Create the V2 → V3 design handoff gate**
+   - [x] Create [V2 → V3 Handoff Criteria](./v2_v3_handoff_criteria.md)
+     before implementing V3.
+   - [x] Define the mock-policy contract, evidence/provenance rules,
+     operational-severity scope, escalation thresholds, adjuster-ready handoff
+     payload, and deterministic test matrix.
+   - [x] Keep coverage, fault, payment, valuation, real insurer integrations,
+     and actual queue writes out of scope until explicitly designed.
 
 ## Definition of done
 

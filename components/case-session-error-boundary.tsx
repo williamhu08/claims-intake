@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V2. */
+
 import { Component, type ReactNode } from "react";
 import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";
 

@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import { describe, expect, it } from "vitest";
 
 import { getCaseSessionConfig } from "@/lib/claims/session-config";

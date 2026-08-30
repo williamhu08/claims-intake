@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import {
   analyzeClaimNarrative,
   selectNextCaseSessionAction,

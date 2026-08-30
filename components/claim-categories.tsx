@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V0. */
+
 import { useState } from "react";
 import { claimTypeOptions } from "@/lib/claims/display";
 

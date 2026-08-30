@@ -1,3 +1,4 @@
+/** Clearway version scope: V1. */
 import { generateText, Output } from "ai";
 
 import {

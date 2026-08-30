@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import { z } from "zod";
 
 import {
@@ -120,10 +121,11 @@ export const clarificationHistoryEntrySchema = askClarifyingQuestionActionSchema
 
 const actionTraceEntrySchema = z.object({
   kind: z.enum(sessionActionKindValues),
-  at: z.string().datetime(),
+  at: z.iso.datetime(),
 });
 
-const terminalSessionStateSchema = z.union([
+/** A completed V2 action; V3 reuses this to require a terminal source session. */
+export const terminalSessionStateSchema = z.union([
   z.object({
     kind: z.literal("propose_route"),
     stopReason: z.literal("route_supported"),
@@ -139,8 +141,8 @@ const terminalSessionStateSchema = z.union([
 export const caseSessionStateSchema = z
   .object({
     version: z.literal(1),
-    issuedAt: z.string().datetime(),
-    expiresAt: z.string().datetime(),
+    issuedAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime(),
     caseState: caseStateSchema,
     clarificationHistory: z.array(clarificationHistoryEntrySchema),
     pendingAction: askClarifyingQuestionActionSchema.optional(),

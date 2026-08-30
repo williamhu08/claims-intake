@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V2. */
+
 import type { ChangeEvent } from "react";
 import {
   getDaysInMonth,

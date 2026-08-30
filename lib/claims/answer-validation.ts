@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MONEY_PATTERN = /^(?:0|[1-9]\d*)\.\d{2}$/;
 const MONEY_CANDIDATE_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;

@@ -1,3 +1,4 @@
+/** Clearway version scope: V0. */
 import { AppShell } from "@/components/app-shell";
 import { ClaimCategories } from "@/components/claim-categories";
 import { ClaimIntakeSection } from "@/components/claim-intake-section";

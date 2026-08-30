@@ -1,3 +1,4 @@
+/** Clearway version scope: V0–V2. */
 import type { ClaimIntakeResult, CaseFactSource } from "@/lib/claims/schema";
 import type { StopReason } from "@/lib/claims/session-schema";
 import type { ClarificationAnswerType } from "@/components/clarification-input";

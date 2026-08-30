@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V0–V1. */
+
 import { useState } from "react";
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { CaseStateSummary } from "@/components/case-state-summary";

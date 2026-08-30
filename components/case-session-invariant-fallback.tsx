@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 type CaseSessionInvariantFallbackProps = {
   /** Called when the user chooses to recover. Should reset the session to a fresh state. */
   onReset: () => void;

@@ -2,7 +2,7 @@
 
 > **V1.5 is planning and contract work only.** It does not add a claimant-facing
 > feature. V2 implementation cannot begin until this plan and
-> `v2_handoff_criteria.md` are complete.
+> `v1_v2_handoff_criteria.md` are complete.
 
 ## Goal
 
@@ -14,7 +14,7 @@ how it stops or escalates.
 ## Inputs
 
 - V1's deployed and tested `CaseState`.
-- `planning/v2_handoff_criteria.md` — product/safety requirements.
+- `planning/v1_v2_handoff_criteria.md` — product/safety requirements.
 - `planning/v1_5_water_source_decision.md` — first material-ambiguity rule
   and claimant copy.
 - `planning/v1_5_v2_session_contract.md` — bounded actions, signed-session
@@ -98,7 +98,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      failed interface test cannot conceal an unsafe state transition.
 
 7. [x] **Approve the V2 build handoff**
-   - [x] Reconcile all decisions with `v2_handoff_criteria.md` and mark its
+   - [x] Reconcile all decisions with `v1_v2_handoff_criteria.md` and mark its
      entry criteria complete.
    - [x] Update `vercel-claims-roadmap.md` with only the concise V1.5/V2
      summary; retain detail in the dedicated documents.

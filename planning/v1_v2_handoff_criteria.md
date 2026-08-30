@@ -34,8 +34,9 @@ constrain actions, while the prompt guides dynamic choice of the next tool.
 Clearway adopts that separation of concerns, not the exercise wholesale. V2
 does **not** add Udacity's policy lookup, severity assessment, write-to-queue
 route tool, coverage rules, or four-category taxonomy. Those remain V3 or out
-of scope. Unlike its fixture harness, a Clearway clarification pauses for a
-real claimant response in the web UI before the session resumes.
+of scope. Unlike its fixture
+harness, a Clearway clarification pauses for a real claimant response in the
+web UI before the session resumes.
 
 ## V1 foundation that V2 must preserve
 
@@ -103,8 +104,8 @@ from that small action set based on validated state:
 2. `propose_route`
 3. `escalate_to_human`
 
-Future evidence or policy lookup tools are V3 concerns. They are not an
-implicit V2 addition.
+Future evidence or policy-lookup tools are V3 concerns, not implicit V2
+additions.
 
 ## Required stop conditions and safety budget
 

@@ -1,3 +1,4 @@
+/** Clearway version scope: V0–V2. */
 import { z } from "zod";
 
 /** Input and claimant-facing display budgets for the intake contract. */
@@ -28,8 +29,14 @@ export const supportedClaimTypeValues = [
 export const claimNarrativeSchema = z
   .string()
   .trim()
-  .min(MIN_CLAIM_NARRATIVE_LENGTH, "Describe what happened in at least 20 characters.")
-  .max(MAX_CLAIM_NARRATIVE_LENGTH, "Keep the description under 4,000 characters.");
+  .min(
+    MIN_CLAIM_NARRATIVE_LENGTH,
+    `Describe what happened in at least ${MIN_CLAIM_NARRATIVE_LENGTH} characters.`,
+  )
+  .max(
+    MAX_CLAIM_NARRATIVE_LENGTH,
+    `Keep the description under ${MAX_CLAIM_NARRATIVE_LENGTH.toLocaleString()} characters.`,
+  );
 
 export const claimIntakeRequestSchema = z.object({
   narrative: claimNarrativeSchema,

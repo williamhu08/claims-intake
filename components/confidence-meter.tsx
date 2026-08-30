@@ -1,3 +1,4 @@
+/** Clearway version scope: V1. */
 type ConfidenceMeterProps = {
   value: number;
 };

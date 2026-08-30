@@ -1,3 +1,4 @@
+/** Clearway version scope: V1. */
 import type { CaseState } from "@/lib/claims/schema";
 import { caseFactSourceLabels, claimTypeDescriptions, claimTypeLabels } from "@/lib/claims/display";
 import { ConfidenceMeter } from "@/components/confidence-meter";

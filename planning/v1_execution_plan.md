@@ -34,7 +34,7 @@ can dynamically choose an allowed next action.
 Udacity's `03-dynamic-decomposition-solution` was reviewed locally after V1
 completion. Its source validates the state-and-tool-loop inspiration, but this
 V1 plan remains a product adaptation—not a copied implementation. The
-source-grounded V2 mapping is recorded in `planning/v2_handoff_criteria.md`.
+source-grounded V2 mapping is recorded in `planning/v1_v2_handoff_criteria.md`.
 
 ## Product boundary
 
@@ -173,7 +173,7 @@ Start V2 only when V1 can reliably answer:
 > information were available?
 
 The concrete V2 entry gate, bounded action set, stop conditions, and required
-tests are recorded in `planning/v2_handoff_criteria.md`.
+tests are recorded in `planning/v1_v2_handoff_criteria.md`.
 
 Before implementing V2, review Udacity's `claims_intake_agent_solution`,
 especially `loop.py` and `run.py`, and make an explicit adaptation decision for

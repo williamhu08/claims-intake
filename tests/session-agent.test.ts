@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("ai", () => ({

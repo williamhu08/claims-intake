@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V0. */
+
 import Link from "next/link";
 import { useTestingMode } from "@/components/app-shell";
 

@@ -1,5 +1,7 @@
 "use client";
 
+/** Clearway version scope: V0–V2. */
+
 import { useEffect, useRef, useState } from "react";
 import { useTestingMode } from "@/components/app-shell";
 import {

@@ -1,3 +1,4 @@
+/** Clearway version scope: V2. */
 /** Server-only V2 session configuration. Do not expose these values to the browser. */
 export const DEFAULT_CASE_SESSION_TTL_SECONDS = 1_800;
 export const DEFAULT_CASE_SESSION_MAX_INPUT_TOKENS = 12_000;
