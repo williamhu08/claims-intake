@@ -338,10 +338,6 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         </form>
       )}
 
-      {session?.terminal && getUnaskedMissingFacts(session).length === 0 && (
-        <CaseHandoffPanel sessionToken={sessionToken} enabled />
-      )}
-
       {session?.terminal && (
         getUnaskedMissingFacts(session).length === 0 ? (
           // Proactive guard: only reaches ResultPanel once every missing fact has
@@ -356,6 +352,10 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
           // attempting ResultPanel at all.
           <CaseSessionInvariantFallback onReset={resetSession} />
         )
+      )}
+
+      {session?.terminal && getUnaskedMissingFacts(session).length === 0 && (
+        <CaseHandoffPanel sessionToken={sessionToken} enabled />
       )}
 
       {session?.terminal && (
