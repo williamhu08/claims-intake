@@ -14,6 +14,7 @@ const fetcher = async ([url, sessionToken]: [string, string]): Promise<ResponseP
     body: JSON.stringify({ sessionToken }),
   });
   const data = (await response.json()) as ResponsePayload;
+  if (response.status === 422) return {};
   if (!response.ok) throw new Error(data.error ?? "The handoff could not be prepared.");
   return data;
 };

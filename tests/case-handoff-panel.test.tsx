@@ -1,5 +1,5 @@
 /** Clearway version scope: V3. */
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -116,6 +116,7 @@ function mockHandoffResponse(body: unknown, status = 200) {
     "fetch",
     vi.fn().mockResolvedValue({
       ok: status >= 200 && status < 300,
+      status,
       json: async () => body,
     }),
   );
@@ -177,15 +178,14 @@ describe("CaseHandoffPanel", () => {
     expect(screen.getByText("No safety detail was confirmed.")).toBeInTheDocument();
   });
 
-  it("shows a retryable error for a malformed handoff response", async () => {
+  it("does not display an ineligible handoff response", async () => {
     mockHandoffResponse({ error: "This case is not eligible for the water-damage handoff. A person can review it instead." }, 422);
 
     render(<CaseHandoffPanel sessionToken="token-malformed" enabled />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "This case is not eligible for the water-damage handoff. A person can review it instead.",
-    );
-    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByText("This case is not eligible for the water-damage handoff. A person can review it instead.")).not.toBeInTheDocument();
   });
 
   it("shows a retryable error when the handoff request fails to reach the service", async () => {
