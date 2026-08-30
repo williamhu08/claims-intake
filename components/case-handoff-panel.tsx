@@ -19,7 +19,7 @@ const fetcher = async ([url, sessionToken]: [string, string]): Promise<ResponseP
 };
 
 export function CaseHandoffPanel({ sessionToken, enabled }: Props) {
-  const key = enabled && sessionToken ? `/api/case-handoff#${sessionToken}` : null;
+  const key = enabled && sessionToken ? (["/api/case-handoff", sessionToken] as const) : null;
   const { data, error, isLoading, mutate } = useSWR<ResponsePayload>(key, fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
