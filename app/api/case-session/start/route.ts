@@ -8,7 +8,10 @@ import {
   createCaseSession,
   signCaseSession,
 } from "@/lib/claims/session-engine";
-import { claimIntakeRequestSchema } from "@/lib/claims/schema";
+import {
+  claimIntakeRequestSchema,
+  supportedClaimTypeValues,
+} from "@/lib/claims/schema";
 import { createMockStartSession } from "@/lib/claims/mock-session";
 
 export const runtime = "nodejs";
@@ -70,6 +73,12 @@ export async function POST(request: Request) {
         config.maxInputTokens,
         config.maxWallClockMs,
       );
+      if (!supportedClaimTypeValues.includes(caseState.claimType as (typeof supportedClaimTypeValues)[number])) {
+        return Response.json(
+          { error: "We couldn't match your narrative to one of the five supported claim categories. Please revise the description with more specific details and try again." },
+          { status: 422 },
+        );
+      }
       const session = createCaseSession(caseState, config.ttlSeconds);
       const action = await selectNextCaseSessionAction(
         session,

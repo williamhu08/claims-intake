@@ -16,6 +16,15 @@ export const claimTypeValues = [
   "other_or_unclear",
 ] as const;
 
+/** Categories that the claimant can submit through the supported intake flow. */
+export const supportedClaimTypeValues = [
+  "water_damage",
+  "fire_or_smoke",
+  "weather_or_storm",
+  "theft_or_vandalism",
+  "liability",
+] as const;
+
 export const claimNarrativeSchema = z
   .string()
   .trim()
