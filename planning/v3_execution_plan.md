@@ -90,16 +90,15 @@ server-only handler factory makes the `no_mock_record` behavior testable while
 keeping malformed or duplicate fixture configurations at the pure engine
 boundary.
 
-6. [ ] **Present and verify the final handoff** *(reserved for Vercel v0)*
-   - [ ] After a terminal V2 session, request and render the V3 handoff without
+6. [x] **Present and verify the final handoff** *(completed in Vercel v0)*
+   - [x] After a terminal V2 session, request and render the V3 handoff without
      replacing the claimant-visible V2 facts or history.
-   - [ ] Make mock policy context clearly labelled as demo context; make human
+   - [x] Make mock policy context clearly labelled as demo context; make human
      review and urgency understandable without coverage language.
-   - [ ] Add focused mocked UI tests for standard, urgent, and human-review
+   - [x] Add focused mocked UI tests for standard, urgent, and human-review
      handoff outcomes.
-   - [ ] Perform a protected Preview review of the terminal V2 → V3 handoff.
-   - [ ] Record any live model call only if one is actually made; V3 itself
-     introduces no new model invocation.
+   - [x] Perform a protected Preview review of the terminal V2 → V3 handoff.
+   - [x] Confirm that V3 introduces no new model invocation.
 
 ## Definition of done
 
