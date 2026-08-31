@@ -49,7 +49,7 @@ export function AppShell({ isProduction, children }: { isProduction: boolean; ch
   return (
     <>
       <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 py-3">
+        <div className="flex w-full items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-2.5">
             <span className="flex size-7 items-center justify-center rounded-md bg-primary font-serif text-sm font-semibold text-primary-foreground" aria-hidden="true">CW</span>
             <span className="text-sm font-semibold tracking-tight text-foreground">Clearway</span>
