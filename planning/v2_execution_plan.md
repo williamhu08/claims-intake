@@ -172,10 +172,10 @@ Update a step to `[x]` only when every bullet beneath it is complete.
    - [x] Assert every fixture reaches a terminal state in the allowed budget
      with an auditable action trace.
 
-4. [ ] **Integrate the V2 claimant flow** *(reserved for Vercel v0)*
+4. [x] **Integrate the V2 claimant flow** *(implemented with Vercel v0)*
    Break this work into the following independently implementable parts:
 
-   **4A.** [ ] **Start a V2 claimant session**
+   **4A.** [x] **Start a V2 claimant session**
       This part is complete only when the narrative-to-session-start path and
       every requirement below are implemented and verified.
 
@@ -222,7 +222,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
         an opaque client value; never let the browser edit or reconstruct
         canonical session state.
       - [x] Once a session starts, make the submitted narrative read-only so
-        the claimant&apos;s active session remains tied to the exact text that was
+        the claimant's active session remains tied to the exact text that was
         analyzed. Provide an explicit “Edit narrative” / “Start over” action,
         which clears the current session, token, question history, and results;
         the edited narrative must begin a new session rather than modifying the
@@ -271,7 +271,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      - [x] Never render, log, decode, or place the token in a URL; keep it in client state for the active session.
      - [x] Ensure the next clarification submission uses the newest token, not the token from the initial `/start` response.
 
-   **4D.** [ ] **Recover, reset, and verify the claimant flow**
+   **4D.** [x] **Recover, reset, and verify the claimant flow**
    
    The detailed 4D design, recovery taxonomy, reset semantics, accessibility contract, test matrix, and browser verification checklist live in the [4D Recovery and Verification Design](./v2_4d_recovery_verification.md).
 
@@ -291,7 +291,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      V2 action schema and route tests with the answer-type field so the dynamic
      contract is explicit and schema-validated end to end.
    - [x] Add focused claimant-flow component/interaction tests with mocked V2
-     routes covering immediate route, one clarification, “I don&apos;t know”,
+     routes covering immediate route, one clarification, “I don't know”,
      retry after failure, malformed response, human review, reset, and
      duplicate-submit prevention.
 

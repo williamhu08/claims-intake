@@ -1,161 +1,272 @@
 # Clearway
 
-Clearway is an AI-assisted, first-touch intake for ambiguous property
-claims. Instead of asking a claimant to complete a long form before they can
-get started, it accepts a plain-language description and returns a narrow,
-structured case state:
+Clearway is an AI-assisted, first-touch intake for ambiguous property claims.
+Claimants describe an incident in plain language; Clearway turns that incomplete
+account into visible facts, asks only the next material question, and produces a
+safe, non-binding next-step recommendation.
 
-- `claimType`
-- `summary`
-- collected and missing facts
-- a proposed, non-binding route
-- confidence in the classification
+It is deliberately **not** a coverage engine, claims-payment system, or
+liability decision-maker.
 
-It intentionally does **not** decide coverage, liability, fault, payment, or
-settlement eligibility.
+## The problem
 
-## V1 status
+Property claims often begin with an incomplete story: something was damaged,
+but the claimant may not know the cause, whether the loss is still active, or
+whether another party is involved. A long form asks for insurer terminology
+before the claimant can reasonably provide it. A single model prompt can label
+the story, but it cannot safely own an evolving intake workflow.
 
-The V1 interface, case-state contract, and AI Gateway path are integrated and
-verified in a protected Vercel Preview:
+Clearway starts with the claimant's language, makes its current understanding
+visible, asks targeted follow-ups, and escalates rather than guessing.
 
-https://claims-intake-ov1ck2c4q-williamhu08s-projects.vercel.app
+## What Clearway does today
 
-The Preview requires access through the owner&apos;s Vercel account. Production is
-intentionally not configured or promoted yet.
+1. Classifies a plain-language property-claim narrative into a structured
+   `CaseState`.
+2. Shows collected facts, missing facts, provenance, a proposed route, and
+   classification confidence.
+3. Asks a bounded series of targeted follow-up questions when material facts
+   are missing, while the app owns session state, validation, and stop
+   conditions.
+4. For terminal **water-damage** sessions only, produces a deterministic next
+   step: standard property-adjuster review or human review, with safety-first
+   urgency.
 
-## Why this problem
+The supported intake categories are water damage, fire or smoke, weather or
+storm, theft or vandalism, and liability. The operational handoff is
+intentionally limited to water damage; other categories remain safe intake
+outcomes rather than receiving invented policy logic.
 
-Property claims are often reported with incomplete, emotionally loaded
-accounts: a claimant knows something went wrong, but not the insurer&apos;s
-categories or the facts that later determine routing. Clearway starts with
-the claimant&apos;s language, gives a clear initial classification, and makes the
-next interaction legible without pretending to make an insurance decision.
+### Implementation milestones used in this README
 
-## V1 architecture
+Clearway was built iteratively. The milestone labels describe implementation
+scope, not separate products; the full sequence is in the
+[Clearway roadmap](./planning/vercel-claims-roadmap.md).
+
+- **V0 — Thin slice:** one narrative becomes a structured claim category,
+  summary, and confidence reading.
+- **V1 — Fixed-pipeline intake:** a fixed pipeline of model prompts and application
+  normalization turns the narrative into a visible case state: collected facts,
+  missing facts, claimant provenance, and a proposed route. The pipeline ends
+  there; it cannot inspect a partial case and decide to add a new step.
+- **V1.5 — Design gate:** the written contract that constrained V2 before it
+  was implemented; it is not a separate claimant-facing release.
+- **V2 — Dynamic-decomposition intake:** the architectural shift from fixed prompt chaining
+  to dynamic decomposition. After each validated partial state, the model may
+  choose the next *permitted* action—ask, route, or escalate—while the
+  application owns signed session state, validation, and safe stop conditions.
+- **V3 — Operational handoff:** the deterministic water-damage next-step layer
+  that evaluates a completed V2 session without another model call.
+- **V4 — Demo quality:** presentation, reliability, and submission readiness;
+  it does not add another major claims capability.
+
+## How the agentic intake works
+
+Clearway's agentic behavior is a small, controlled workflow—not an open-ended
+chatbot. Each claimant turn follows the same application-owned sequence:
+
+1. **Read the initial account.** The model extracts a structured case state:
+   category, known facts, unknown facts, and a preliminary non-binding route.
+2. **Inspect what is still material.** The server allows only one of three next
+   actions: ask one targeted clarification, propose a route, or escalate to a
+   person. It rejects repeated, irrelevant, or unsafe actions.
+3. **Pause for the claimant.** If a question can reduce a material ambiguity,
+   the UI shows one question and explains why it matters. The model does not
+   silently fill in an answer or continue a hidden loop.
+4. **Validate and resume.** The claimant's response is added to a server-signed
+   session with its provenance. Clearway re-evaluates the updated facts instead
+   of rerunning a fixed sequence of prompts.
+5. **Stop safely.** Clearway proposes a non-binding route only when the facts
+   support it. Missing information, inability to answer, potential third-party
+   involvement, active safety concerns, repeated questions, and safety-budget
+   limits lead to human review instead of a guess.
+
+This is the product's key distinction from a thin model wrapper: the model
+helps choose the next permitted step, while the application owns the state,
+validation, safety limits, and terminal outcome.
+
+## Demo flow
+
+Use **Unknown water source** in the app's example chips to demonstrate the
+full workflow:
 
 ```text
 Claimant narrative
-        |
-        v
-Structured-intake interface
-        |
-        v
-POST /api/case-analysis
-        |
-        v
-AI SDK generateText + Zod structured output
-        |
-        v
-Vercel AI Gateway (openai/gpt-5.2 by default)
-        |
-        v
-Application-normalized CaseState
+  → structured facts and missing information
+  → one targeted clarification
+  → signed terminal intake session
+  → deterministic water-damage next step
 ```
 
-The API owns the schema, model instructions, and normalization. It derives the
-missing-fact list from fact statuses, attaches claimant-narrative provenance,
-and keeps credentials and model policy server-side. The frontend consumes only
-the stable `/api/case-analysis` contract.
+For the water-damage handoff, the same terminal intake state always yields the
+same next step:
 
-## API contract
+| Condition | Next step |
+| --- | --- |
+| Clear first-party water loss, resolved safety fact, supported mock context | Standard property-adjuster review |
+| Active water loss or safety concern | Urgent human review |
+| Missing safety fact, material ambiguity, possible third-party involvement, or no mock record | Human review |
 
-`POST /api/case-analysis`
+“Human review” is intentionally different from property-adjuster review: it
+means Clearway has not safely justified the ordinary property path. It does not
+decide what a human reviewer will ultimately do.
 
-```json
-{
-  "narrative": "A pipe burst under the kitchen sink overnight..."
-}
+## Architecture
+
+```text
+Browser (Next.js client)
+  │
+  ├─ POST /api/case-session/start
+  ├─ POST /api/case-session/respond
+  │       │
+  │       ▼
+  │   AI SDK + AI Gateway
+  │   structured analysis and bounded tool/action selection
+  │       │
+  │       ▼
+  │   signed intake session state
+  │
+  └─ POST /api/case-handoff  (terminal water-damage session only)
+          │
+          ▼
+      deterministic V3 fixture lookup, urgency, and handoff precedence
 ```
 
-The narrative must be trimmed and between 20 and 4,000 characters.
+The model can analyze a narrative and choose the next allowed clarification
+action. It does not own the session, invent arbitrary actions, or make the
+water-damage policy/urgency decision. The app validates model output with Zod,
+preserves claimant fact provenance, signs session state server-side, and rejects
+unsafe transitions.
 
-```json
-{
-  "claimType": "water_damage",
-  "summary": "A pipe burst under the kitchen sink damaged the cabinet and floor.",
-  "classificationConfidence": 0.98,
-  "facts": [
-    {
-      "key": "incident_cause",
-      "label": "What caused the incident",
-      "status": "collected",
-      "value": "A pipe burst under the kitchen sink.",
-      "source": "claimant_narrative"
-    }
-  ],
-  "missingFactKeys": ["loss_timing"],
-  "proposedRoute": {
-    "kind": "property_adjuster_review",
-    "rationale": "The narrative describes first-party water damage.",
-    "confidence": 0.91
-  }
-}
-```
+## Key decisions and tradeoffs
 
-Each case includes all six canonical fact keys. A fact is `collected`,
-`missing`, `unclear`, or `not_applicable`; the server derives
-`missingFactKeys` from `missing` and `unclear` statuses. The route is a visible
-intake recommendation, never a coverage, fault, liability, payment, or
-settlement decision.
+- **Dynamic decomposition in the clarification workflow, not a fixed prompt
+  chain.** The next action
+  emerges from the current structured state, but only within a bounded action
+  set and clarification budget.
+- **Application-owned session state.** The browser holds an opaque signed token;
+  it never reconstructs canonical facts, route decisions, or session history.
+- **Deterministic operational handoff.** The model's output is not treated as
+  policy logic. A completed water session is evaluated by fixed, testable rules.
+- **Safety before false precision.** Active loss, ambiguity, missing safety
+  facts, and potential third-party involvement lead to human review.
+- **Narrow scope.** No database, real insurer integration, coverage decision,
+  valuation, payment, or photo upload is included yet.
 
-The legacy V0 `POST /api/intake` endpoint remains temporarily for compatibility
-while the V1 case-analysis contract is adopted.
+## AI collaboration and decision ownership
+
+AI tools were used throughout the build for execution and generation: exploring
+options, drafting plans and documentation, scaffolding code, and iterating on
+the interface. That can look end-to-end from a distance, but it was not a
+single “build this for me” handoff.
+
+The project owner intervened at the forks where generated work could diverge
+from the intended product. Each intervention supplied the **delta**: the
+specific correction, constraint, or new direction that shaped the next
+iteration. In this sense, human involvement created alignment rather than
+merely approving an AI-produced result at the end.
+
+Examples include narrowing the problem to first-touch property-claim triage;
+setting the boundary against coverage, fault, liability, payment, and
+settlement decisions; inserting V1.5 when the move from a fixed pipeline to
+dynamic decomposition required an explicit session contract; using Udacity
+material to strengthen the agent-loop design; keeping V2's action set bounded;
+and reducing V3 to deterministic water-damage handling rather than a broad
+policy platform.
+
+The resulting decisions, tradeoffs, and cuts are recorded in the code and
+plans so they can be reviewed and explained—not attributed to a one-shot model
+prompt.
+
+## Vercel products used
+
+| Product | Role in Clearway |
+| --- | --- |
+| Next.js | Full web application and server-side route handlers. |
+| AI SDK | Structured model output and clarification action selection. |
+| AI Gateway | Server-side model access. |
+| v0 | Frontend iteration and the V3 terminal handoff experience. |
 
 ## Run locally
+
+### Prerequisites
+
+- Node.js 20 or later
+- An AI Gateway API key for live model-backed intake
+
+### Installation
 
 ```bash
 npm install
 cp .env.example .env.local
-# Set AI_GATEWAY_API_KEY in .env.local
+```
+
+Set the following server-only variables in `.env.local`:
+
+```bash
+AI_GATEWAY_API_KEY=your_gateway_key
+CASE_SESSION_SIGNING_SECRET=a_long_random_secret
+# Optional: defaults to the configured AI Gateway model.
+AI_MODEL=openai/gpt-5.6-luna
+```
+
+Then run:
+
+```bash
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open <http://localhost:3000>.
 
-## Environment variables
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `AI_GATEWAY_API_KEY` | Local development | Server-only Vercel AI Gateway credential. |
-| `AI_MODEL` | No | Overrides the default `openai/gpt-5.2` model. |
-
-In Vercel, the key is configured as a sensitive **Preview** environment
-variable. It is not committed to the repository; Production is intentionally
-not configured yet.
-
-## Verification
+## Test and verify
 
 ```bash
-npm run lint
 npm test
+npm run lint
+npx tsc --noEmit
 npx next build --webpack
 ```
 
-The deployed V1 backend was smoke-tested through Vercel-authenticated access
-with a synthetic burst-pipe narrative. It returned a schema-valid
-`water_damage` `CaseState` with grounded facts and a non-binding property
-adjuster recommendation.
+The test suite covers schema validation, session transitions, claimant-answer
+validation, fixture lookup, urgency/precedence rules, and the server handoff
+route. In development or Preview, Testing mode provides deterministic mock V2
+responses without invoking the model; it is unavailable in production.
 
-## Key implementation decisions
+## API overview
 
-- **Single structured model call:** V1 makes the system's understanding visible
-  without pretending to already be a conversational agent.
-- **Application-owned state:** Zod-backed output plus deterministic
-  normalization makes facts, missing information, and route recommendations
-  explicit rather than leaving the product as a wrapper around a prompt.
-- **Neutral, triage-only language:** prevents the product from implying a
-  coverage or settlement decision.
-- **v0 owns the first UI iteration:** the interface was generated against the
-  proven API contract instead of being hand-built before visual exploration.
-- **Preview before production:** the deployed slice is verified without
-  promoting it to an official production release.
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/case-session/start` | Analyze a narrative and create a signed intake session. |
+| `POST /api/case-session/respond` | Record a claimant response and return the next intake state. |
+| `POST /api/case-handoff` | Turn a signed terminal water-damage session into a deterministic handoff. |
+| `POST /api/case-analysis` | Legacy one-turn V1 case-analysis endpoint. |
+| `POST /api/intake` | Legacy V0 classification endpoint. |
 
-## What comes next
+`/api/case-handoff` accepts only an opaque intake `sessionToken`; it does not accept
+browser-supplied facts, route decisions, or mock-policy inputs.
 
-- **V2:** add bounded, targeted clarification based on the observed case state.
-  The agent will dynamically choose among permitted next actions rather than
-  run a fixed prompt chain; it will escalate rather than guess or loop
-  indefinitely.
-- **V3:** introduce policy lookup, evidence-backed routing, uncertainty
-  escalation, and an adjuster-ready handoff.
+## Roadmap
+
+- **V0:** narrative in, structured category result out.
+- **V1:** visible case state and proposed route.
+- **V1.5:** design gate for the bounded V2 session contract.
+- **V2:** dynamic, multi-turn clarification with explicit stop conditions.
+- **V3:** narrow deterministic water-damage handoff.
+- **V4:** demo polish, reliable edge states, architecture notes, and
+  presentation rehearsal.
+
+Tracked plans live in [`planning/`](./planning/). Local working notes and
+presentation material live in Git-ignored `.docs/`.
+
+## Contributing
+
+This is a private project. If you are contributing, keep changes scoped to a
+version plan, preserve claimant-safe language, add focused tests for behavior
+changes, and do not commit credentials, claim PII, or model-run metadata.
+
+## Credits
+
+- Built with Next.js, the Vercel AI SDK, AI Gateway, Zod, Vitest, and v0.
+- The V2 dynamic-decomposition design was informed by the Udacity
+  `03-dynamic-decomposition-solution` exercise, then adapted to Clearway's
+  signed claimant-session and safety requirements.

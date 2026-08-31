@@ -44,7 +44,7 @@ Update a step to `[x]` only when every bullet beneath it is complete.
      route or escalation.
    - [x] Define the non-trigger: do not ask merely to complete every missing
      fact; clear first-party water damage can stop without a question.
-   - [x] Write the single claimant-facing question and its “I don&apos;t know”
+   - [x] Write the single claimant-facing question and its “I don't know”
      fallback copy.
 
 3. [x] **Freeze the bounded V2 action and stop contract**
