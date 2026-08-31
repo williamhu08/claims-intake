@@ -31,11 +31,11 @@ The finished submission must provide:
    - [x] Translate the final-round requirements into this execution plan.
    - [x] Keep V4 focused on presentation quality rather than feature expansion.
 
-2. [ ] **Finish the public project narrative**
-   - [ ] Make the README understandable without internal version vocabulary.
-   - [ ] Explain the problem, architecture, key decisions, deliberate cuts, and
+2. [x] **Finish the public project narrative**
+   - [x] Make the README understandable without internal version vocabulary.
+   - [x] Explain the problem, architecture, key decisions, deliberate cuts, and
      the AI/human division of work.
-   - [ ] Write and review the separate one- to two-paragraph submission blurb.
+   - [x] Write and review the separate one- to two-paragraph submission blurb.
 
 3. [ ] **Create a compact demo script and decision guide**
    - [ ] Prepare a 20-minute narrative in the required order: problem,

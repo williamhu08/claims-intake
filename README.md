@@ -1,23 +1,38 @@
+# The problem
+
+Growing up, water getting into our kitchen floor was more than a maintenance
+problem. It became a recurring source of stress and conflict at home. Years
+later, now that I am older and living in an apartment, I have encountered water
+in the kitchen again—the same visible damage, but with a new layer of
+uncertainty.
+
+Apartment living makes the uncertainty sharper because walls, plumbing, and
+responsibility can be shared. Water on the kitchen floor might come from your
+own sink, a shared pipe, or another unit. You know what you can see, but not
+necessarily the source, who is involved, or which detail the insurer needs
+next.
+
+Traditional digital intake handles that uncertainty with a predefined
+questionnaire. The useful follow-up depends on the claimant's previous answer,
+but people must anticipate and encode every branch in advance. The result is
+often a long generic form or an early handoff to a person before the claim has
+enough specific detail.
+
 # Clearway
 
-Clearway is an AI-assisted, first-touch intake for ambiguous property claims.
-Claimants describe an incident in plain language; Clearway turns that incomplete
-account into visible facts, asks only the next material question, and produces a
-safe, non-binding next-step recommendation.
+Clearway uses AI to streamline that first-touch claims process. It starts with
+the claimant's ordinary-language account, turns it into visible structured
+facts, and lets the model choose the next relevant question from a bounded set
+of permitted actions. After each answer, the system evaluates the updated case
+instead of following the same fixed questionnaire for everyone.
+
+This makes it practical to collect more claim-specific detail before a person
+has to step in. The application still owns validation, session state, safety
+limits, and stopping behavior; unresolved, unsafe, or unsupported cases go to
+human review rather than being guessed through automatically.
 
 It is deliberately **not** a coverage engine, claims-payment system, or
 liability decision-maker.
-
-## The problem
-
-Property claims often begin with an incomplete story: something was damaged,
-but the claimant may not know the cause, whether the loss is still active, or
-whether another party is involved. A long form asks for insurer terminology
-before the claimant can reasonably provide it. A single model prompt can label
-the story, but it cannot safely own an evolving intake workflow.
-
-Clearway starts with the claimant's language, makes its current understanding
-visible, asks targeted follow-ups, and escalates rather than guessing.
 
 ## What Clearway does today
 
