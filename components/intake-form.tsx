@@ -60,6 +60,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     : false;
   const isNoResponse = answer === "no_response";
   const hasActiveSession = Boolean(sessionToken);
+  const isCategoryMismatch = error?.includes("couldn't match your narrative") ?? false;
   const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession && !assessmentAttempted;
 
   function updateSession(nextSession: CaseSessionState | null) {
@@ -215,7 +216,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             name="narrative"
             value={narrative}
             onChange={(e) => setNarrative(e.target.value)}
-            readOnly={hasActiveSession}
+            readOnly={hasActiveSession || isCategoryMismatch}
             rows={7}
             maxLength={MAX_LENGTH}
             placeholder="e.g. A pipe burst under the kitchen sink overnight and flooded the cabinet and floor..."
