@@ -73,6 +73,7 @@ export async function POST(request: Request) {
         parsedRequest.data.narrative,
         config.maxInputTokens,
         config.maxWallClockMs,
+        parsedRequest.data.claimType,
       );
       if (!supportedClaimTypeValues.includes(caseState.claimType as (typeof supportedClaimTypeValues)[number])) {
         return Response.json(

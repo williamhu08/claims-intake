@@ -40,6 +40,7 @@ export const claimNarrativeSchema = z
 
 export const claimIntakeRequestSchema = z.object({
   narrative: claimNarrativeSchema,
+  claimType: z.enum(supportedClaimTypeValues).optional(),
   testingMode: z.boolean().optional().default(false),
 });
 

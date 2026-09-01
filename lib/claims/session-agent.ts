@@ -51,11 +51,12 @@ export async function analyzeClaimNarrative(
   narrative: string,
   maxInputTokens: number,
   timeout: number,
+  selectedClaimType?: CaseState["claimType"],
 ): Promise<CaseState> {
   const result = await generateText({
     model: model(),
     system: caseAnalysisInstructions,
-    prompt: `Claimant narrative:\n\n${narrative}`,
+    prompt: `Claimant narrative:\n\n${narrative}${selectedClaimType ? `\n\nClaimant-selected category: ${selectedClaimType}. Use this category only if it is supported by the narrative.` : ""}`,
     output: Output.object({
       name: "property_claim_case_analysis",
       description: "A structured, first-touch property-claim case state.",

@@ -44,6 +44,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const retryAction = useRef<(() => void) | null>(null);
   const [errorRecovery, setErrorRecovery] = useState<"retry" | "reset" | null>(null);
   const [showTryAnother, setShowTryAnother] = useState(false);
+  const [selectedClaimType, setSelectedClaimType] = useState("");
 
   useEffect(() => {
     if (!session?.terminal) return;
@@ -90,7 +91,11 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       const response = await fetch("/api/case-session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ narrative: submittedNarrative, testingMode }),
+        body: JSON.stringify({
+          narrative: submittedNarrative,
+          claimType: selectedClaimType || undefined,
+          testingMode,
+        }),
         signal: abortController.current.signal,
       });
       if (version !== requestVersion.current) return;
@@ -272,15 +277,25 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
 
       {error && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <ul className="list-disc space-y-1 pl-5">
-            {error.split(/(?<=\.)\s+/).map((message, index) => (
-              <li key={`${message}-${index}`}>
-                {message}
-                {" "}
-              </li>
-            ))}
-          </ul>
+          {error.includes("We couldn't match") ? (
+            <>
+              <p>We couldn&apos;t match your narrative to one of the {SUPPORTED_CLAIM_CATEGORY_COUNT} supported claim categories. Please revise the description with more specific details and try again.</p>
+              <p className="mt-3">If you believe that your claim matches one of the {SUPPORTED_CLAIM_CATEGORY_COUNT} categories, please choose within the dropdown menu.</p>
+              <label htmlFor="claim-category" className="sr-only">Choose a claim category</label>
+              <select id="claim-category" value={selectedClaimType} onChange={(event) => setSelectedClaimType(event.target.value)} className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground sm:max-w-md">
+                <option value="">Choose a claim category</option>
+                {claimTypeOptions.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}
+              </select>
+            </>
+          ) : (
+            <ul className="list-disc space-y-1 pl-5">
+              {error.split(/(?<=\.)\s+/).map((message, index) => <li key={`${message}-${index}`}>{message}{"\u00a0"}</li>)}
+            </ul>
+          )}
           <div className="mt-3 flex flex-wrap gap-3">
+            {error.includes("We couldn't match") && selectedClaimType ? (
+              <button type="button" onClick={() => { setRequestState("idle"); window.setTimeout(() => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent), 0); }} className="rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground">Use selected category</button>
+            ) : null}
             {errorRecovery === "retry" && retryAction.current && (
               <button type="button" onClick={() => retryAction.current?.()} disabled={loading} className="rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground disabled:opacity-50">
                 Try again
@@ -392,6 +407,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     abortController.current?.abort();
     requestVersion.current += 1;
     setNarrative("");
+    setSelectedClaimType("");
     updateSession(null);
     setSessionToken(null);
     setRequestState("idle");
