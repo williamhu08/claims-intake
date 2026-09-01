@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; performs the adaptive model work that produces sessions consumed through V3. */
 import { generateText, Output } from "ai";
 
 import { getAiModel } from "@/lib/ai/gateway";

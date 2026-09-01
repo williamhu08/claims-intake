@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; validates clarification answers for both the server and the current V2–V3 frontend. */
 import type {
   ClarificationAnswerType,
   ClarificationOption,

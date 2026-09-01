@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; starts the adaptive intake session that feeds the V3 handoff. */
 import {
   analyzeClaimNarrative,
   selectNextCaseSessionAction,

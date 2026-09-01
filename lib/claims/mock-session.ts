@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; provides deterministic session fixtures for the current V2–V3 testing flow. */
 import type { CaseState } from "@/lib/claims/schema";
 import {
   applyCaseSessionAction,

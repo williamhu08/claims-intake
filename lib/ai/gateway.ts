@@ -1,4 +1,4 @@
-/** Clearway version scope: V0–V2. */
+/** Introduced in V0; supports the model-backed intake stages used before the deterministic V3 handoff. */
 
 export const DEFAULT_AI_MODEL = "openai/gpt-5.6-luna";
 

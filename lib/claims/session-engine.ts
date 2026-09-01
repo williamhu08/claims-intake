@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; enforces session transitions and signed state consumed through V3. */
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import {

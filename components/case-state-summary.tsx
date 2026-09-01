@@ -1,4 +1,4 @@
-/** Clearway version scope: V1. */
+/** Introduced in V1; renders case-state snapshots throughout the current V2–V3 workflow. */
 import type { CaseState } from "@/lib/claims/schema";
 import { caseFactSourceLabels, claimTypeDisplay } from "@/lib/claims/display";
 import { ConfidenceMeter } from "@/components/confidence-meter";

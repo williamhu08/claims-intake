@@ -1,4 +1,4 @@
-/** Clearway version scope: V1. */
+/** Introduced in V1; displays classification confidence throughout the current V2–V3 workflow. */
 type ConfidenceMeterProps = {
   value: number;
 };

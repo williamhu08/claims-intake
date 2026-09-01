@@ -1,4 +1,4 @@
-/** Clearway version scope: V0–V2. */
+/** Frontend display configuration accumulated across V0–V2 and used throughout the current V3 application. */
 import {
   supportedClaimTypeValues,
   type ClaimIntakeResult,

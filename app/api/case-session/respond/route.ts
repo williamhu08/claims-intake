@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; advances the adaptive intake session that feeds the V3 handoff. */
 import { z } from "zod";
 
 import {

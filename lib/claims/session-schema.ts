@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; defines the case-session contract consumed through V3. */
 import { z } from "zod";
 
 import {

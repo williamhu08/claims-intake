@@ -1,4 +1,4 @@
-/** Clearway version scope: V0. */
+/** Introduced in V0; provides global metadata, typography, and layout for the current V3 application. */
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";

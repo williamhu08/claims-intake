@@ -1,4 +1,4 @@
-/** Clearway version scope: V0. */
+/** Current application entry point, assembling product surfaces introduced across V0–V3. */
 import { AppShell } from "@/components/app-shell";
 import { ClaimCategories } from "@/components/claim-categories";
 import { ClaimIntakeSection } from "@/components/claim-intake-section";

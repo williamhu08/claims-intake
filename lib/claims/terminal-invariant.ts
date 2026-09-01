@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; protects terminal session results consumed through V3. */
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 
 /**

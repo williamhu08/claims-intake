@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V0–V1. */
+/** Built across V0–V1; coordinates case-state presentation throughout the current V2–V3 flow. */
 
 import { useState } from "react";
 import type { CaseSessionState } from "@/lib/claims/session-schema";

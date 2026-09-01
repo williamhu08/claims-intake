@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; renders the terminal intake result that precedes the V3 handoff. */
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { proposedRouteLabels } from "@/lib/claims/schema";
 import { CaseStateSummary } from "@/components/case-state-summary";

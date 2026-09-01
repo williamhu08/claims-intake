@@ -1,4 +1,4 @@
-/** Clearway version scope: V2. */
+/** Introduced in V2; provides safe recovery when the current V2–V3 session violates an invariant. */
 type CaseSessionInvariantFallbackProps = {
   /** Called when the user chooses to recover. Should reset the session to a fresh state. */
   onReset: () => void;

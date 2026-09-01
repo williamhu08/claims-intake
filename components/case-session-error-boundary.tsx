@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V2. */
+/** Introduced in V2; protects the current session-result UI from invalid runtime state. */
 
 import { Component, type ReactNode } from "react";
 import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";

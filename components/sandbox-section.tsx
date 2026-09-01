@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V0. */
+/** Introduced in V0; exposes non-production testing tools for the current application. */
 
 import Link from "next/link";
 import { useTestingMode } from "@/components/app-shell";

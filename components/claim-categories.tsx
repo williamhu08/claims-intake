@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V0. */
+/** Introduced in V0; presents the supported categories in the current V3 application. */
 
 import { useState } from "react";
 import { claimTypeOptions } from "@/lib/claims/display";

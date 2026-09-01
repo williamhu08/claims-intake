@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V0–V2. */
+/** Built across V0–V2; orchestrates the claimant flow through the current V3 handoff. */
 
 import { useEffect, useRef, useState } from "react";
 import { useTestingMode } from "@/components/app-shell";

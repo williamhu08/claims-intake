@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V2. */
+/** Introduced in V2; renders adaptive answer controls throughout the current V2–V3 claimant flow. */
 
 import type { ChangeEvent } from "react";
 import type {

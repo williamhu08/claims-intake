@@ -1,6 +1,6 @@
 "use client";
 
-/** Clearway version scope: V0. */
+/** Introduced in V0; provides application-shell and testing-mode state for the current V3 application. */
 
 import { createContext, useContext, useSyncExternalStore } from "react";
 
