@@ -30,6 +30,8 @@ const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
+const selectClassName = "w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground disabled:opacity-60";
+type DatePart = "year" | "month" | "day";
 
 /**
  * Encodes a date-of-loss answer as "YYYY-MM-DD" with any not-yet-chosen part
@@ -45,8 +47,62 @@ function parseDateParts(value: string): { year: string; month: string; day: stri
   return { year, month, day };
 }
 
-function DateAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
+/** Renders the cascading year, month, and day controls shared by date inputs. */
+function CalendarAnswerSelects({
+  year,
+  month,
+  day,
+  onPartChange,
+  disabled,
+  describedBy,
+  labelSuffix = "",
+  className,
+}: {
+  year: string;
+  month: string;
+  day: string;
+  onPartChange: (part: DatePart, value: string) => void;
+  disabled?: boolean;
+  describedBy?: string;
+  labelSuffix?: string;
+  className: string;
+}) {
   const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: currentYear - MIN_LOSS_DATE_YEAR + 1 }, (_, index) => String(currentYear - index));
+  const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0"));
+  const dayCount = year && month ? getDaysInMonth(Number(year), Number(month)) : 31;
+  const dayOptions = Array.from({ length: dayCount }, (_, index) => String(index + 1).padStart(2, "0"));
+
+  function selectProps(part: DatePart, currentValue: string, prerequisiteMet: boolean) {
+    return {
+      "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}${labelSuffix}`,
+      value: currentValue,
+      onChange: (event: ChangeEvent<HTMLSelectElement>) => onPartChange(part, event.target.value),
+      disabled: disabled || !prerequisiteMet,
+      "aria-disabled": disabled || !prerequisiteMet,
+      className: selectClassName,
+    };
+  }
+
+  return (
+    <div aria-describedby={describedBy} className={className}>
+      <select {...selectProps("year", year, true)}>
+        <option value="" disabled={disabled && year !== ""}>Year</option>
+        {yearOptions.map((option) => <option key={option} value={option} disabled={disabled && year !== option}>{option}</option>)}
+      </select>
+      <select {...selectProps("month", month, year !== "")}>
+        <option value="" disabled={disabled && month !== ""}>Month</option>
+        {monthOptions.map((option, index) => <option key={option} value={option} disabled={disabled && month !== option}>{option} · {MONTH_LABELS[index]}</option>)}
+      </select>
+      <select {...selectProps("day", day, year !== "" && month !== "")}>
+        <option value="" disabled={disabled && day !== ""}>Day</option>
+        {dayOptions.map((option) => <option key={option} value={option} disabled={disabled && day !== option}>{option}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function DateAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
   const { year, month, day } = parseDateParts(value);
 
   // A previously-submitted "I don't know" answer is rendered as this literal
@@ -61,12 +117,7 @@ function DateAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props
     );
   }
 
-  const yearOptions = Array.from({ length: currentYear - MIN_LOSS_DATE_YEAR + 1 }, (_, index) => String(currentYear - index));
-  const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0"));
-  const dayCount = year && month ? getDaysInMonth(Number(year), Number(month)) : 31;
-  const dayOptions = Array.from({ length: dayCount }, (_, index) => String(index + 1).padStart(2, "0"));
-
-  function handlePartChange(part: "year" | "month" | "day", nextRaw: string) {
+  function handlePartChange(part: DatePart, nextRaw: string) {
     if (disabled) return;
     // Choosing a part resets every part after it: a new year invalidates the
     // previously-selected month and day (the day count may differ, e.g. Feb
@@ -77,49 +128,19 @@ function DateAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props
     else onChange(nextRaw ? `${year}-${month}-${nextRaw}` : `${year}-${month}-`);
   }
 
-  function selectProps(part: "year" | "month" | "day", currentValue: string, prerequisiteMet: boolean) {
-    return {
-      "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)} of loss`,
-      value: currentValue,
-      onChange: (event: ChangeEvent<HTMLSelectElement>) => handlePartChange(part, event.target.value),
-      disabled: disabled || !prerequisiteMet,
-      "aria-disabled": disabled || !prerequisiteMet,
-      className:
-        "w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground disabled:opacity-60",
-    };
-  }
-
   return (
-    <div aria-describedby={describedBy} className="mt-2 grid grid-cols-3 gap-3">
-      <select {...selectProps("year", year, true)}>
-        <option value="" disabled={disabled && year !== ""}>Year</option>
-        {yearOptions.map((option) => (
-          <option key={option} value={option} disabled={disabled && year !== option}>
-            {option}
-          </option>
-        ))}
-      </select>
-      <select {...selectProps("month", month, year !== "")}>
-        <option value="" disabled={disabled && month !== ""}>Month</option>
-        {monthOptions.map((option, index) => (
-          <option key={option} value={option} disabled={disabled && month !== option}>
-            {option} · {MONTH_LABELS[index]}
-          </option>
-        ))}
-      </select>
-      <select {...selectProps("day", day, year !== "" && month !== "")}>
-        <option value="" disabled={disabled && day !== ""}>Day</option>
-        {dayOptions.map((option) => (
-          <option key={option} value={option} disabled={disabled && day !== option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
+    <CalendarAnswerSelects
+      year={year}
+      month={month}
+      day={day}
+      onPartChange={handlePartChange}
+      disabled={disabled}
+      describedBy={describedBy}
+      labelSuffix=" of loss"
+      className="mt-2 grid grid-cols-3 gap-3"
+    />
   );
 }
-
-const selectClassName = "w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground disabled:opacity-60";
 
 /**
  * Encodes a date_time answer as "YYYY-MM-DDTHH:MM:SS" with any not-yet-chosen
@@ -149,7 +170,6 @@ function encodeDateTimeParts(parts: { year: string; month: string; day: string; 
  * Values outside 00-23/00-59/00-59 remain visible in red and cannot validate.
  */
 function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<Props, "value" | "onChange" | "disabled" | "describedBy">) {
-  const currentYear = new Date().getFullYear();
   const { year, month, day, hour, minute, second } = parseDateTimeParts(value);
 
   // A previously-submitted "I don't know" answer is rendered as a literal
@@ -164,11 +184,7 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
     );
   }
 
-  const yearOptions = Array.from({ length: currentYear - MIN_LOSS_DATE_YEAR + 1 }, (_, index) => String(currentYear - index));
-  const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0"));
-  const dayCount = year && month ? getDaysInMonth(Number(year), Number(month)) : 31;
-  const dayOptions = Array.from({ length: dayCount }, (_, index) => String(index + 1).padStart(2, "0"));
-  function handleDatePartChange(part: "year" | "month" | "day", nextRaw: string) {
+  function handleDatePartChange(part: DatePart, nextRaw: string) {
     if (disabled) return;
     // Choosing a date part resets every date part after it, same as
     // DateAnswerSelect, but leaves the time part untouched since date and
@@ -196,17 +212,6 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
     }
   }
 
-  function dateSelectProps(part: "year" | "month" | "day", currentValue: string, prerequisiteMet: boolean) {
-    return {
-      "aria-label": `${part.charAt(0).toUpperCase()}${part.slice(1)}`,
-      value: currentValue,
-      onChange: (event: ChangeEvent<HTMLSelectElement>) => handleDatePartChange(part, event.target.value),
-      disabled: disabled || !prerequisiteMet,
-      "aria-disabled": disabled || !prerequisiteMet,
-      className: selectClassName,
-    };
-  }
-
   function timeInputProps(part: "hour" | "minute" | "second", currentValue: string, index: number) {
     const hasValue = currentValue.length > 0;
     const numericValue = Number(currentValue);
@@ -232,32 +237,14 @@ function DateTimeAnswerSelect({ value, onChange, disabled, describedBy }: Pick<P
 
   return (
     <div aria-describedby={describedBy} className="mt-2 space-y-3">
-      <div className="grid grid-cols-3 gap-3">
-        <select {...dateSelectProps("year", year, true)}>
-          <option value="" disabled={disabled && year !== ""}>Year</option>
-          {yearOptions.map((option) => (
-            <option key={option} value={option} disabled={disabled && year !== option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <select {...dateSelectProps("month", month, year !== "")}>
-          <option value="" disabled={disabled && month !== ""}>Month</option>
-          {monthOptions.map((option, index) => (
-            <option key={option} value={option} disabled={disabled && month !== option}>
-              {option} · {MONTH_LABELS[index]}
-            </option>
-          ))}
-        </select>
-        <select {...dateSelectProps("day", day, year !== "" && month !== "")}>
-          <option value="" disabled={disabled && day !== ""}>Day</option>
-          {dayOptions.map((option) => (
-            <option key={option} value={option} disabled={disabled && day !== option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CalendarAnswerSelects
+        year={year}
+        month={month}
+        day={day}
+        onPartChange={handleDatePartChange}
+        disabled={disabled}
+        className="grid grid-cols-3 gap-3"
+      />
       <div aria-label="Time" className="flex items-center gap-2">
         <span className="sr-only">Time in hours, minutes, and seconds</span>
         <input {...timeInputProps("hour", hour, 0)} />
@@ -373,7 +360,7 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
   if (answerType === "phone") {
     return <PhoneAnswerInput value={value} onChange={onChange} disabled={disabled} describedBy={describedBy} />;
   }
-  const inputType = answerType === "email" ? "email" : answerType === "url" ? "url" : answerType === "address" || answerType === "free_text" ? "text" : "text";
+  const inputType = answerType === "email" || answerType === "url" ? answerType : "text";
   const inputMode: "numeric" | "text" = ["money", "integer", "percentage", "postal_code"].includes(answerType) ? "numeric" : "text";
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const next = event.target.value;
