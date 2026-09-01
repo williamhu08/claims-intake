@@ -1,7 +1,48 @@
 # Clearway
 
+Clearway uses AI to streamline the first-touch property claims process. It
+starts with the claimant's ordinary-language account, turns it into visible
+structured facts, and lets the model choose the next relevant question from a
+bounded set of permitted actions. After each answer, the system evaluates the
+updated case instead of following the same fixed questionnaire for everyone.
+
+This makes it practical to collect more claim-specific detail before a person
+has to step in. The application still owns validation, session state, safety
+limits, and stopping behavior; unresolved, unsafe, or unsupported cases go to
+human review rather than being guessed through automatically.
+
+It is deliberately **not** a coverage engine, claims-payment system, or
+liability decision-maker.
+
 For the problem, product decisions, implementation scope, and division of work
 between AI tools and the project owner, read the [project overview](./OVERVIEW.md).
+
+## What Clearway does today
+
+1. Classifies a plain-language property-claim narrative into a structured
+   `CaseState`.
+2. Shows collected facts, missing facts, provenance, a proposed route, and
+   classification confidence.
+3. Asks a bounded series of targeted follow-up questions when material facts
+   are missing, while the app owns session state, validation, and stop
+   conditions.
+4. For terminal **water-damage** sessions only, produces a deterministic next
+   step: standard property-adjuster review or human review, with safety-first
+   urgency.
+
+`CaseState` is Clearway's canonical structured snapshot of the intake. It
+contains the claim category, factual summary, classification confidence, and a
+fixed set of material facts covering cause, damage, affected property, timing,
+active loss or safety concerns, and injury or third-party involvement. Each
+fact records whether it was collected, missing, unclear, or not applicable and
+whether it came from the initial narrative or a claimant response. The state
+also identifies missing facts and carries a non-binding proposed route with its
+rationale and confidence.
+
+The supported intake categories are water damage, fire or smoke, weather or
+storm, theft or vandalism, and liability. The operational handoff is
+intentionally limited to water damage; other categories remain safe intake
+outcomes rather than receiving invented policy logic.
 
 ## Use the app
 
@@ -22,10 +63,6 @@ Claimant narrative
   → signed terminal intake session
   → deterministic water-damage next step
 ```
-
-Clearway supports intake for water damage, fire or smoke, weather or storm,
-theft or vandalism, and liability. The deterministic operational handoff is
-currently limited to water damage.
 
 ## Run locally
 
