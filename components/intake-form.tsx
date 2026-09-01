@@ -5,10 +5,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useTestingMode } from "@/components/app-shell";
 import {
+  clarificationAnswerTypeHints,
+  claimTypeOptions,
+  exampleClaims,
+} from "@/lib/claims/display";
+import {
   caseSessionStateSchema,
   type CaseSessionState,
 } from "@/lib/claims/session-schema";
-import { clarificationAnswerTypeHints, exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 import { CaseHandoffPanel } from "@/components/case-handoff-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
@@ -21,6 +25,7 @@ import {
 
 const MIN_LENGTH = 20;
 const MAX_LENGTH = 4000;
+const SUPPORTED_CLAIM_CATEGORY_COUNT = claimTypeOptions.length;
 
 type IntakeFormProps = {
   onSessionChange?: (session: CaseSessionState | null) => void;
@@ -205,7 +210,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             Describe what happened
           </label>
           <p className="mt-1 text-sm text-muted-foreground text-pretty">
-            Use your own words. Include what was damaged and how, but only what you actually know.
+            Use your own words. Include what was damaged and how, but only what you actually know. Your description must fit one of the {SUPPORTED_CLAIM_CATEGORY_COUNT} supported claim categories. To see what each category means, click &quot;Supported claim categories&quot; above.
           </p>
           <textarea
             id="narrative"
