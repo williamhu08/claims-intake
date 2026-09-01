@@ -39,6 +39,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const retryAction = useRef<(() => void) | null>(null);
   const [errorRecovery, setErrorRecovery] = useState<"retry" | "reset" | null>(null);
   const [showTryAnother, setShowTryAnother] = useState(false);
+  const [assessmentAttempted, setAssessmentAttempted] = useState(false);
 
   useEffect(() => {
     if (!session?.terminal) return;
@@ -58,18 +59,19 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     : false;
   const isNoResponse = answer === "no_response";
   const hasActiveSession = Boolean(sessionToken);
-  const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession;
+  const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession && !assessmentAttempted;
 
   function updateSession(nextSession: CaseSessionState | null) {
     setSession(nextSession);
     onSessionChange?.(nextSession);
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent, allowRetry = false) {
     event.preventDefault();
-    if (!canSubmit) return;
+    if ((!canSubmit && !allowRetry) || loading || hasActiveSession) return;
 
     const submittedNarrative = narrative.trim();
+    setAssessmentAttempted(true);
     const version = ++requestVersion.current;
     abortController.current?.abort();
     abortController.current = new AbortController();
@@ -77,7 +79,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     setShowTryAnother(false);
     setError(null);
     setErrorRecovery(null);
-    retryAction.current = () => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent);
+    retryAction.current = () => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent, true);
     updateSession(null);
     setSessionToken(null);
 
@@ -387,6 +389,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     abortController.current?.abort();
     requestVersion.current += 1;
     setNarrative("");
+    setAssessmentAttempted(false);
     updateSession(null);
     setSessionToken(null);
     setRequestState("idle");
