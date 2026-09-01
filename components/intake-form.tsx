@@ -13,7 +13,7 @@ import {
   caseSessionResponseSchema,
   type CaseSessionState,
 } from "@/lib/claims/session-schema";
-import { clarificationAnswerTypeHints, exampleClaims } from "@/lib/claims/display";
+import { clarificationAnswerTypeDisplay, exampleClaims } from "@/lib/claims/display";
 import { ResultPanel } from "@/components/result-panel";
 import { CaseHandoffPanel } from "@/components/case-handoff-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
@@ -332,9 +332,9 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             disabled={loading}
             describedBy="clarification-hint"
           />
-          {clarificationAnswerTypeHints[pendingAction.answerType] ? (
+          {clarificationAnswerTypeDisplay[pendingAction.answerType].hint ? (
             <p id="clarification-hint" className="mt-2 text-sm text-muted-foreground">
-              {clarificationAnswerTypeHints[pendingAction.answerType]}
+              {clarificationAnswerTypeDisplay[pendingAction.answerType].hint}
             </p>
           ) : null}
           <div className="mt-4 flex flex-wrap items-center gap-3">

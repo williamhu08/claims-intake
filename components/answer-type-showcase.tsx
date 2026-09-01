@@ -7,9 +7,7 @@ import { ClarificationInput } from "@/components/clarification-input";
 import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
 import { clarificationAnswerTypeValues } from "@/lib/claims/session-schema";
 import {
-  clarificationAnswerTypeHints,
-  clarificationAnswerTypeLabels,
-  clarificationAnswerTypeSampleOptions,
+  clarificationAnswerTypeDisplay,
 } from "@/lib/claims/display";
 
 /**
@@ -27,7 +25,8 @@ export function AnswerTypeShowcase() {
     <div className="grid gap-6 sm:grid-cols-2">
       {clarificationAnswerTypeValues.map((answerType) => {
         const value = answers[answerType] ?? "";
-        const options = clarificationAnswerTypeSampleOptions[answerType];
+        const display = clarificationAnswerTypeDisplay[answerType];
+        const options = display.sampleOptions;
         const valid = value.trim().length > 0
           && isValidClarificationAnswer(answerType, value, options);
 
@@ -36,7 +35,7 @@ export function AnswerTypeShowcase() {
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-mono text-sm font-semibold text-foreground">{answerType}</h2>
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {clarificationAnswerTypeLabels[answerType]}
+                {display.label}
               </span>
             </div>
             <ClarificationInput
@@ -46,9 +45,9 @@ export function AnswerTypeShowcase() {
               options={options}
               describedBy={`answer-type-hint-${answerType}`}
             />
-            {clarificationAnswerTypeHints[answerType] ? (
+            {display.hint ? (
               <p id={`answer-type-hint-${answerType}`} className="mt-2 text-sm text-muted-foreground">
-                {clarificationAnswerTypeHints[answerType]}
+                {display.hint}
               </p>
             ) : null}
             <p className="mt-2 text-sm font-medium" aria-live="polite">

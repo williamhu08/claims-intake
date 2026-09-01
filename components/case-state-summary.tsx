@@ -1,6 +1,6 @@
 /** Clearway version scope: V1. */
 import type { CaseState } from "@/lib/claims/schema";
-import { caseFactSourceLabels, claimTypeDescriptions, claimTypeLabels } from "@/lib/claims/display";
+import { caseFactSourceLabels, claimTypeDisplay } from "@/lib/claims/display";
 import { ConfidenceMeter } from "@/components/confidence-meter";
 
 type CaseStateSummaryProps = {
@@ -37,8 +37,8 @@ export function CaseStateSummary({ result, heading = "Case state" }: CaseStateSu
       </div>
       <div className="mt-4 space-y-1">
         <p className="text-sm font-medium text-muted-foreground">Likely category</p>
-        <h2 className="font-serif text-2xl font-semibold text-foreground text-balance">{claimTypeLabels[result.claimType]}</h2>
-        <p className="text-sm text-muted-foreground text-pretty">{claimTypeDescriptions[result.claimType]}</p>
+        <h2 className="font-serif text-2xl font-semibold text-foreground text-balance">{claimTypeDisplay[result.claimType].label}</h2>
+        <p className="text-sm text-muted-foreground text-pretty">{claimTypeDisplay[result.claimType].description}</p>
       </div>
       <div className="mt-6 space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Factual summary</p>
