@@ -7,37 +7,30 @@ import {
   classifyAiGatewayError,
   isAiGatewayConfigured,
 } from "@/lib/ai/gateway";
+import { parseJsonRequest } from "@/lib/api/json-request";
 import { getCaseSessionConfig } from "@/lib/claims/session-config";
 import {
   applyCaseSessionAction,
   createCaseSession,
-  signCaseSession,
 } from "@/lib/claims/session-engine";
 import {
   claimIntakeRequestSchema,
   supportedClaimTypeValues,
 } from "@/lib/claims/schema";
 import { createMockStartSession } from "@/lib/claims/mock-session";
-import { caseSessionResponseSchema } from "@/lib/claims/session-schema";
+import { signedCaseSessionJsonResponse } from "@/lib/claims/session-response";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  let body: unknown;
-
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Send a JSON request with a claim narrative." }, { status: 400 });
-  }
-
-  const parsedRequest = claimIntakeRequestSchema.safeParse(body);
-
+  const parsedRequest = await parseJsonRequest(
+    request,
+    claimIntakeRequestSchema,
+    "Send a JSON request with a claim narrative.",
+    "Invalid claim narrative.",
+  );
   if (!parsedRequest.success) {
-    return Response.json(
-      { error: parsedRequest.error.issues[0]?.message ?? "Invalid claim narrative." },
-      { status: 400 },
-    );
+    return parsedRequest.response;
   }
 
   let config: ReturnType<typeof getCaseSessionConfig>;
@@ -51,10 +44,7 @@ export async function POST(request: Request) {
 
   if (parsedRequest.data.testingMode) {
     const session = createMockStartSession(config.ttlSeconds);
-    return Response.json(caseSessionResponseSchema.parse({
-      session,
-      sessionToken: signCaseSession(session, config.signingSecret),
-    }));
+    return signedCaseSessionJsonResponse(session, config.signingSecret);
   }
 
   if (!isAiGatewayConfigured()) {
@@ -85,10 +75,7 @@ export async function POST(request: Request) {
       );
       const nextSession = applyCaseSessionAction(session, action, config.maxClarifications);
 
-      return Response.json(caseSessionResponseSchema.parse({
-        session: nextSession,
-        sessionToken: signCaseSession(nextSession, config.signingSecret),
-      }));
+      return signedCaseSessionJsonResponse(nextSession, config.signingSecret);
     } catch (error) {
       lastError = error;
 

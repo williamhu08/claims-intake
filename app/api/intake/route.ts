@@ -10,6 +10,7 @@ import {
   claimIntakeRequestSchema,
   claimIntakeResultSchema,
 } from "@/lib/claims/schema";
+import { parseJsonRequest } from "@/lib/api/json-request";
 
 export const runtime = "nodejs";
 
@@ -18,24 +19,14 @@ const triageInstructions = `You perform first-touch triage for ambiguous propert
 Classify the claimant's account into the single best claim type and write a concise, neutral factual summary. Use only facts explicitly stated by the claimant. Never invent facts, policy details, fault, coverage, payment eligibility, or a recommended settlement. If the account does not support a reliable category, select other_or_unclear. Confidence measures only confidence in the category classification, from 0 to 1.`;
 
 export async function POST(request: Request) {
-  let body: unknown;
-
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json(
-      { error: "Send a JSON request with a claim narrative." },
-      { status: 400 },
-    );
-  }
-
-  const parsedRequest = claimIntakeRequestSchema.safeParse(body);
-
+  const parsedRequest = await parseJsonRequest(
+    request,
+    claimIntakeRequestSchema,
+    "Send a JSON request with a claim narrative.",
+    "Invalid claim narrative.",
+  );
   if (!parsedRequest.success) {
-    return Response.json(
-      { error: parsedRequest.error.issues[0]?.message ?? "Invalid claim narrative." },
-      { status: 400 },
-    );
+    return parsedRequest.response;
   }
 
   if (!isAiGatewayConfigured()) {

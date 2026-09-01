@@ -11,6 +11,7 @@ import {
   claimIntakeRequestSchema,
   normalizeCaseState,
 } from "@/lib/claims/schema";
+import { parseJsonRequest } from "@/lib/api/json-request";
 
 export const runtime = "nodejs";
 
@@ -23,24 +24,14 @@ For each fact you include, mark it collected only when the narrative explicitly 
 Propose a non-binding intake route. Choose liability_review only when the claimant states an injury or third-party involvement. Use human_triage_review when the account is materially ambiguous or does not support reliable routing. Confidence measures confidence in classification or the proposed route, not coverage or liability.`;
 
 export async function POST(request: Request) {
-  let body: unknown;
-
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json(
-      { error: "Send a JSON request with a claim narrative." },
-      { status: 400 },
-    );
-  }
-
-  const parsedRequest = claimIntakeRequestSchema.safeParse(body);
-
+  const parsedRequest = await parseJsonRequest(
+    request,
+    claimIntakeRequestSchema,
+    "Send a JSON request with a claim narrative.",
+    "Invalid claim narrative.",
+  );
   if (!parsedRequest.success) {
-    return Response.json(
-      { error: parsedRequest.error.issues[0]?.message ?? "Invalid claim narrative." },
-      { status: 400 },
-    );
+    return parsedRequest.response;
   }
 
   if (!isAiGatewayConfigured()) {

@@ -1,6 +1,7 @@
 /** Clearway version scope: V3. */
 import { z } from "zod";
 
+import { parseJsonRequest } from "@/lib/api/json-request";
 import {
   V3HandoffEligibilityError,
   buildAdjusterReadyHandoff,
@@ -23,6 +24,11 @@ function handoffJsonResponse(payload: unknown, init?: ResponseInit): Response {
   return Response.json(caseHandoffResponseSchema.parse(payload), init);
 }
 
+/** Serializes request-validation failures through the V3 response schema. */
+function handoffRequestErrorResponse(message: string, status: number): Response {
+  return handoffJsonResponse({ error: message }, { status });
+}
+
 /**
  * Creates a deterministic V3 request handler using a server-selected fixture registry.
  * The factory is a test seam only: production imports it with the immutable
@@ -37,21 +43,15 @@ export function createCaseHandoffRouteHandler(
    * decisions remain on the server.
    */
   return async function handleCaseHandoff(request: Request) {
-    let body: unknown;
-
-    try {
-      body = await request.json();
-    } catch {
-      return handoffJsonResponse({ error: "Send a JSON request with a case session token." }, { status: 400 });
-    }
-
-    const parsedRequest = handoffRequestSchema.safeParse(body);
-
+    const parsedRequest = await parseJsonRequest(
+      request,
+      handoffRequestSchema,
+      "Send a JSON request with a case session token.",
+      "Send a valid case session token.",
+      handoffRequestErrorResponse,
+    );
     if (!parsedRequest.success) {
-      return handoffJsonResponse(
-        { error: parsedRequest.error.issues[0]?.message ?? "Send a valid case session token." },
-        { status: 400 },
-      );
+      return parsedRequest.response;
     }
 
     let config: ReturnType<typeof getCaseSessionConfig>;
