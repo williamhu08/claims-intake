@@ -3,6 +3,10 @@ import {
   analyzeClaimNarrative,
   selectNextCaseSessionAction,
 } from "@/lib/claims/session-agent";
+import {
+  classifyAiGatewayError,
+  isAiGatewayConfigured,
+} from "@/lib/ai/gateway";
 import { getCaseSessionConfig } from "@/lib/claims/session-config";
 import {
   applyCaseSessionAction,
@@ -16,15 +20,6 @@ import {
 import { createMockStartSession } from "@/lib/claims/mock-session";
 
 export const runtime = "nodejs";
-
-function gatewayConfigured(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
-}
-
-function isRateLimitError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /429|rate[- ]?limit|quota|GatewayRateLimitError/i.test(message);
-}
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -61,7 +56,7 @@ export async function POST(request: Request) {
     });
   }
 
-  if (!gatewayConfigured()) {
+  if (!isAiGatewayConfigured()) {
     return Response.json({ error: "AI Gateway is not configured for this environment." }, { status: 503 });
   }
 
@@ -98,7 +93,7 @@ export async function POST(request: Request) {
 
       // Retrying a rate-limited request cannot succeed and only consumes more of the
       // free-tier per-minute budget, so fail fast instead of amplifying the burst.
-      if (isRateLimitError(error)) break;
+      if (classifyAiGatewayError(error) === "rate_limited") break;
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
     }
   }
@@ -110,9 +105,9 @@ export async function POST(request: Request) {
       message: error instanceof Error ? error.message : "Unknown error",
     });
 
-    const message = error instanceof Error ? error.message : "Unknown startup failure.";
-    const isRateLimited = /429|rate[- ]?limit|quota/i.test(message);
-    const isUnauthorized = /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
+    const errorKind = classifyAiGatewayError(error);
+    const isRateLimited = errorKind === "rate_limited";
+    const isUnauthorized = errorKind === "unauthorized";
 
     return Response.json(
       {

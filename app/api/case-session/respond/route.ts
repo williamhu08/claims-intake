@@ -2,6 +2,10 @@
 import { z } from "zod";
 
 import {
+  classifyAiGatewayError,
+  isAiGatewayConfigured,
+} from "@/lib/ai/gateway";
+import {
   refreshCaseStateFromClarification,
   selectNextCaseSessionAction,
 } from "@/lib/claims/session-agent";
@@ -28,25 +32,6 @@ const responseRequestSchema = z.object({
     .or(z.literal("no_response")),
   testingMode: z.boolean().optional().default(false),
 });
-
-function gatewayConfigured(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
-}
-
-function isRateLimitError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /429|rate[- ]?limit|quota|GatewayRateLimitError/i.test(message);
-}
-
-function isUnauthorizedError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
-}
-
-function isTimeoutError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /abort|aborted|timeout|timed out|deadline/i.test(message);
-}
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -88,7 +73,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if (parsedRequest.data.answer !== "no_response" && !gatewayConfigured()) {
+  if (parsedRequest.data.answer !== "no_response" && !isAiGatewayConfigured()) {
     return Response.json({ error: "AI Gateway is not configured for this environment." }, { status: 503 });
   }
 
@@ -127,9 +112,10 @@ export async function POST(request: Request) {
       message: error instanceof Error ? error.message : "Unknown error",
     });
 
-    const isRateLimited = isRateLimitError(error);
-    const isUnauthorized = isUnauthorizedError(error);
-    const isTimedOut = isTimeoutError(error);
+    const errorKind = classifyAiGatewayError(error);
+    const isRateLimited = errorKind === "rate_limited";
+    const isUnauthorized = errorKind === "unauthorized";
+    const isTimedOut = errorKind === "timeout";
 
     return Response.json(
       {

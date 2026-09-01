@@ -1,6 +1,7 @@
 /** Clearway version scope: V2. */
 import { generateText, Output } from "ai";
 
+import { getAiModel } from "@/lib/ai/gateway";
 import {
   caseAnalysisModelOutputSchema,
   normalizeCaseState,
@@ -14,8 +15,6 @@ import {
   type CaseSessionState,
 } from "@/lib/claims/session-schema";
 import { isClarificationEligible } from "@/lib/claims/session-engine";
-
-const defaultModel = "openai/gpt-5.6-luna";
 
 const caseAnalysisInstructions = `You perform first-touch triage for ambiguous property insurance claims.
 
@@ -35,10 +34,6 @@ const nextActionInstructions = `You choose exactly one next action for a bounded
 
 Use only the provided tools. Never answer with prose. Do not decide coverage, fault, liability, payment, or settlement. Ask a question only when the application made that tool available. Route only when the validated state supports it. Escalate whenever material uncertainty remains, the claimant cannot answer, or safety needs review.`;
 
-function model() {
-  return process.env.AI_MODEL ?? defaultModel;
-}
-
 export class CaseSessionSafetyBudgetError extends Error {}
 
 function enforceInputTokenBudget(inputTokens: number | undefined, maxInputTokens: number) {
@@ -53,7 +48,7 @@ export async function analyzeClaimNarrative(
   timeout: number,
 ): Promise<CaseState> {
   const result = await generateText({
-    model: model(),
+    model: getAiModel(),
     system: caseAnalysisInstructions,
     prompt: `Claimant narrative:\n\n${narrative}`,
     output: Output.object({
@@ -83,7 +78,7 @@ export async function refreshCaseStateFromClarification(
   timeout: number,
 ): Promise<CaseState> {
   const result = await generateText({
-    model: model(),
+    model: getAiModel(),
     system: `${caseAnalysisInstructions}\n\nPreserve previously collected facts unless the claimant's new answer explicitly corrects or adds information.`,
     prompt: `Current validated case state:\n${JSON.stringify(previous)}\n\nClarifying question:\n${question}\n\nClaimant answer:\n${answer}`,
     output: Output.object({
@@ -174,7 +169,7 @@ export async function selectNextCaseSessionAction(
   };
 
   let result = await generateText({
-    model: model(),
+    model: getAiModel(),
     system: nextActionInstructions,
     prompt: `Validated case-session state:\n${JSON.stringify(session)}${
       canAskClarification
@@ -191,7 +186,7 @@ export async function selectNextCaseSessionAction(
 
   if (canAskClarification && result.toolCalls[0]?.toolName !== "ask_clarifying_question") {
     result = await generateText({
-      model: model(),
+      model: getAiModel(),
       system: nextActionInstructions,
       prompt: `The previous action was invalid. Select ask_clarifying_question now. Ask about a missing or unclear fact from Case State and write the question dynamically. Do not route or escalate.\nValidated case-session state:\n${JSON.stringify(session)}`,
       tools,

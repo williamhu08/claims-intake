@@ -4,7 +4,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTestingMode } from "@/components/app-shell";
-import { supportedClaimTypeValues } from "@/lib/claims/schema";
+import {
+  MAX_CLAIM_NARRATIVE_LENGTH,
+  MIN_CLAIM_NARRATIVE_LENGTH,
+  supportedClaimTypeValues,
+} from "@/lib/claims/schema";
 import {
   caseSessionStateSchema,
   type CaseSessionState,
@@ -19,9 +23,6 @@ import {
   ClarificationInput,
   isClarificationAnswerValid,
 } from "@/components/clarification-input";
-
-const MIN_LENGTH = 20;
-const MAX_LENGTH = 4000;
 
 type IntakeFormProps = {
   onSessionChange?: (session: CaseSessionState | null) => void;
@@ -50,7 +51,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   }, [session?.terminal]);
 
   const trimmedLength = narrative.trim().length;
-  const tooShort = trimmedLength > 0 && trimmedLength < MIN_LENGTH;
+  const tooShort = trimmedLength > 0 && trimmedLength < MIN_CLAIM_NARRATIVE_LENGTH;
   const isSubmittingNarrative = requestState === "submitting";
   const isRespondingToClarification = requestState === "responding";
   const loading = isSubmittingNarrative || isRespondingToClarification;
@@ -61,7 +62,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const isNoResponse = answer === "no_response";
   const hasActiveSession = Boolean(sessionToken);
   const isCategoryMismatch = error?.includes("couldn't match your narrative") ?? false;
-  const canSubmit = trimmedLength >= MIN_LENGTH && trimmedLength <= MAX_LENGTH && !loading && !hasActiveSession && !assessmentAttempted;
+  const canSubmit = trimmedLength >= MIN_CLAIM_NARRATIVE_LENGTH && trimmedLength <= MAX_CLAIM_NARRATIVE_LENGTH && !loading && !hasActiveSession && !assessmentAttempted;
 
   function updateSession(nextSession: CaseSessionState | null) {
     setSession(nextSession);
@@ -218,7 +219,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             onChange={(e) => setNarrative(e.target.value)}
             readOnly={hasActiveSession || isCategoryMismatch}
             rows={7}
-            maxLength={MAX_LENGTH}
+            maxLength={MAX_CLAIM_NARRATIVE_LENGTH}
             placeholder="e.g. A pipe burst under the kitchen sink overnight and flooded the cabinet and floor..."
             aria-invalid={tooShort}
             aria-describedby="narrative-hint"
@@ -227,11 +228,11 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
           <div id="narrative-hint" className="mt-2 flex items-center justify-between text-sm">
             <span className={tooShort ? "text-destructive" : "text-muted-foreground"}>
               {tooShort
-                ? `At least ${MIN_LENGTH} characters — add a little more detail.`
-                : "Minimum 20 characters."}
+                ? `At least ${MIN_CLAIM_NARRATIVE_LENGTH} characters — add a little more detail.`
+                : `Minimum ${MIN_CLAIM_NARRATIVE_LENGTH} characters.`}
             </span>
             <span className="tabular-nums text-muted-foreground">
-              {trimmedLength}/{MAX_LENGTH}
+              {trimmedLength}/{MAX_CLAIM_NARRATIVE_LENGTH}
             </span>
           </div>
         </div>

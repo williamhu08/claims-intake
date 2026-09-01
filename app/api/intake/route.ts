@@ -2,23 +2,16 @@
 import { generateText, Output } from "ai";
 
 import {
+  classifyAiGatewayError,
+  getAiModel,
+  isAiGatewayConfigured,
+} from "@/lib/ai/gateway";
+import {
   claimIntakeRequestSchema,
   claimIntakeResultSchema,
 } from "@/lib/claims/schema";
 
 export const runtime = "nodejs";
-
-const defaultModel = "openai/gpt-5.6-luna";
-
-function isRateLimitError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /429|rate[- ]?limit|quota|GatewayRateLimitError/i.test(message);
-}
-
-function isUnauthorizedError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return /401|unauthenticated|authentication|AI_GATEWAY_API_KEY/i.test(message);
-}
 
 const triageInstructions = `You perform first-touch triage for ambiguous property insurance claims.
 
@@ -45,7 +38,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
+  if (!isAiGatewayConfigured()) {
     return Response.json(
       { error: "AI Gateway is not configured for this environment." },
       { status: 503 },
@@ -54,7 +47,7 @@ export async function POST(request: Request) {
 
   try {
     const { output } = await generateText({
-      model: process.env.AI_MODEL ?? defaultModel,
+      model: getAiModel(),
       system: triageInstructions,
       prompt: `Claimant narrative:\n\n${parsedRequest.data.narrative}`,
       output: Output.object({
@@ -74,8 +67,9 @@ export async function POST(request: Request) {
       message: error instanceof Error ? error.message : "Unknown error",
     });
 
-    const isRateLimited = isRateLimitError(error);
-    const isUnauthorized = isUnauthorizedError(error);
+    const errorKind = classifyAiGatewayError(error);
+    const isRateLimited = errorKind === "rate_limited";
+    const isUnauthorized = errorKind === "unauthorized";
 
     return Response.json(
       {
