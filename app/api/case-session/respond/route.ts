@@ -19,6 +19,7 @@ import {
 import { MAX_CASE_FACT_VALUE_LENGTH } from "@/lib/claims/schema";
 import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
 import { createMockRespondedSession } from "@/lib/claims/mock-session";
+import { caseSessionResponseSchema } from "@/lib/claims/session-schema";
 
 export const runtime = "nodejs";
 
@@ -64,10 +65,10 @@ export async function POST(request: Request) {
     try {
       const session = verifyCaseSession(parsedRequest.data.sessionToken, getCaseSessionConfig().signingSecret);
       const nextSession = createMockRespondedSession(session, parsedRequest.data.answer);
-      return Response.json({
+      return Response.json(caseSessionResponseSchema.parse({
         session: nextSession,
         sessionToken: signCaseSession(nextSession, config.signingSecret),
-      });
+      }));
     } catch {
       return Response.json({ error: "This testing session is invalid or has expired. Start again to continue." }, { status: 409 });
     }
@@ -103,10 +104,10 @@ export async function POST(request: Request) {
     // cannot skip a fact that was never put to the claimant.
     const nextSession = await continueAfterAnswer(answeredSession, parsedRequest.data.answer, config);
 
-    return Response.json({
+    return Response.json(caseSessionResponseSchema.parse({
       session: nextSession,
       sessionToken: signCaseSession(nextSession, config.signingSecret),
-    });
+    }));
   } catch (error) {
     console.error("Case-session response failed", {
       message: error instanceof Error ? error.message : "Unknown error",

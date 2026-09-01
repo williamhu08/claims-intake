@@ -3,58 +3,26 @@
 /** Clearway version scope: V2. */
 
 import type { ChangeEvent } from "react";
+import type {
+  ClarificationAnswerType,
+  ClarificationOption,
+} from "@/lib/claims/session-schema";
 import {
   getDaysInMonth,
   isIntegerCandidate,
   isMoneyCandidate,
   isPostalCodeCandidate,
-  isValidCalendarDate,
-  isValidDateTime,
-  isValidMoney,
-  isValidPercentage,
   isValidPhone,
-  isValidPostalCode,
+  isValidClarificationAnswer,
 } from "@/lib/claims/answer-validation";
 
-// The array is the source of truth; ClarificationAnswerType is derived from it
-// so runtime code (e.g. the testing-mode answer-type showcase, which iterates
-// every type) and the static type can never drift apart.
-export const clarificationAnswerTypeValues = [
-  "free_text", "money", "date", "yes_no", "single_choice", "multi_choice",
-  "integer", "percentage", "phone", "email", "date_time", "postal_code",
-  "address", "url",
-] as const;
-export type ClarificationAnswerType = (typeof clarificationAnswerTypeValues)[number];
-
-type Option = { value: string; label: string };
 interface Props {
   answerType: ClarificationAnswerType;
   value: string;
   onChange: (value: string) => void;
-  options?: Option[];
+  options?: ClarificationOption[];
   disabled?: boolean;
   describedBy?: string;
-}
-
-const patterns: Partial<Record<ClarificationAnswerType, RegExp>> = {
-  integer: /^\d+$/,
-  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  url: /^https?:\/\/[^\s]+$/i,
-};
-
-export function isClarificationAnswerValid(type: ClarificationAnswerType, value: string) {
-  const trimmed = value.trim();
-  if (type === "free_text" || type === "address") return trimmed.length > 0;
-  if (type === "money") return isValidMoney(trimmed);
-  if (type === "date") return isValidCalendarDate(trimmed);
-  if (type === "yes_no") return trimmed === "yes" || trimmed === "no";
-  if (type === "single_choice") return trimmed.length > 0;
-  if (type === "multi_choice") return trimmed.split(",").filter(Boolean).length > 0;
-  if (type === "date_time") return isValidDateTime(trimmed);
-  if (type === "percentage") return isValidPercentage(trimmed);
-  if (type === "phone") return isValidPhone(trimmed);
-  if (type === "postal_code") return isValidPostalCode(trimmed);
-  return patterns[type]?.test(trimmed) ?? false;
 }
 
 const MIN_LOSS_DATE_YEAR = 2000;
@@ -417,7 +385,7 @@ export function ClarificationInput({ answerType, value, onChange, options = [], 
     if (answerType === "postal_code") { if (!isPostalCodeCandidate(next)) return; }
     onChange(next);
   }
-  const common = { value, onChange: handleChange, disabled, inputMode, "aria-describedby": describedBy, "aria-invalid": value.length > 0 && !isClarificationAnswerValid(answerType, value), className: "mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" };
+  const common = { value, onChange: handleChange, disabled, inputMode, "aria-describedby": describedBy, "aria-invalid": value.length > 0 && !isValidClarificationAnswer(answerType, value, options), className: "mt-2 w-full rounded-lg border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" };
   if (answerType === "free_text" || answerType === "address") return <textarea {...common} rows={answerType === "address" ? 3 : 2} placeholder={answerType === "address" ? "Enter the address" : "Type your answer"} />;
   return <input {...common} type={inputType} placeholder={answerType === "money" ? "0.00" : undefined} />;
 }

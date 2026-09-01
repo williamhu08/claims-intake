@@ -1,4 +1,9 @@
 /** Clearway version scope: V2. */
+import type {
+  ClarificationAnswerType,
+  ClarificationOption,
+} from "@/lib/claims/session-schema";
+
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MONEY_PATTERN = /^(?:0|[1-9]\d*)\.\d{2}$/;
 const MONEY_CANDIDATE_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{0,2})?$/;
@@ -110,7 +115,11 @@ export function isMoneyCandidate(value: string): boolean {
   return value === "" || MONEY_CANDIDATE_PATTERN.test(value);
 }
 
-export function isValidClarificationAnswer(type: string, value: string, options?: Array<{ value: string }>): boolean {
+export function isValidClarificationAnswer(
+  type: ClarificationAnswerType,
+  value: string,
+  options?: ClarificationOption[],
+): boolean {
   const trimmed = value.trim();
   if (type === "free_text" || type === "address") return trimmed.length > 0;
   if (type === "money") return isValidMoney(trimmed);

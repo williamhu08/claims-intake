@@ -6,7 +6,10 @@ import {
   buildAdjusterReadyHandoff,
   mockWaterPolicyFixtures,
 } from "@/lib/claims/handoff-engine";
-import type { MockPolicyFixture } from "@/lib/claims/handoff-schema";
+import {
+  caseHandoffResponseSchema,
+  type MockPolicyFixture,
+} from "@/lib/claims/handoff-schema";
 import { getCaseSessionConfig } from "@/lib/claims/session-config";
 import { verifyCaseSession } from "@/lib/claims/session-engine";
 import type { CaseSessionState } from "@/lib/claims/session-schema";
@@ -14,6 +17,11 @@ import type { CaseSessionState } from "@/lib/claims/session-schema";
 const handoffRequestSchema = z.object({
   sessionToken: z.string().trim().min(1),
 });
+
+/** Serializes only a schema-valid exclusive handoff-or-error response. */
+function handoffJsonResponse(payload: unknown, init?: ResponseInit): Response {
+  return Response.json(caseHandoffResponseSchema.parse(payload), init);
+}
 
 /**
  * Creates a deterministic V3 request handler using a server-selected fixture registry.
@@ -34,13 +42,13 @@ export function createCaseHandoffRouteHandler(
     try {
       body = await request.json();
     } catch {
-      return Response.json({ error: "Send a JSON request with a case session token." }, { status: 400 });
+      return handoffJsonResponse({ error: "Send a JSON request with a case session token." }, { status: 400 });
     }
 
     const parsedRequest = handoffRequestSchema.safeParse(body);
 
     if (!parsedRequest.success) {
-      return Response.json(
+      return handoffJsonResponse(
         { error: parsedRequest.error.issues[0]?.message ?? "Send a valid case session token." },
         { status: 400 },
       );
@@ -51,7 +59,7 @@ export function createCaseHandoffRouteHandler(
     try {
       config = getCaseSessionConfig();
     } catch {
-      return Response.json({ error: "Case handoff is not configured for this environment." }, { status: 503 });
+      return handoffJsonResponse({ error: "Case handoff is not configured for this environment." }, { status: 503 });
     }
 
     let session: CaseSessionState;
@@ -59,17 +67,17 @@ export function createCaseHandoffRouteHandler(
     try {
       session = verifyCaseSession(parsedRequest.data.sessionToken, config.signingSecret);
     } catch {
-      return Response.json(
+      return handoffJsonResponse(
         { error: "This case session is invalid or has expired. Start again to continue." },
         { status: 409 },
       );
     }
 
     try {
-      return Response.json({ handoff: buildAdjusterReadyHandoff(session, fixtures) });
+      return handoffJsonResponse({ handoff: buildAdjusterReadyHandoff(session, fixtures) });
     } catch (error) {
       if (error instanceof V3HandoffEligibilityError) {
-        return Response.json(
+        return handoffJsonResponse(
           { error: "This case is not eligible for the water-damage handoff. A person can review it instead." },
           { status: 422 },
         );
@@ -78,7 +86,7 @@ export function createCaseHandoffRouteHandler(
       console.error("Case handoff failed", {
         message: error instanceof Error ? error.message : "Unknown error",
       });
-      return Response.json(
+      return handoffJsonResponse(
         { error: "The case handoff could not be prepared. Please try again later." },
         { status: 500 },
       );

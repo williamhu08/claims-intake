@@ -1,36 +1,41 @@
 "use client";
 
 import useSWR from "swr";
-import type { AdjusterReadyHandoff } from "@/lib/claims/handoff-schema";
+import {
+  caseHandoffResponseSchema,
+  type AdjusterReadyHandoff,
+} from "@/lib/claims/handoff-schema";
 
 type Props = { sessionToken: string | null; enabled: boolean; claimType?: string };
 
 const WATER_DAMAGE = "water_damage";
 
-type ResponsePayload = { handoff?: AdjusterReadyHandoff; error?: string };
-
-const fetcher = async ([url, sessionToken]: [string, string]): Promise<ResponsePayload> => {
+const fetcher = async ([url, sessionToken]: [string, string]): Promise<AdjusterReadyHandoff> => {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ sessionToken }),
   });
-  let data: ResponsePayload;
+  let data: unknown;
   try {
-    data = (await response.json()) as ResponsePayload;
+    data = await response.json();
   } catch {
     throw new Error("The next step could not be prepared. Please try again.");
   }
-  if (response.status === 422) return {};
-  if (!response.ok) throw new Error(data.error ?? "The handoff could not be prepared.");
-  if (!data.handoff) throw new Error("The next step could not be prepared. Please try again.");
-  return data;
+
+  const parsedResponse = caseHandoffResponseSchema.safeParse(data);
+  if (!parsedResponse.success) {
+    throw new Error("The next step could not be prepared. Please try again.");
+  }
+  if ("error" in parsedResponse.data) throw new Error(parsedResponse.data.error);
+  if (!response.ok) throw new Error("The handoff could not be prepared.");
+  return parsedResponse.data.handoff;
 };
 
 export function CaseHandoffPanel({ sessionToken, enabled, claimType }: Props) {
   const eligible = enabled && claimType === WATER_DAMAGE;
   const key = eligible && sessionToken ? (["/api/case-handoff", sessionToken] as const) : null;
-  const { data, error, isLoading, mutate } = useSWR<ResponsePayload>(key, fetcher, {
+  const { data, error, isLoading, mutate } = useSWR<AdjusterReadyHandoff>(key, fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     shouldRetryOnError: false,
@@ -48,9 +53,9 @@ export function CaseHandoffPanel({ sessionToken, enabled, claimType }: Props) {
       </div>
     );
   }
-  if (!data?.handoff) return null;
+  if (!data) return null;
 
-  const { handoff } = data;
+  const handoff = data;
   const urgent = handoff.urgency.level === "urgent";
   return (
     <section aria-live="polite" className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">

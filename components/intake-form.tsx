@@ -10,7 +10,7 @@ import {
   supportedClaimTypeValues,
 } from "@/lib/claims/schema";
 import {
-  caseSessionStateSchema,
+  caseSessionResponseSchema,
   type CaseSessionState,
 } from "@/lib/claims/session-schema";
 import { clarificationAnswerTypeHints, exampleClaims } from "@/lib/claims/display";
@@ -19,10 +19,8 @@ import { CaseHandoffPanel } from "@/components/case-handoff-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
 import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";
 import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
-import {
-  ClarificationInput,
-  isClarificationAnswerValid,
-} from "@/components/clarification-input";
+import { ClarificationInput } from "@/components/clarification-input";
+import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
 
 type IntakeFormProps = {
   onSessionChange?: (session: CaseSessionState | null) => void;
@@ -57,7 +55,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const loading = isSubmittingNarrative || isRespondingToClarification;
   const pendingAction = session?.pendingAction;
   const answerIsValid = pendingAction
-    ? isClarificationAnswerValid(pendingAction.answerType, answer)
+    ? isValidClarificationAnswer(pendingAction.answerType, answer, pendingAction.options)
     : false;
   const isNoResponse = answer === "no_response";
   const hasActiveSession = Boolean(sessionToken);
@@ -113,7 +111,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         return;
       }
 
-      const parsed = parseSessionStartResponse(data);
+      const parsed = parseCaseSessionResponse(data);
       if (!parsed) {
         setRequestState("error");
         setErrorRecovery("reset");
@@ -149,7 +147,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       });
       const data: unknown = await response.json();
       if (!response.ok) throw new Error(getErrorMessage(data));
-      const parsed = parseSessionStartResponse(data);
+      const parsed = parseCaseSessionResponse(data);
       if (!parsed) throw new Error("The session response didn't match the expected shape. Check /api/case-session/respond for a schema mismatch between the server payload and caseSessionStateSchema.");
       updateSession(parsed.session);
       setSessionToken(parsed.sessionToken);
@@ -412,14 +410,7 @@ function getErrorMessage(data: unknown) {
   return "The assessment could not be completed and your narrative has not been submitted. Check the server logs for the specific AI Gateway error (invalid AI_GATEWAY_API_KEY, exhausted quota, or an unrecognized AI_MODEL value) before retrying.";
 }
 
-function parseSessionStartResponse(data: unknown) {
-  if (!data || typeof data !== "object") return null;
-
-  const payload = data as { session?: unknown; sessionToken?: unknown };
-  const parsedSession = caseSessionStateSchema.safeParse(payload.session);
-  if (!parsedSession.success || typeof payload.sessionToken !== "string" || !payload.sessionToken.trim()) {
-    return null;
-  }
-
-  return { session: parsedSession.data, sessionToken: payload.sessionToken };
+function parseCaseSessionResponse(data: unknown) {
+  const parsed = caseSessionResponseSchema.safeParse(data);
+  return parsed.success ? parsed.data : null;
 }

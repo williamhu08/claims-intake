@@ -1,4 +1,4 @@
-/** Clearway version scope: V0–V2. */
+/** Shared claim and case-state contracts used throughout Clearway. */
 import { z } from "zod";
 
 /** Input and claimant-facing display budgets for the intake contract. */

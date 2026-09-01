@@ -66,6 +66,11 @@ material to strengthen the agent-loop design; keeping V2's action set bounded;
 and reducing V3 to deterministic water-damage handling rather than a broad
 policy platform.
 
+I also noticed duplicated contracts and validation rules across the frontend
+and backend. Because that redundancy could create code slop and allow the two
+layers to drift apart, I manually consolidated them around backend-owned,
+browser-safe sources of truth while keeping server validation authoritative.
+
 The resulting decisions, tradeoffs, and cuts are recorded in the code and
 plans so they can be reviewed and explained—not attributed to a one-shot model
 prompt.

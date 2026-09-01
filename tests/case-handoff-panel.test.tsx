@@ -189,14 +189,14 @@ describe("CaseHandoffPanel", () => {
     expect(screen.getByText("No safety detail was confirmed.")).toBeInTheDocument();
   });
 
-  it("does not display an ineligible handoff response", async () => {
+  it("shows the backend eligibility error for an ineligible handoff response", async () => {
     mockHandoffResponse({ error: "This case is not eligible for the water-damage handoff. A person can review it instead." }, 422);
 
     render(<CaseHandoffPanel sessionToken="token-malformed" claimType="water_damage" enabled />);
 
-    await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(screen.queryByText("This case is not eligible for the water-damage handoff. A person can review it instead.")).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This case is not eligible for the water-damage handoff. A person can review it instead.",
+    );
   });
 
   it("shows a safe retryable error for malformed JSON", async () => {

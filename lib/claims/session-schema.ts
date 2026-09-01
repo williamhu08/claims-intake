@@ -167,6 +167,15 @@ export const caseSessionStateSchema = z
     }
   });
 
+/** Shared response contract returned by both V2 session endpoints. */
+export const caseSessionResponseSchema = z.object({
+  session: caseSessionStateSchema,
+  sessionToken: z.string().trim().min(1),
+});
+
 export type CaseSessionAction = z.infer<typeof caseSessionActionSchema>;
+export type CaseSessionResponse = z.infer<typeof caseSessionResponseSchema>;
 export type CaseSessionState = z.infer<typeof caseSessionStateSchema>;
+export type ClarificationAnswerType = (typeof clarificationAnswerTypeValues)[number];
+export type ClarificationOption = z.infer<typeof clarificationOptionSchema>;
 export type StopReason = (typeof stopReasonValues)[number];

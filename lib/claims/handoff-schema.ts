@@ -200,6 +200,15 @@ export const adjusterReadyHandoffSchema = z
     }
   });
 
+/**
+ * Enforces one terminal V3 API outcome: either a validated handoff or a
+ * non-empty error message, but never both or neither.
+ */
+export const caseHandoffResponseSchema = z.union([
+  z.strictObject({ handoff: adjusterReadyHandoffSchema }),
+  z.strictObject({ error: z.string().trim().min(1) }),
+]);
+
 /** A validated local mock-policy fixture record. */
 export type MockPolicyFixture = z.infer<typeof mockPolicyFixtureSchema>;
 /** Mock fixture provenance retained in a handoff. */
@@ -208,3 +217,5 @@ export type MockPolicyContext = z.infer<typeof mockPolicyContextSchema>;
 export type OperationalUrgency = z.infer<typeof operationalUrgencySchema>;
 /** The validated, non-binding V3 output consumed by the API route and UI. */
 export type AdjusterReadyHandoff = z.infer<typeof adjusterReadyHandoffSchema>;
+/** The exclusive success-or-error contract returned by the V3 handoff API. */
+export type CaseHandoffResponse = z.infer<typeof caseHandoffResponseSchema>;

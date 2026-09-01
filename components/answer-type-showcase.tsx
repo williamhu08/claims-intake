@@ -3,11 +3,9 @@
 /** Clearway version scope: V2. */
 
 import { useState } from "react";
-import {
-  ClarificationInput,
-  clarificationAnswerTypeValues,
-  isClarificationAnswerValid,
-} from "@/components/clarification-input";
+import { ClarificationInput } from "@/components/clarification-input";
+import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
+import { clarificationAnswerTypeValues } from "@/lib/claims/session-schema";
 import {
   clarificationAnswerTypeHints,
   clarificationAnswerTypeLabels,
@@ -29,7 +27,9 @@ export function AnswerTypeShowcase() {
     <div className="grid gap-6 sm:grid-cols-2">
       {clarificationAnswerTypeValues.map((answerType) => {
         const value = answers[answerType] ?? "";
-        const valid = value.trim().length > 0 && isClarificationAnswerValid(answerType, value);
+        const options = clarificationAnswerTypeSampleOptions[answerType];
+        const valid = value.trim().length > 0
+          && isValidClarificationAnswer(answerType, value, options);
 
         return (
           <div key={answerType} className="rounded-xl border border-border bg-card p-5">
@@ -43,7 +43,7 @@ export function AnswerTypeShowcase() {
               answerType={answerType}
               value={value}
               onChange={(next) => setAnswers((prev) => ({ ...prev, [answerType]: next }))}
-              options={clarificationAnswerTypeSampleOptions[answerType]}
+              options={options}
               describedBy={`answer-type-hint-${answerType}`}
             />
             {clarificationAnswerTypeHints[answerType] ? (

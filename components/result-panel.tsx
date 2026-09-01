@@ -1,5 +1,6 @@
 /** Clearway version scope: V2. */
 import type { CaseSessionState } from "@/lib/claims/session-schema";
+import { proposedRouteLabels } from "@/lib/claims/schema";
 import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";
 import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
@@ -13,12 +14,6 @@ const missingFactLabels: Record<CaseSessionState["caseState"]["facts"][number]["
   active_loss_or_safety: "Whether the damage is still happening or the area is unsafe",
   injury_or_third_party: "Whether anyone was injured or another party is involved",
 };
-
-const routeLabels = {
-  property_adjuster_review: "Property adjuster review",
-  liability_review: "Liability review",
-  human_triage_review: "Human triage review",
-} as const;
 
 function reviewReason(stopReason: keyof typeof stopReasonCopy) {
   if (stopReason === "claimant_cannot_answer") {
@@ -101,7 +96,7 @@ export function ResultPanel({ session }: ResultPanelProps) {
         {terminal.kind === "propose_route" ? (
           <div className="mt-6 border-t border-border pt-6">
             <p className="text-sm font-medium text-muted-foreground">Suggested next step</p>
-            <p className="mt-1 font-medium text-foreground">{routeLabels[caseState.proposedRoute.kind]}</p>
+            <p className="mt-1 font-medium text-foreground">{proposedRouteLabels[caseState.proposedRoute.kind]}</p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">{terminal.rationale}</p>
             <p className="mt-3 inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
               Preliminary — not a coverage or fault decision

@@ -18,6 +18,7 @@ import {
   supportedClaimTypeValues,
 } from "@/lib/claims/schema";
 import { createMockStartSession } from "@/lib/claims/mock-session";
+import { caseSessionResponseSchema } from "@/lib/claims/session-schema";
 
 export const runtime = "nodejs";
 
@@ -50,10 +51,10 @@ export async function POST(request: Request) {
 
   if (parsedRequest.data.testingMode) {
     const session = createMockStartSession(config.ttlSeconds);
-    return Response.json({
+    return Response.json(caseSessionResponseSchema.parse({
       session,
       sessionToken: signCaseSession(session, config.signingSecret),
-    });
+    }));
   }
 
   if (!isAiGatewayConfigured()) {
@@ -84,10 +85,10 @@ export async function POST(request: Request) {
       );
       const nextSession = applyCaseSessionAction(session, action, config.maxClarifications);
 
-      return Response.json({
+      return Response.json(caseSessionResponseSchema.parse({
         session: nextSession,
         sessionToken: signCaseSession(nextSession, config.signingSecret),
-      });
+      }));
     } catch (error) {
       lastError = error;
 

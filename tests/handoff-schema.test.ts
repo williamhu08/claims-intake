@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   adjusterReadyHandoffSchema,
+  caseHandoffResponseSchema,
   mockPolicyContextSchema,
   mockPolicyFixtureSchema,
   operationalUrgencySchema,
@@ -38,6 +39,33 @@ const terminal = {
 const resolvedSafetyFact = caseState.facts[4];
 
 describe("V3 handoff schema contract", () => {
+  it("requires exactly one handoff response outcome", () => {
+    const handoff = adjusterReadyHandoffSchema.parse({
+      version: 1,
+      caseState,
+      clarificationHistory: [],
+      v2Terminal: terminal,
+      mockPolicyContext: {
+        fixtureId: "clearway-demo-water-property-adjuster-v1",
+        fixtureVersion: 1,
+        policyContextStatus: "route_supported",
+        rationale: "Demo handling context supports property-adjuster review.",
+      },
+      urgency: {
+        level: "standard",
+        evidenceFact: resolvedSafetyFact,
+        rationale: "The claimant confirmed that the loss is resolved and the area is safe.",
+      },
+      finalDisposition: "property_adjuster_review",
+      rationale: "The intake can proceed to property-adjuster review.",
+    });
+
+    expect(caseHandoffResponseSchema.safeParse({ handoff }).success).toBe(true);
+    expect(caseHandoffResponseSchema.safeParse({ error: "A person must review this case." }).success).toBe(true);
+    expect(caseHandoffResponseSchema.safeParse({}).success).toBe(false);
+    expect(caseHandoffResponseSchema.safeParse({ handoff, error: "Contradictory outcome." }).success).toBe(false);
+  });
+
   it("accepts the agreed property-adjuster fixture shape", () => {
     expect(mockPolicyFixtureSchema.safeParse({
       id: "clearway-demo-water-property-adjuster-v1",
