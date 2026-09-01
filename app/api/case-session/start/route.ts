@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       );
       if (!supportedClaimTypeValues.includes(caseState.claimType as (typeof supportedClaimTypeValues)[number])) {
         return Response.json(
-          { error: "We couldn't match your narrative to one of the five supported claim categories. Please revise the description with more specific details and try again." },
+          { error: `We couldn't match your narrative to one of the ${supportedClaimTypeValues.length} supported claim categories. Please revise the description with more specific details and try again.` },
           { status: 422 },
         );
       }
