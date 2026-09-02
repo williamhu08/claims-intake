@@ -298,7 +298,9 @@ describe("IntakeForm", () => {
     await submitNarrative();
     expect(await screen.findByRole("button", { name: "Start over" })).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "Start over" }));
-    expect(screen.getByRole("textbox", { name: "Describe what happened" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "Describe what happened" })).toHaveValue(
+      "A pipe burst under the kitchen sink and damaged the cabinet and floor.",
+    );
   });
 
   it("keeps the case-state update accessible and responsive", async () => {

@@ -401,7 +401,6 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   function resetSession() {
     abortController.current?.abort();
     requestVersion.current += 1;
-    setNarrative("");
     setAssessmentAttempted(false);
     setShowTryAnother(false);
     updateSession(null);
