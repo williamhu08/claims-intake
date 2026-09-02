@@ -16,17 +16,17 @@ export function ClaimCategories() {
         </p>
       </div>
       <div className="overflow-x-auto px-6 pb-6">
-        <table className="w-full min-w-[32rem] border-collapse text-left" aria-label="Supported claim categories">
+        <table className="w-full min-w-[32rem] border-collapse border border-border text-left" aria-label="Supported claim categories">
           <thead>
-            <tr className="border-b border-border text-sm text-muted-foreground">
-              <th scope="col" className="px-4 py-3 font-medium">Category</th>
+            <tr className="border-b-2 border-foreground/40 text-sm text-muted-foreground">
+              <th scope="col" className="border-r border-border px-4 py-3 font-medium">Category</th>
               <th scope="col" className="px-4 py-3 font-medium">What it covers</th>
             </tr>
           </thead>
           <tbody>
             {claimTypeOptions.map((category) => (
               <tr key={category.value} className="border-b border-border last:border-b-0">
-                <th scope="row" className="px-4 py-3 align-top text-sm font-medium text-foreground">{category.label}</th>
+                <th scope="row" className="border-r border-border px-4 py-3 align-top text-sm font-medium text-foreground">{category.label}</th>
                 <td className="px-4 py-3 text-sm leading-relaxed text-muted-foreground">{category.description}</td>
               </tr>
             ))}
