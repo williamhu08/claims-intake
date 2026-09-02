@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       const nextSession = applyCaseSessionAction(session, action, config.maxClarifications);
 
       return signedCaseSessionJsonResponse(nextSession, config.signingSecret);
-    } catch (error) {of `
+    } catch (error) {
       lastError = error;
 
       // Retrying a rate-limited request cannot succeed and only consumes more of the
