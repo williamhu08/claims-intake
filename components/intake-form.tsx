@@ -40,13 +40,20 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
   const [errorRecovery, setErrorRecovery] = useState<"retry" | "reset" | null>(null);
   const [showTryAnother, setShowTryAnother] = useState(false);
   const [assessmentAttempted, setAssessmentAttempted] = useState(false);
+  const tryAnotherSentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!session?.terminal) return;
+    if (!session?.terminal || showTryAnother || !tryAnotherSentinel.current || typeof IntersectionObserver === "undefined") return;
 
-    const timer = window.setTimeout(() => setShowTryAnother(true), 1000);
-    return () => window.clearTimeout(timer);
-  }, [session?.terminal]);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setShowTryAnother(true);
+      observer.disconnect();
+    });
+
+    observer.observe(tryAnotherSentinel.current);
+    return () => observer.disconnect();
+  }, [session?.terminal, showTryAnother]);
 
   const trimmedLength = narrative.trim().length;
   const tooShort = trimmedLength > 0 && trimmedLength < MIN_CLAIM_NARRATIVE_LENGTH;
@@ -368,6 +375,8 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         <CaseHandoffPanel sessionToken={sessionToken} claimType={session.caseState.claimType} enabled />
       )}
 
+      {session?.terminal && <div ref={tryAnotherSentinel} className="h-px" aria-hidden="true" />}
+
       {session?.terminal && (
         <div
           aria-hidden={!showTryAnother}
@@ -391,6 +400,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     requestVersion.current += 1;
     setNarrative("");
     setAssessmentAttempted(false);
+    setShowTryAnother(false);
     updateSession(null);
     setSessionToken(null);
     setRequestState("idle");
