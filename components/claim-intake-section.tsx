@@ -14,8 +14,19 @@ export function ClaimIntakeSection() {
 
   return (
     <>
+      <div>
+        <div className="mb-5">
+          <h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">Start with what you know</h2>
+          <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">Share the details you have so we can make an initial assessment.</p>
+        </div>
+        <ClaimCategories />
+        <div className="mt-8">
+          <IntakeForm onSessionChange={setSession} />
+        </div>
+      </div>
+
       <section
-        className="category-panel border-y-2 border-foreground/50 transition-colors duration-200 hover:border-foreground/70"
+        className="category-panel mt-10 border-y-2 border-foreground/50 transition-colors duration-200 hover:border-foreground/70"
         aria-labelledby="case-state-heading"
       >
         <button
@@ -63,17 +74,6 @@ export function ClaimIntakeSection() {
           </div>
         </div>
       </section>
-
-      <div className="mt-10">
-        <div className="mb-5">
-          <h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">Start with what you know</h2>
-          <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">Share the details you have so we can make an initial assessment.</p>
-        </div>
-        <ClaimCategories />
-        <div className="mt-8">
-          <IntakeForm onSessionChange={setSession} />
-        </div>
-      </div>
     </>
   );
 }
