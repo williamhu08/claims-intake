@@ -208,7 +208,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
             Describe what happened
           </label>
           <p className="mt-1 text-sm text-muted-foreground text-pretty">
-            Use your own words. Include what was damaged and how, but only what you actually know. Your description must fit one of the {supportedClaimTypeValues.length} supported claim categories.
+            Use your own words. Include what was damaged and how, but only what you actually know. Your description must fit one of the {supportedClaimTypeValues.length} supported claim categories. To see which categories are supported, click the &quot;Supported claim categories&quot; section above.
           </p>
           <textarea
             id="narrative"
