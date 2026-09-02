@@ -245,23 +245,15 @@ describe("IntakeForm", () => {
     expect(await screen.findByRole("heading", { name: "Water damage" })).toBeInTheDocument();
   });
 
-  it("renders claimant-facing collected and still-needed facts from a CaseState", async () => {
+  it("rejects a terminal CaseState with details still needed", async () => {
     mockJsonResponse(incompleteCaseState);
 
     render(<IntakeForm />);
     await submitNarrative();
 
-    expect(await screen.findByRole("heading", { name: "Collected facts" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Still needed" })).toBeInTheDocument();
-    expect(screen.getByText("Is the damage still happening or is anyone unsafe?")).toBeInTheDocument();
-    expect(screen.getByText("It was mentioned, but the detail is still unclear.")).toBeInTheDocument();
     expect(
-      screen.getByText(/We don't know yet—for example, whether water is still leaking/),
+      screen.getByRole("heading", { name: "This case could not be finalized correctly" }),
     ).toBeInTheDocument();
-    // The mocked case still has unresolved facts, so a valid terminal state must
-    // escalate to human review rather than propose a route (ResultPanel's
-    // terminal-state invariant forbids a route proposal with facts unresolved).
-    expect(screen.getByRole("heading", { name: "Needs human review" })).toBeInTheDocument();
   });
 
   it("prevents duplicate initial submissions while the request is pending", async () => {
@@ -304,7 +296,11 @@ describe("IntakeForm", () => {
   });
 
   it("keeps the case-state update accessible and responsive", async () => {
-    mockJsonResponse(incompleteCaseState);
+    mockJsonResponse({
+      claimType: "water_damage",
+      summary: "A pipe damaged the kitchen cabinet and floor.",
+      confidence: 0.86,
+    });
 
     render(<IntakeForm />);
     await submitNarrative();

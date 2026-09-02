@@ -3,7 +3,6 @@ import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { proposedRouteLabels } from "@/lib/claims/schema";
 import { CaseStateSummary } from "@/components/case-state-summary";
 import { stopReasonCopy } from "@/lib/claims/display";
-import { getUnaskedMissingFacts } from "@/lib/claims/terminal-invariant";
 type ResultPanelProps = { session: CaseSessionState };
 
 const missingFactLabels: Record<CaseSessionState["caseState"]["facts"][number]["key"], string> = {
@@ -32,46 +31,12 @@ export function ResultPanel({ session }: ResultPanelProps) {
   const { terminal, caseState } = session;
   if (!terminal) return null;
 
-  // Poison pill: a terminal case must never carry an unresolved fact that was
-  // never actually put to the claimant. This is a defense-in-depth backstop —
-  // IntakeForm already checks getUnaskedMissingFacts BEFORE ever rendering this
-  // component, so this should be unreachable in practice. It exists in case a
-  // future caller renders ResultPanel without that proactive guard: fail loudly
-  // instead of silently rendering an incomplete "final" result. The
-  // CaseSessionErrorBoundary that wraps this component catches this and shows
-  // the same safe fallback IntakeForm's proactive guard would have shown.
-  const unaskedMissingFacts = getUnaskedMissingFacts(session);
-  // Read the raw kind as a string before any narrowing checks below, so the
-  // exhaustiveness guard can still report an unexpected value at runtime even
-  // though the static type only ever admits the two known literals.
-  const terminalKind: string = terminal.kind;
-
-  if (unaskedMissingFacts.length > 0) {
-    if (terminalKind === "propose_route") {
-      throw new Error(
-        `ResultPanel invariant violated: a route proposal was terminal while facts remained unresolved (${unaskedMissingFacts.join(", ")}).`,
-      );
-    } else if (terminalKind === "escalate_to_human") {
-      throw new Error(
-        `ResultPanel invariant violated: escalation was terminal while facts were never asked (${unaskedMissingFacts.join(", ")}).`,
-      );
-    } else if (terminalKind === "ask_clarifying_question") {
-      // ask_clarifying_question is a valid `pendingAction.kind`, but it is never
-      // a valid `terminal.kind` — a session cannot be both pending a question
-      // and terminal at once. Reaching this branch means the two states were
-      // conflated upstream.
-      throw new Error(
-        `ResultPanel invariant violated: terminal.kind was "ask_clarifying_question" while facts remained unasked (${unaskedMissingFacts.join(", ")}) — a session cannot be both pending a question and terminal.`,
-      );
-    } else {
-      // Exhaustiveness guard: terminalSessionStateSchema only ever validates
-      // "propose_route" or "escalate_to_human" as terminal.kind, and
-      // "ask_clarifying_question" is covered above. If any other value ever
-      // reaches this component — e.g. from a future schema change that forgot
-      // to add a matching branch above — fail loudly instead of silently
-      // falling through with no coverage at all.
-      throw new Error(`ResultPanel invariant violated: invalid terminal.kind ("${terminalKind}").`);
-    }
+  // A final case state must be complete. Fail into the surrounding recovery
+  // boundary rather than presenting unresolved details as a finished intake.
+  if (caseState.missingFactKeys.length > 0) {
+    throw new Error(
+      `ResultPanel invariant violated: terminal case state still has unresolved facts (${caseState.missingFactKeys.join(", ")}).`,
+    );
   }
 
   const copy = stopReasonCopy[terminal.stopReason];
