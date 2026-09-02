@@ -6,21 +6,19 @@ import { ClaimCategories } from "@/components/claim-categories";
 import { claimTypeOptions } from "@/lib/claims/display";
 
 describe("ClaimCategories", () => {
-  it("shows every supported claim category by default", () => {
+  it("shows every supported claim category in a table", () => {
     render(<ClaimCategories />);
+    expect(screen.getByRole("table", { name: "Supported claim categories" })).toBeInTheDocument();
 
     for (const category of claimTypeOptions) {
-      expect(screen.getByRole("heading", { name: category.label })).toBeInTheDocument();
+      expect(screen.getByRole("rowheader", { name: category.label })).toBeInTheDocument();
       expect(screen.getByText(category.description)).toBeInTheDocument();
     }
   });
 
-  it("provides a control to collapse the categories", () => {
+  it("renders accessible table columns", () => {
     render(<ClaimCategories />);
-
-    expect(screen.getByRole("button", { name: /supported claim categories/i })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    expect(screen.getByRole("columnheader", { name: "Category" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "What it covers" })).toBeInTheDocument();
   });
 });
