@@ -1,4 +1,18 @@
-/** Clearway version scope: V1. */
+/**
+ * Retained V1 structured-intake endpoint.
+ *
+ * POST /api/case-analysis accepts one claimant narrative, makes one AI SDK
+ * structured-output call through AI Gateway, normalizes the result, and returns
+ * a validated CaseState containing classification, summary, facts, missing fact
+ * keys, and a nonbinding proposed route. The response is a static snapshot: this
+ * route does not create a signed session, ask clarifying questions, or advance a
+ * multi-turn workflow.
+ *
+ * The current claimant UI no longer calls this route. V2 starts with POST
+ * /api/case-session/start and evolves the same CaseState concept through POST
+ * /api/case-session/respond. This endpoint remains callable and tested as the
+ * executable boundary between V1's fixed snapshot and V2's dynamic session.
+ */
 import { generateText, Output } from "ai";
 
 import {

@@ -237,7 +237,7 @@ describe("V2 session contract", () => {
     ).toThrow("CASE_SESSION_MAX_CLARIFICATIONS");
   });
 
-  it("allows one eligible water-source question, records the answer, and prevents a repeat", () => {
+  it("keeps an unresolved fact eligible for a narrower follow-up", () => {
     const now = new Date("2026-08-26T19:00:00.000Z");
     const session = createCaseSession(caseState, 1_800, () => now);
 
@@ -249,6 +249,7 @@ describe("V2 session contract", () => {
     expect(answered.pendingAction).toBeUndefined();
     expect(answered.clarificationHistory).toHaveLength(1);
     expect(isWaterSourceClarificationEligible(answered, 2)).toBe(true);
+    expect(applyCaseSessionAction(answered, question, 2).pendingAction).toMatchObject(question);
   });
 
   it("turns one claimant-supplied first-party source into a provenance-marked property route", () => {
@@ -415,12 +416,10 @@ describe("V2 session contract", () => {
   });
 
   it("escalates no-response, safety uncertainty, unresolved ambiguity, and gibberish safely", () => {
-    // incident_cause must be the ONLY unresolved fact here: escalating with
-    // claimant_cannot_answer is only valid once every unresolved fact has been
-    // asked, and this stopReason must never excuse skipping unasked facts that
-    // are unrelated to the one the claimant actually declined to answer.
+    // Exhausting the one-turn budget permits a bounded human escalation when
+    // the claimant cannot resolve the only missing fact.
     const onlyIncidentCauseUnresolved = withFact(withAllFactsCollected(caseState), "incident_cause", "unclear");
-    const noResponsePending = applyCaseSessionAction(createCaseSession(onlyIncidentCauseUnresolved, 1_800), question, 2);
+    const noResponsePending = applyCaseSessionAction(createCaseSession(onlyIncidentCauseUnresolved, 1_800), question, 1);
     const noResponse = recordClaimantAnswer(noResponsePending, "no_response");
     const noResponseTerminal = applyCaseSessionAction(
       noResponse,
@@ -429,7 +428,7 @@ describe("V2 session contract", () => {
         stopReason: "claimant_cannot_answer",
         rationale: "The claimant could not identify the source.",
       },
-      2,
+      1,
     );
     const safetyState = withFact(caseState, "active_loss_or_safety", "unclear");
     const gibberishState: CaseState = {
@@ -452,12 +451,12 @@ describe("V2 session contract", () => {
           stopReason: "safety_review",
           rationale: "The active loss or safety status needs human review.",
         },
-        2,
+        1,
       ),
     ).toThrow("remain unresolved");
 
-    // Once the safety concern is the only unresolved fact and it has been asked,
-    // a human safety review is the correct terminal action.
+    // Once the one-turn budget is exhausted, a human safety review is the
+    // bounded terminal action for a concern the claimant could not resolve.
     const othersCollectedSafetyUnclear = withFact(withAllFactsCollected(caseState), "active_loss_or_safety", "unclear");
     const safetyAsked = recordClaimantAnswer(
       applyCaseSessionAction(
@@ -469,7 +468,7 @@ describe("V2 session contract", () => {
           factKeys: ["active_loss_or_safety"],
           whyItMatters: "An active loss or unsafe area should be reviewed by a person.",
         },
-        2,
+        1,
       ),
       "I am not sure",
     );
@@ -481,7 +480,7 @@ describe("V2 session contract", () => {
           stopReason: "safety_review",
           rationale: "The active loss or safety status needs human review.",
         },
-        2,
+        1,
       ).terminal?.stopReason,
     ).toBe("safety_review");
     expect(isWaterSourceClarificationEligible(createCaseSession(gibberishState, 1_800), 2)).toBe(true);

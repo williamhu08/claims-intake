@@ -17,6 +17,7 @@ import { clarificationAnswerTypeDisplay, exampleClaims } from "@/lib/claims/disp
 import { ResultPanel } from "@/components/result-panel";
 import { CaseHandoffPanel } from "@/components/case-handoff-panel";
 import { CaseSessionErrorBoundary } from "@/components/case-session-error-boundary";
+import { CaseSessionInvariantFallback } from "@/components/case-session-invariant-fallback";
 import { ClarificationInput } from "@/components/clarification-input";
 import { isValidClarificationAnswer } from "@/lib/claims/answer-validation";
 
@@ -357,9 +358,13 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
       )}
 
       {session?.terminal && (
-        <CaseSessionErrorBoundary key={sessionToken ?? "no-session"} onReset={resetSession}>
-          <ResultPanel session={session} />
-        </CaseSessionErrorBoundary>
+        session.caseState.missingFactKeys.length === 0 ? (
+          <CaseSessionErrorBoundary key={sessionToken ?? "no-session"} onReset={resetSession}>
+            <ResultPanel session={session} />
+          </CaseSessionErrorBoundary>
+        ) : (
+          <CaseSessionInvariantFallback onReset={resetSession} />
+        )
       )}
 
       {session?.terminal && session.caseState.missingFactKeys.length === 0 && (

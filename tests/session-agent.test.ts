@@ -62,6 +62,8 @@ describe("V2 session-agent tool selection", () => {
         tools: expect.objectContaining({ ask_clarifying_question: expect.any(Object) }),
       }),
     );
+    expect(mockedGenerateText.mock.calls[0]?.[0].tools).not.toHaveProperty("propose_route");
+    expect(mockedGenerateText.mock.calls[0]?.[0].tools).not.toHaveProperty("escalate_to_human");
   });
 
   it("fails safely when a mocked model action exceeds the configured input-token budget", async () => {

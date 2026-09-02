@@ -132,11 +132,9 @@ describe("V2 case-session routes", () => {
     expect(mockedSelect).toHaveBeenCalledOnce();
   });
 
-  it("escalates a no-response only once every unresolved fact has actually been asked", async () => {
-    // Build a session where the other three unresolved facts (loss_timing,
-    // active_loss_or_safety, injury_or_third_party) were already asked and
-    // answered in prior turns, so only incident_cause remains — asking it and
-    // getting a no-response makes every fact "asked", so escalation is now valid.
+  it("escalates unresolved facts only after the clarification budget is exhausted", async () => {
+    // Build four unanswered clarification turns and configure a four-turn
+    // budget. The route may escalate only because no further turn remains.
     const timingQuestion: CaseSessionAction = {
       kind: "ask_clarifying_question",
       answerType: "free_text",
@@ -166,6 +164,7 @@ describe("V2 case-session routes", () => {
     }
     const session = applyCaseSessionAction(priorTurns, sourceQuestion, 10);
     const token = signCaseSession(session, sessionSecret);
+    vi.stubEnv("CASE_SESSION_MAX_CLARIFICATIONS", "4");
 
     mockedRefresh.mockResolvedValue(waterCaseState);
     mockedSelect.mockResolvedValue({

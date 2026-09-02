@@ -1,4 +1,15 @@
-/** Clearway version scope: V0. */
+/**
+ * Retained V0 thin-slice endpoint.
+ *
+ * POST /api/intake accepts one claimant narrative, makes one AI SDK structured-
+ * output call through AI Gateway, and returns only `claimType`, `summary`, and
+ * `confidence`. It does not create a CaseState, ask follow-up questions, retain
+ * session state, or produce an operational handoff.
+ *
+ * The current claimant UI no longer calls this route; it starts the adaptive
+ * workflow through POST /api/case-session/start. This endpoint remains callable
+ * and tested as executable evidence of the original V0 contract.
+ */
 import { generateText, Output } from "ai";
 
 import {

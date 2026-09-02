@@ -32,11 +32,8 @@ export function isClarificationEligible(
     return false;
   }
 
-  const alreadyAsked = new Set(session.clarificationHistory.flatMap((entry) => entry.factKeys));
-
   return session.caseState.facts.some(
-    (fact) =>
-      (fact.status === "missing" || fact.status === "unclear") && !alreadyAsked.has(fact.key),
+    (fact) => fact.status === "missing" || fact.status === "unclear",
   );
 }
 
@@ -97,18 +94,11 @@ export function applyCaseSessionAction(
   }
 
   if (parsedAction.kind === "escalate_to_human") {
-    // A human escalation may only terminate the session once every unresolved fact
-    // has actually been put to the claimant, regardless of the chosen stopReason.
-    // A claimant who explicitly declined to answer a fact that WAS asked is already
-    // covered here — that fact is in `alreadyAsked`, so it is not "unasked". The
-    // stopReason must never bypass this check for facts that were never asked: doing
-    // so previously let an unrelated declined fact (e.g. loss_timing) excuse escalating
-    // past a completely different, never-asked fact (e.g. active_loss_or_safety).
-    const alreadyAsked = new Set(session.clarificationHistory.flatMap((entry) => entry.factKeys));
-    const hasUnaskedUnresolvedFact = unresolvedFacts.some((fact) => !alreadyAsked.has(fact.key));
     const budgetRemains = session.clarificationHistory.length < maxClarifications;
 
-    if (hasUnaskedUnresolvedFact && budgetRemains) {
+    // Asking a fact once does not make it resolved. While budget remains, the
+    // agent must ask a narrower follow-up instead of terminating the session.
+    if (unresolvedFacts.length > 0 && budgetRemains) {
       throw new Error("This escalation is premature while relevant case details remain unresolved.");
     }
   }

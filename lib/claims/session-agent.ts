@@ -1,5 +1,5 @@
 /** Introduced in V2; performs the adaptive model work that produces sessions consumed through V3. */
-import { generateText, Output } from "ai";
+import { generateText, Output, type ToolSet } from "ai";
 
 import { getAiModel } from "@/lib/ai/gateway";
 import {
@@ -148,27 +148,34 @@ export async function selectNextCaseSessionAction(
   timeout: number,
 ): Promise<CaseSessionAction> {
   const canAskClarification = isClarificationEligible(session, maxClarifications);
-  const tools = {
-    ...(canAskClarification
+  const hasUnresolvedFacts = session.caseState.missingFactKeys.length > 0;
+  const tools: ToolSet = canAskClarification
+    ? {
+        ask_clarifying_question: {
+          description:
+            "Ask one specific, claimant-friendly question for one or more facts that are currently missing or unclear in Case State. A previously asked fact remains eligible when its answer did not resolve it; ask a narrower follow-up. Never ask about facts that are collected or not applicable.",
+          inputSchema: askClarifyingQuestionInputSchema,
+        },
+      }
+    : hasUnresolvedFacts
       ? {
-          ask_clarifying_question: {
-            description:
-              "Ask one specific, claimant-friendly question for one or more facts that are currently missing or unclear in Case State and have not already been asked about. Choose factKeys only from those facts. Write the question and whyItMatters dynamically from the current case details. Never infer or hardcode an answer, and do not ask for facts that are already collected or not applicable.",
-            inputSchema: askClarifyingQuestionInputSchema,
+          escalate_to_human: {
+            description: "End with human review because the clarification budget is exhausted and relevant facts remain unresolved.",
+            inputSchema: escalateToHumanInputSchema,
           },
         }
-      : {}),
-    propose_route: {
-      description: "End with a non-binding intake route only when supported by the state.",
-      inputSchema: proposeRouteInputSchema,
-    },
-    escalate_to_human: {
-      description: "End with a human-review escalation when a route is not safely supported.",
-      inputSchema: escalateToHumanInputSchema,
-    },
-  };
+      : {
+        propose_route: {
+          description: "End with a non-binding intake route only when supported by the state.",
+          inputSchema: proposeRouteInputSchema,
+        },
+        escalate_to_human: {
+          description: "End with a human-review escalation when a route is not safely supported.",
+          inputSchema: escalateToHumanInputSchema,
+        },
+      };
 
-  let result = await generateText({
+  const result = await generateText({
     model: getAiModel(),
     system: nextActionInstructions,
     prompt: `Validated case-session state:\n${JSON.stringify(session)}${
@@ -183,19 +190,6 @@ export async function selectNextCaseSessionAction(
   });
 
   enforceInputTokenBudget(result.usage.inputTokens, maxInputTokens);
-
-  if (canAskClarification && result.toolCalls[0]?.toolName !== "ask_clarifying_question") {
-    result = await generateText({
-      model: getAiModel(),
-      system: nextActionInstructions,
-      prompt: `The previous action was invalid. Select ask_clarifying_question now. Ask about a missing or unclear fact from Case State and write the question dynamically. Do not route or escalate.\nValidated case-session state:\n${JSON.stringify(session)}`,
-      tools,
-      toolChoice: "required",
-      maxRetries: 0,
-      timeout,
-    });
-    enforceInputTokenBudget(result.usage.inputTokens, maxInputTokens);
-  }
 
   if (result.toolCalls.length !== 1) {
     throw new Error("The model must select exactly one case-session action.");
