@@ -78,7 +78,10 @@ export function ResultPanel({ session }: ResultPanelProps) {
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <CaseStateSummary result={caseState} heading="Final case state" />
+      <CaseStateSummary
+        result={caseState}
+        heading={caseState.missingFactKeys.length > 0 ? "Case review snapshot" : "Final case state"}
+      />
 
       <section aria-live="polite" className="mt-8 border-t border-border pt-6">
         <div className="flex items-center gap-2">
