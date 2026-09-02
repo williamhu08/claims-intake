@@ -25,10 +25,16 @@ export function ClaimIntakeSection() {
         </div>
       </div>
 
-      <section
-        className="category-panel mt-10 border-y-2 border-foreground/50 transition-colors duration-200 hover:border-foreground/70"
-        aria-labelledby="case-state-heading"
-      >
+      <div className="mt-10">
+        <div className="mb-5">
+          <h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">Review what we know</h2>
+          <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">See what we collected, what still needs clarification, and where each detail came from.</p>
+        </div>
+
+        <section
+          className="category-panel border-y-2 border-foreground/50 transition-colors duration-200 hover:border-foreground/70"
+          aria-labelledby="case-state-heading"
+        >
         <button
           type="button"
           className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left text-foreground"
@@ -73,7 +79,8 @@ export function ClaimIntakeSection() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      </div>
     </>
   );
 }

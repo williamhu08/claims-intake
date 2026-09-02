@@ -6,19 +6,18 @@ import { ClaimCategories } from "@/components/claim-categories";
 import { claimTypeOptions } from "@/lib/claims/display";
 
 describe("ClaimCategories", () => {
-  it("shows every supported claim category in a table", () => {
+  it("shows every supported claim category as a card", () => {
     render(<ClaimCategories />);
-    expect(screen.getByRole("table", { name: "Supported claim categories" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Supported claim categories" })).toBeInTheDocument();
 
     for (const category of claimTypeOptions) {
-      expect(screen.getByRole("rowheader", { name: category.label })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: category.label })).toBeInTheDocument();
       expect(screen.getByText(category.description)).toBeInTheDocument();
     }
   });
 
-  it("renders accessible table columns", () => {
+  it("keeps each category in its own list item", () => {
     render(<ClaimCategories />);
-    expect(screen.getByRole("columnheader", { name: "Category" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "What it covers" })).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(claimTypeOptions.length);
   });
 });

@@ -21,12 +21,16 @@ export function ClaimCategories() {
         <div className="min-h-0 overflow-hidden">
           <div className="px-6 pb-6">
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground text-pretty">These are the claim categories we support. We use the information you provide to suggest the closest match. If the incident is unclear, we&apos;ll say so rather than make assumptions.</p>
-            <div className="mt-5 overflow-x-auto">
-              <table className="w-full min-w-[32rem] border-collapse border-2 border-black text-left" aria-label="Supported claim categories">
-                <thead><tr className="border-b-2 border-black text-sm text-muted-foreground"><th scope="col" className="border-r-2 border-black px-4 py-3 font-medium">Category</th><th scope="col" className="px-4 py-3 font-medium">What it covers</th></tr></thead>
-                <tbody>{claimTypeOptions.map((category) => <tr key={category.value} className="border-b border-border last:border-b-0"><th scope="row" className="border-r-2 border-black px-4 py-3 align-top text-sm font-medium text-foreground">{category.label}</th><td className="px-4 py-3 text-sm leading-relaxed text-muted-foreground">{category.description}</td></tr>)}</tbody>
-              </table>
-            </div>
+            <ul className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Supported claim categories">
+              {claimTypeOptions.map((category) => (
+                <li key={category.value} className="rounded-lg border border-border bg-card p-4">
+                  <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground text-pretty">
+                    {category.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
