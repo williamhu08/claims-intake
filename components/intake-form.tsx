@@ -153,7 +153,7 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionToken, answer: value, testingMode }),
       });
-      const data: unknown = await response.json();
+      const data = await readJsonResponse(response);
       if (!response.ok) throw new Error(getErrorMessage(data));
       const parsed = parseCaseSessionResponse(data);
       if (!parsed) throw new Error("The session response didn't match the expected shape. Check /api/case-session/respond for a schema mismatch between the server payload and caseSessionStateSchema.");
@@ -398,6 +398,17 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     setError(null);
     setErrorRecovery(null);
     retryAction.current = null;
+  }
+}
+
+async function readJsonResponse(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text.trim()) return null;
+
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return { error: `The assessment service returned an invalid response (HTTP ${response.status}). Please try again.` };
   }
 }
 
