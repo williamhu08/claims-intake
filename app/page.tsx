@@ -15,7 +15,7 @@ export default function Home() {
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Claim triage</p>
             <p className="mt-2 text-sm font-medium text-muted-foreground">Property claims</p>
             <h1 className="mt-2 font-serif text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl">Tell us what happened, and we&apos;ll route it for you.</h1>
-            <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">Describe the incident in your own words. We provide an instant initial reading of the claim category so it reaches the right team faster.</p>
+            <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">Describe the incident in your own words. We review your narrative to identify the closest supported claim category, capture the facts you provide, and guide any follow-up questions needed to clarify the incident before routing it to the right team. This initial assessment helps organize the claim intake, but it does not determine coverage, liability, fault, or payment.</p>
           </div>
           <div role="note" className="mt-6 rounded-lg border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground text-pretty">This is an early triage assessment only. It does not determine coverage, liability, fault, or payment, and it is not a decision on your claim.</div>
           <div className="mt-8"><ClaimIntakeSection /></div>
