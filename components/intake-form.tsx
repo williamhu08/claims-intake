@@ -87,7 +87,10 @@ export function IntakeForm({ onSessionChange }: IntakeFormProps) {
     setShowTryAnother(false);
     setError(null);
     setErrorRecovery(null);
-    retryAction.current = () => void handleSubmit({ preventDefault: () => undefined } as React.FormEvent, true);
+    retryAction.current = () => {
+      setNarrative(submittedNarrative);
+      void handleSubmit({ preventDefault: () => undefined } as React.FormEvent, true);
+    };
     updateSession(null);
     setSessionToken(null);
 
