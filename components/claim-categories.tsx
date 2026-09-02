@@ -6,7 +6,7 @@ import { useState } from "react";
 import { claimTypeOptions } from "@/lib/claims/display";
 
 export function ClaimCategories() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <section
