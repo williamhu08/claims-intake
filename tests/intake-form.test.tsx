@@ -309,8 +309,7 @@ describe("IntakeForm", () => {
     render(<IntakeForm />);
     await submitNarrative();
 
-  expect(await screen.findByText("Case review snapshot")).toBeInTheDocument();
-  expect(screen.queryByText("Final case state")).not.toBeInTheDocument();
+  expect(await screen.findByText("Final case state")).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Collected facts" }).parentElement?.parentElement).toHaveClass(
     "sm:grid-cols-2",
   );
