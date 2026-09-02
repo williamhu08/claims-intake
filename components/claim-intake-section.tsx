@@ -5,6 +5,7 @@
 import { useState } from "react";
 import type { CaseSessionState } from "@/lib/claims/session-schema";
 import { CaseStateSummary } from "@/components/case-state-summary";
+import { ClaimCategories } from "@/components/claim-categories";
 import { IntakeForm } from "@/components/intake-form";
 
 export function ClaimIntakeSection() {
@@ -68,7 +69,10 @@ export function ClaimIntakeSection() {
           <h2 className="font-serif text-2xl font-semibold text-foreground text-balance sm:text-3xl">Start with what you know</h2>
           <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">Share the details you have so we can make an initial assessment.</p>
         </div>
-        <IntakeForm onSessionChange={setSession} />
+        <ClaimCategories />
+        <div className="mt-8">
+          <IntakeForm onSessionChange={setSession} />
+        </div>
       </div>
     </>
   );

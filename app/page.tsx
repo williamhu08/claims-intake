@@ -1,6 +1,5 @@
 /** Current application entry point, assembling product surfaces introduced across V0–V3. */
 import { AppShell } from "@/components/app-shell";
-import { ClaimCategories } from "@/components/claim-categories";
 import { ClaimIntakeSection } from "@/components/claim-intake-section";
 import { SandboxSection } from "@/components/sandbox-section";
 
@@ -19,7 +18,7 @@ export default function Home() {
             <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">Describe the incident in your own words. We provide an instant initial reading of the claim category so it reaches the right team faster.</p>
           </div>
           <div role="note" className="mt-6 rounded-lg border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground text-pretty">This is an early triage assessment only. It does not determine coverage, liability, fault, or payment, and it is not a decision on your claim.</div>
-          <div className="mt-8"><ClaimCategories /><div className="mt-10"><ClaimIntakeSection /></div></div>
+          <div className="mt-8"><ClaimIntakeSection /></div>
         </main>
       </AppShell>
 
